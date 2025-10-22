@@ -2,7 +2,7 @@
 
 import { useChat } from '@ai-sdk/react';
 import { useAnchorWallet, useConnection } from '@solana/wallet-adapter-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   Conversation,
@@ -35,6 +35,7 @@ import {
   SourcesContent,
   SourcesTrigger,
 } from '@/components/ai-elements/source';
+import { TopicsSidebar } from '@/components/ai-elements/topics-sidebar';
 import { fetchAllUserChats, fetchUserContext, initializeUserContext } from '@/lib/loyal/service';
 import type { UserChat, UserContext } from '@/lib/loyal/types';
 import { GrpcChatTransport } from '@/lib/query/transport';
@@ -50,6 +51,45 @@ const models = [
     value: 'deepseek/deepseek-r1',
   },
 ];
+
+const toSafeNumber = (value: unknown): number | null => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value;
+  }
+  if (typeof value === 'bigint') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  if (
+    typeof value === 'object' &&
+    value !== null &&
+    'toNumber' in value &&
+    typeof (value as { toNumber: () => number }).toNumber === 'function'
+  ) {
+    try {
+      const parsed = (value as { toNumber: () => number }).toNumber();
+      return Number.isFinite(parsed) ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+};
+
+const toIsoDateString = (value: unknown): string => {
+  const timestamp = toSafeNumber(value);
+  if (timestamp === null || timestamp <= 0) {
+    return new Date().toISOString();
+  }
+  const normalized = timestamp > 1e12 ? timestamp : timestamp * 1000;
+  return Number.isFinite(normalized)
+    ? new Date(normalized).toISOString()
+    : new Date().toISOString();
+};
 
 const ChatBotDemo = () => {
   const [input, setInput] = useState('');
@@ -70,6 +110,26 @@ const ChatBotDemo = () => {
       }
     }),
   });
+
+  const topics = useMemo(
+    () =>
+      userChats.map((chat, index) => {
+        const chatIdNumber = toSafeNumber(chat.id);
+        const topicId =
+          chatIdNumber !== null
+            ? chatIdNumber.toString()
+            : String(chat.id ?? index);
+        const displayNumber =
+          chatIdNumber !== null ? chatIdNumber + 1 : index + 1;
+
+        return {
+          id: topicId,
+          title: `Chat ${displayNumber}`,
+          updatedAt: toIsoDateString(chat.createdAt),
+        };
+      }),
+    [userChats],
+  );
 
   // Initialize dark mode based on system preference
   useEffect(() => {
@@ -186,109 +246,114 @@ const ChatBotDemo = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 relative size-full h-screen">
-      <button
-        type="button"
-        onClick={handleTestCreateChat}
-        disabled={!anchorWallet || !userContext || isCreatingChat || isContextLoading}
-        className="fixed top-6 right-[10.5rem] z-20 rounded-md border border-white/20 bg-zinc-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {isCreatingChat ? 'Creating chat...' : 'Test Chat Upload'}
-      </button>
-      <div className="flex flex-col h-full">
-        <Conversation className="h-full">
-          <ConversationContent>
-            {messages.map((message) => (
-              <div key={message.id}>
-                {message.role === 'assistant' && (
-                  <Sources>
-                    {message.parts.map((part, i) => {
-                      switch (part.type) {
-                        case 'source-url':
-                          return (
-                            <>
-                              <SourcesTrigger
-                                count={
-                                  message.parts.filter(
-                                    (part) => part.type === 'source-url',
-                                  ).length
-                                }
-                              />
-                              <SourcesContent key={`${message.id}-${i}`}>
-                                <Source
+    <div className="flex h-screen">
+      <TopicsSidebar topics={topics} />
+      <div className="flex-1 overflow-hidden">
+        <div className="relative mx-auto flex h-full max-w-4xl flex-col p-6">
+          <button
+            type="button"
+            onClick={handleTestCreateChat}
+            disabled={!anchorWallet || !userContext || isCreatingChat || isContextLoading}
+            className="fixed top-6 right-[10.5rem] z-20 rounded-md border border-white/20 bg-zinc-900 px-3 py-2 text-xs font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isCreatingChat ? 'Creating chat...' : 'Test Chat Upload'}
+          </button>
+          <div className="flex h-full flex-col">
+            <Conversation className="h-full">
+              <ConversationContent>
+                {messages.map((message) => (
+                  <div key={message.id}>
+                    {message.role === 'assistant' && (
+                      <Sources>
+                        {message.parts.map((part, i) => {
+                          switch (part.type) {
+                            case 'source-url':
+                              return (
+                                <>
+                                  <SourcesTrigger
+                                    count={
+                                      message.parts.filter(
+                                        (part) => part.type === 'source-url',
+                                      ).length
+                                    }
+                                  />
+                                  <SourcesContent key={`${message.id}-${i}`}>
+                                    <Source
+                                      key={`${message.id}-${i}`}
+                                      href={part.url}
+                                      title={part.url}
+                                    />
+                                  </SourcesContent>
+                                </>
+                              );
+                          }
+                        })}
+                      </Sources>
+                    )}
+                    <Message from={message.role} key={message.id}>
+                      <MessageContent>
+                        {message.parts.map((part, i) => {
+                          switch (part.type) {
+                            case 'text':
+                              return (
+                                <Response key={`${message.id}-${i}`}>
+                                  {part.text}
+                                </Response>
+                              );
+                            case 'reasoning':
+                              return (
+                                <Reasoning
                                   key={`${message.id}-${i}`}
-                                  href={part.url}
-                                  title={part.url}
-                                />
-                              </SourcesContent>
-                            </>
-                          );
-                      }
-                    })}
-                  </Sources>
-                )}
-                <Message from={message.role} key={message.id}>
-                  <MessageContent>
-                    {message.parts.map((part, i) => {
-                      switch (part.type) {
-                        case 'text':
-                          return (
-                            <Response key={`${message.id}-${i}`}>
-                              {part.text}
-                            </Response>
-                          );
-                        case 'reasoning':
-                          return (
-                            <Reasoning
-                              key={`${message.id}-${i}`}
-                              className="w-full"
-                              isStreaming={status === 'streaming'}
-                            >
-                              <ReasoningTrigger />
-                              <ReasoningContent>{part.text}</ReasoningContent>
-                            </Reasoning>
-                          );
-                        default:
-                          return null;
-                      }
-                    })}
-                  </MessageContent>
-                </Message>
-              </div>
-            ))}
-            {status === 'submitted' && <Loader />}
-          </ConversationContent>
-          <ConversationScrollButton />
-        </Conversation>
+                                  className="w-full"
+                                  isStreaming={status === 'streaming'}
+                                >
+                                  <ReasoningTrigger />
+                                  <ReasoningContent>{part.text}</ReasoningContent>
+                                </Reasoning>
+                              );
+                            default:
+                              return null;
+                          }
+                        })}
+                      </MessageContent>
+                    </Message>
+                  </div>
+                ))}
+                {status === 'submitted' && <Loader />}
+              </ConversationContent>
+              <ConversationScrollButton />
+            </Conversation>
 
-        <PromptInput onSubmit={handleSubmit} className="mt-4">
-          <PromptInputTextarea
-            onChange={(e) => setInput(e.target.value)}
-            value={input}
-          />
-          <PromptInputToolbar>
-            <PromptInputTools>
-              <PromptInputModelSelect
-                onValueChange={(value) => {
-                  setModel(value);
-                }}
-                value={model}
-              >
-                <PromptInputModelSelectTrigger>
-                  <PromptInputModelSelectValue />
-                </PromptInputModelSelectTrigger>
-                <PromptInputModelSelectContent>
-                  {models.map((model) => (
-                    <PromptInputModelSelectItem key={model.value} value={model.value}>
-                      {model.name}
-                    </PromptInputModelSelectItem>
-                  ))}
-                </PromptInputModelSelectContent>
-              </PromptInputModelSelect>
-            </PromptInputTools>
-            <PromptInputSubmit disabled={!input} status={status} />
-          </PromptInputToolbar>
-        </PromptInput>
+            <PromptInput onSubmit={handleSubmit} className="mt-4">
+              <PromptInputTextarea
+                onChange={(e) => setInput(e.target.value)}
+                value={input}
+              />
+              <PromptInputToolbar>
+                <PromptInputTools>
+                  <PromptInputModelSelect
+                    onValueChange={(value) => {
+                      setModel(value);
+                    }}
+                    value={model}
+                  >
+                    <PromptInputModelSelectTrigger>
+                      <PromptInputModelSelectValue />
+                    </PromptInputModelSelectTrigger>
+                    <PromptInputModelSelectContent>
+                      {models.map((model) => (
+                        <PromptInputModelSelectItem key={model.value} value={model.value}>
+                          {model.name}
+                        </PromptInputModelSelectItem>
+                      ))}
+                    </PromptInputModelSelectContent>
+                  </PromptInputModelSelect>
+                </PromptInputTools>
+                <PromptInputSubmit disabled={!input} status={status} />
+              </PromptInputToolbar>
+            </PromptInput>
+          </div>
+        </div>
       </div>
     </div>
   );
