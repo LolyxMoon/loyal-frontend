@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useEffect,useRef, useState } from "react";
 
 import { CircleChevronRightIcon } from "@/components/ui/circle-chevron-right";
+import { CopyIcon, type CopyIconHandle } from "@/components/ui/copy";
 import { MenuIcon, type MenuIconHandle } from "@/components/ui/menu";
 
 const instrumentSerif = localFont({
@@ -34,8 +35,10 @@ export default function LandingPage() {
   const [input, setInput] = useState("");
   const [isChatMode, setIsChatMode] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const menuIconRef = useRef<MenuIconHandle>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const copyIconRefs = useRef<Map<string, CopyIconHandle>>(new Map());
 
   // Control menu icon animation based on sidebar state
   useEffect(() => {
@@ -125,6 +128,25 @@ export default function LandingPage() {
       setTimeout(() => {
         inputRef.current?.focus();
       }, 50);
+    }
+  };
+
+  const handleCopyMessage = async (messageId: string, text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedMessageId(messageId);
+
+      // Trigger animation on the specific copy icon
+      const iconHandle = copyIconRefs.current.get(messageId);
+      iconHandle?.startAnimation();
+
+      // Reset copied state after 2 seconds
+      setTimeout(() => {
+        setCopiedMessageId(null);
+        iconHandle?.stopAnimation();
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
     }
   };
 
@@ -417,7 +439,7 @@ export default function LandingPage() {
                 display: "flex",
                 flexDirection: "column",
                 gap: "1rem",
-                paddingBottom: "1rem",
+                padding: "0.5rem 0 1rem 0",
                 animation: "fadeIn 0.5s ease-in",
               }}
               onClick={() => {
@@ -425,33 +447,113 @@ export default function LandingPage() {
                 inputRef.current?.focus();
               }}
             >
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  style={{
-                    padding: "1rem 1.5rem",
-                    borderRadius: "16px",
-                    background:
-                      message.role === "user"
-                        ? "rgba(255, 255, 255, 0.1)"
-                        : "rgba(255, 255, 255, 0.05)",
-                    backdropFilter: "blur(10px)",
-                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                    color: "#fff",
-                    fontSize: "1rem",
-                    lineHeight: 1.5,
-                    alignSelf:
-                      message.role === "user" ? "flex-end" : "flex-start",
-                    maxWidth: "80%",
-                  }}
-                >
-                  {message.parts.map((part, index) =>
-                    part.type === "text" ? (
-                      <span key={index}>{part.text}</span>
-                    ) : null,
-                  )}
-                </div>
-              ))}
+              {messages.map((message) => {
+                const messageText = message.parts
+                  .filter(part => part.type === "text")
+                  .map(part => part.text)
+                  .join("");
+
+                return (
+                  <div
+                    key={message.id}
+                    style={{
+                      position: "relative",
+                      padding: "1rem 3rem 1rem 1.5rem",
+                      borderRadius: "16px",
+                      background:
+                        message.role === "user"
+                          ? "rgba(255, 255, 255, 0.1)"
+                          : "rgba(255, 255, 255, 0.05)",
+                      backdropFilter: "blur(10px)",
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      color: "#fff",
+                      fontSize: "1rem",
+                      lineHeight: 1.5,
+                      alignSelf:
+                        message.role === "user" ? "flex-end" : "flex-start",
+                      maxWidth: "80%",
+                      transition: "all 0.2s ease",
+                      overflow: "visible",
+                    }}
+                  >
+                    {message.parts.map((part, index) =>
+                      part.type === "text" ? (
+                        <span key={index}>{part.text}</span>
+                      ) : null,
+                    )}
+
+                    {/* Copy button */}
+                    <button
+                      onClick={() => handleCopyMessage(message.id, messageText)}
+                      style={{
+                        position: "absolute",
+                        top: "1rem",
+                        right: "0.75rem",
+                        padding: "0.25rem",
+                        background: copiedMessageId === message.id
+                          ? "rgba(34, 197, 94, 0.2)"
+                          : "transparent",
+                        border: "none",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        color: copiedMessageId === message.id
+                          ? "#22c55e"
+                          : "rgba(255, 255, 255, 0.5)",
+                        transition: "all 0.2s ease",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (copiedMessageId !== message.id) {
+                          e.currentTarget.style.color = "rgba(255, 255, 255, 0.8)";
+                          e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (copiedMessageId !== message.id) {
+                          e.currentTarget.style.color = "rgba(255, 255, 255, 0.5)";
+                          e.currentTarget.style.background = "transparent";
+                        }
+                      }}
+                      title={copiedMessageId === message.id ? "Copied!" : "Copy message"}
+                    >
+                      <CopyIcon
+                        ref={(el) => {
+                          if (el) {
+                            copyIconRefs.current.set(message.id, el);
+                          }
+                        }}
+                        size={18}
+                      />
+                    </button>
+
+                    {/* Copied feedback text */}
+                    {copiedMessageId === message.id && (
+                      <span
+                        style={{
+                          position: "absolute",
+                          top: "-0.5rem",
+                          right: "0.125rem",
+                          fontSize: "0.65rem",
+                          color: "#fff",
+                          background: "rgba(34, 197, 94, 0.9)",
+                          padding: "0.125rem 0.375rem",
+                          borderRadius: "4px",
+                          animation: "fadeInDownSimple 0.2s ease-in",
+                          fontWeight: 500,
+                          letterSpacing: "0.025em",
+                          whiteSpace: "nowrap",
+                          pointerEvents: "none",
+                          zIndex: 10,
+                        }}
+                      >
+                        Copied
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
 
@@ -586,6 +688,26 @@ export default function LandingPage() {
           to {
             opacity: 1;
             transform: translateY(0);
+          }
+        }
+
+        @keyframes fadeInDown {
+          from {
+            opacity: 0;
+            transform: translateY(-8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fadeInDownSimple {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
           }
         }
 
