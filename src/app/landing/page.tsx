@@ -4,7 +4,9 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import localFont from "next/font/local";
 import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import { useEffect,useRef, useState } from "react";
+
+import { CircleChevronRightIcon } from "@/components/ui/circle-chevron-right";
 import { MenuIcon, type MenuIconHandle } from "@/components/ui/menu";
 
 const instrumentSerif = localFont({
@@ -33,6 +35,7 @@ export default function LandingPage() {
   const [isChatMode, setIsChatMode] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const menuIconRef = useRef<MenuIconHandle>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Control menu icon animation based on sidebar state
   useEffect(() => {
@@ -43,12 +46,85 @@ export default function LandingPage() {
     }
   }, [isSidebarOpen]);
 
+  // Auto-focus on initial load
+  useEffect(() => {
+    // Focus the textarea when the component mounts
+    const timer = setTimeout(() => {
+      inputRef.current?.focus();
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []); // Empty dependency array = run once on mount
+
+  // Auto-focus input when entering chat mode with multiple fallback strategies
+  useEffect(() => {
+    if (isChatMode && inputRef.current) {
+      const focusInput = () => {
+        if (inputRef.current && document.activeElement !== inputRef.current) {
+          inputRef.current.focus();
+          inputRef.current.select(); // Also select any existing text
+        }
+      };
+
+      // Strategy 1: Immediate focus attempt
+      focusInput();
+
+      // Strategy 2: After micro-task
+      Promise.resolve().then(focusInput);
+
+      // Strategy 3: After animation frame (for layout)
+      requestAnimationFrame(() => {
+        focusInput();
+
+        // Strategy 4: After second animation frame (for paint)
+        requestAnimationFrame(focusInput);
+      });
+
+      // Strategy 5: After transition completes (800ms based on CSS)
+      const timeout1 = setTimeout(focusInput, 850);
+
+      // Strategy 6: Multiple attempts with increasing delays
+      const timeout2 = setTimeout(focusInput, 100);
+      const timeout3 = setTimeout(focusInput, 300);
+      const timeout4 = setTimeout(focusInput, 500);
+      const timeout5 = setTimeout(focusInput, 1000);
+
+      // Cleanup
+      return () => {
+        clearTimeout(timeout1);
+        clearTimeout(timeout2);
+        clearTimeout(timeout3);
+        clearTimeout(timeout4);
+        clearTimeout(timeout5);
+      };
+    }
+  }, [isChatMode]);
+
+  // Keep focus on textarea when messages change (e.g., after receiving response)
+  useEffect(() => {
+    if (isChatMode && messages.length > 0 && inputRef.current) {
+      // Small delay to ensure UI has updated
+      const timeout = setTimeout(() => {
+        if (document.activeElement !== inputRef.current) {
+          inputRef.current?.focus();
+        }
+      }, 100);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [messages, isChatMode]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim() && status === "ready") {
       sendMessage({ text: input });
       setInput("");
       setIsChatMode(true);
+
+      // Ensure focus remains on input after sending message
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 50);
     }
   };
 
@@ -175,6 +251,10 @@ export default function LandingPage() {
               onClick={() => {
                 setIsChatMode(false);
                 setInput("");
+                // Focus on input after resetting chat
+                setTimeout(() => {
+                  inputRef.current?.focus();
+                }, 100);
               }}
               style={{
                 width: "100%",
@@ -321,6 +401,12 @@ export default function LandingPage() {
             gap: "1rem",
             padding: isChatMode ? "2rem" : "0",
           }}
+          onClick={(e) => {
+            // Focus input when clicking on the container (but not on other elements)
+            if (isChatMode && e.target === e.currentTarget) {
+              inputRef.current?.focus();
+            }
+          }}
         >
           {/* Chat messages */}
           {isChatMode && (
@@ -333,6 +419,10 @@ export default function LandingPage() {
                 gap: "1rem",
                 paddingBottom: "1rem",
                 animation: "fadeIn 0.5s ease-in",
+              }}
+              onClick={() => {
+                // Focus input when clicking on the message area
+                inputRef.current?.focus();
               }}
             >
               {messages.map((message) => (
@@ -375,11 +465,21 @@ export default function LandingPage() {
               gap: "0.75rem",
             }}
           >
-            <input
+            <textarea
+              ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={status !== "ready"}
               placeholder="Ask me anything..."
+              autoFocus
+              tabIndex={0}
+              rows={1}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSubmit(e);
+                }
+              }}
               style={{
                 flex: 1,
                 padding: "1.25rem 1.75rem",
@@ -390,9 +490,12 @@ export default function LandingPage() {
                 border: "1px solid rgba(255, 255, 255, 0.15)",
                 borderRadius: "20px",
                 outline: "none",
-                transition: "all 0.3s ease",
+                transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
                 boxShadow:
                   "0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
+                resize: "none",
+                fontFamily: "inherit",
+                lineHeight: "1.5",
               }}
               onFocus={(e) => {
                 e.target.style.background = "rgba(255, 255, 255, 0.12)";
@@ -407,9 +510,12 @@ export default function LandingPage() {
               type="submit"
               disabled={status !== "ready" || !input.trim()}
               style={{
-                padding: "1.25rem 2rem",
-                fontSize: "1rem",
-                fontWeight: 500,
+                padding: "0",
+                width: "auto",
+                aspectRatio: "1",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 color: "#fff",
                 background:
                   status !== "ready" || !input.trim()
@@ -427,6 +533,8 @@ export default function LandingPage() {
                 boxShadow:
                   "0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
                 opacity: status !== "ready" || !input.trim() ? 0.5 : 1,
+                alignSelf: "stretch",
+                minWidth: "60px",
               }}
               onMouseEnter={(e) => {
                 if (status === "ready" && input.trim()) {
@@ -445,9 +553,14 @@ export default function LandingPage() {
                   "0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1)";
               }}
             >
-              {status === "streaming" || status === "submitted"
-                ? "Sending..."
-                : "Send"}
+              <CircleChevronRightIcon
+                size={32}
+                style={{
+                  animation: (status === "streaming" || status === "submitted")
+                    ? "pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+                    : "none"
+                }}
+              />
             </button>
           </form>
         </div>
@@ -476,7 +589,17 @@ export default function LandingPage() {
           }
         }
 
-        input::placeholder {
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.5;
+          }
+        }
+
+        input::placeholder,
+        textarea::placeholder {
           color: rgba(255, 255, 255, 0.5);
         }
       `}</style>

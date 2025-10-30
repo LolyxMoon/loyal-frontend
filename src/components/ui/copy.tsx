@@ -1,40 +1,28 @@
 'use client';
 
-import type { Variants } from 'motion/react';
+import type { Transition } from 'motion/react';
 import { motion, useAnimation } from 'motion/react';
 import type { HTMLAttributes } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useRef } from 'react';
-
 import { cn } from '@/lib/utils';
 
-export interface MenuIconHandle {
+export interface CopyIconHandle {
   startAnimation: () => void;
   stopAnimation: () => void;
 }
 
-interface MenuIconProps extends HTMLAttributes<HTMLDivElement> {
+interface CopyIconProps extends HTMLAttributes<HTMLDivElement> {
   size?: number;
 }
 
-const lineVariants: Variants = {
-  normal: {
-    rotate: 0,
-    y: 0,
-    opacity: 1,
-  },
-  animate: (custom: number) => ({
-    rotate: custom === 1 ? 45 : custom === 3 ? -45 : 0,
-    y: custom === 1 ? 6 : custom === 3 ? -6 : 0,
-    opacity: custom === 2 ? 0 : 1,
-    transition: {
-      type: 'spring',
-      stiffness: 260,
-      damping: 20,
-    },
-  }),
+const defaultTransition: Transition = {
+  type: 'spring',
+  stiffness: 160,
+  damping: 17,
+  mass: 1,
 };
 
-const MenuIcon = forwardRef<MenuIconHandle, MenuIconProps>(
+const CopyIcon = forwardRef<CopyIconHandle, CopyIconProps>(
   ({ onMouseEnter, onMouseLeave, className, size = 28, ...props }, ref) => {
     const controls = useAnimation();
     const isControlledRef = useRef(false);
@@ -87,32 +75,28 @@ const MenuIcon = forwardRef<MenuIconHandle, MenuIconProps>(
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <motion.line
-            x1="4"
-            y1="6"
-            x2="20"
-            y2="6"
-            variants={lineVariants}
+          <motion.rect
+            width="14"
+            height="14"
+            x="8"
+            y="8"
+            rx="2"
+            ry="2"
+            variants={{
+              normal: { translateY: 0, translateX: 0 },
+              animate: { translateY: -3, translateX: -3 },
+            }}
             animate={controls}
-            custom={1}
+            transition={defaultTransition}
           />
-          <motion.line
-            x1="4"
-            y1="12"
-            x2="20"
-            y2="12"
-            variants={lineVariants}
+          <motion.path
+            d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+            variants={{
+              normal: { x: 0, y: 0 },
+              animate: { x: 3, y: 3 },
+            }}
+            transition={defaultTransition}
             animate={controls}
-            custom={2}
-          />
-          <motion.line
-            x1="4"
-            y1="18"
-            x2="20"
-            y2="18"
-            variants={lineVariants}
-            animate={controls}
-            custom={3}
           />
         </svg>
       </div>
@@ -120,6 +104,6 @@ const MenuIcon = forwardRef<MenuIconHandle, MenuIconProps>(
   }
 );
 
-MenuIcon.displayName = 'MenuIcon';
+CopyIcon.displayName = 'CopyIcon';
 
-export { MenuIcon };
+export { CopyIcon };
