@@ -40,6 +40,7 @@ export default function LandingPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hoveredChatId, setHoveredChatId] = useState<string | null>(null);
   const menuIconRef = useRef<MenuIconHandle>(null);
   const plusIconRef = useRef<PlusIconHandle>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -387,6 +388,7 @@ export default function LandingPage() {
             display: "flex",
             flexDirection: "column",
             boxShadow: isSidebarOpen ? "0 0 60px rgba(0, 0, 0, 0.5)" : "none",
+            overflow: "visible", // Allow tooltip to overflow
           }}
         >
           {/* Sidebar Header */}
@@ -441,7 +443,9 @@ export default function LandingPage() {
             style={{
               flex: 1,
               overflowY: "auto",
+              overflowX: "visible",
               padding: "1rem",
+              position: "relative",
             }}
           >
             {previousChats.map((chat) => (
@@ -449,26 +453,79 @@ export default function LandingPage() {
                 key={chat.id}
                 style={{
                   padding: "0.875rem 1rem",
-                  marginBottom: "0.5rem",
+                  marginBottom: hoveredChatId === chat.id ? "3rem" : "0.5rem",
                   background: "rgba(255, 255, 255, 0.05)",
                   backdropFilter: "blur(10px)",
                   border: "1px solid rgba(255, 255, 255, 0.08)",
                   borderRadius: "12px",
                   cursor: "pointer",
                   transition: "all 0.3s ease",
+                  position: "relative",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
                   e.currentTarget.style.border =
                     "1px solid rgba(255, 255, 255, 0.15)";
+                  setHoveredChatId(chat.id);
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background =
                     "rgba(255, 255, 255, 0.05)";
                   e.currentTarget.style.border =
                     "1px solid rgba(255, 255, 255, 0.08)";
+                  setHoveredChatId(null);
                 }}
               >
+                {/* Tooltip */}
+                {hoveredChatId === chat.id && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: "-2.5rem",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      padding: "0.4rem 0.6rem",
+                      background: "rgba(255, 255, 255, 0.12)",
+                      backdropFilter: "blur(20px)",
+                      border: "1px solid rgba(255, 255, 255, 0.2)",
+                      borderRadius: "10px",
+                      boxShadow: "0 8px 24px 0 rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.15)",
+                      fontSize: "0.75rem",
+                      fontWeight: 500,
+                      color: "rgba(255, 255, 255, 0.9)",
+                      whiteSpace: "nowrap",
+                      pointerEvents: "none",
+                      zIndex: 1000,
+                      animation: "tooltipFadeInDown 0.2s ease-out",
+                      fontFamily: "system-ui, -apple-system, sans-serif",
+                      letterSpacing: "0.025em",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+                      <span style={{
+                        fontSize: "0.85rem",
+                        opacity: 0.8,
+                      }}>⚠️</span>
+                      Preview. Storage is WIP
+                    </div>
+                    {/* Tooltip arrow pointing up */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "-5px",
+                        left: "50%",
+                        transform: "translateX(-50%) rotate(45deg)",
+                        width: "10px",
+                        height: "10px",
+                        background: "rgba(255, 255, 255, 0.12)",
+                        border: "1px solid rgba(255, 255, 255, 0.2)",
+                        borderRight: "none",
+                        borderBottom: "none",
+                        backdropFilter: "blur(20px)",
+                      }}
+                    />
+                  </div>
+                )}
                 <div
                   style={{
                     color: "#fff",
@@ -533,18 +590,15 @@ export default function LandingPage() {
               cursor: "pointer",
               transition: "all 0.3s ease",
               outline: "none",
-              animation: "subtlePulse 2s ease-in-out infinite",
               boxShadow: "0 2px 10px rgba(255, 68, 68, 0.2)",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.animation = "none";
               e.currentTarget.style.background = "rgba(255, 68, 68, 0.15)";
               e.currentTarget.style.border = "1px solid rgba(255, 68, 68, 0.4)";
               e.currentTarget.style.transform = "translateX(-50%) scale(1.05)";
               e.currentTarget.style.boxShadow = "0 4px 20px rgba(255, 68, 68, 0.3)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.animation = "subtlePulse 2s ease-in-out infinite";
               e.currentTarget.style.background = "rgba(255, 68, 68, 0.1)";
               e.currentTarget.style.border = "1px solid rgba(255, 68, 68, 0.3)";
               e.currentTarget.style.transform = "translateX(-50%) scale(1)";
@@ -1291,6 +1345,17 @@ export default function LandingPage() {
           50% {
             transform: translateX(-50%) scale(1.03);
             box-shadow: 0 4px 15px rgba(255, 68, 68, 0.35);
+          }
+        }
+
+        @keyframes tooltipFadeInDown {
+          from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
           }
         }
 
