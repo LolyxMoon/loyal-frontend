@@ -30,7 +30,7 @@ const instrumentSerif = localFont({
 });
 
 export default function LandingPage() {
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, setMessages } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
     }),
@@ -329,9 +329,8 @@ export default function LandingPage() {
             onClick={() => {
               setIsChatMode(false);
               setInput("");
-              // Clear messages to start fresh
-              // Note: This would need to be implemented with the chat API
-              // For now, just reset the UI state
+              // Clear all messages to start a completely new chat
+              setMessages([]);
               setTimeout(() => {
                 inputRef.current?.focus();
               }, 100);
@@ -402,6 +401,8 @@ export default function LandingPage() {
               onClick={() => {
                 setIsChatMode(false);
                 setInput("");
+                // Clear all messages for a new chat
+                setMessages([]);
                 // Focus on input after resetting chat
                 setTimeout(() => {
                   inputRef.current?.focus();

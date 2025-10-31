@@ -66,7 +66,7 @@ const ChatBotDemo = () => {
     refreshUserChats,
   } = useUserChats();
 
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, setMessages, reload } = useChat({
     transport: new GrpcChatTransport({
       baseUrl: 'http://localhost:8000',
       headers: {
@@ -77,11 +77,22 @@ const ChatBotDemo = () => {
 
   const topics = useMemo(() => mapChatsToTopics(userChats), [userChats]);
 
+  // Handle new chat creation
+  const handleNewChat = useCallback(() => {
+    // Clear the current messages
+    setMessages([]);
+    // Reset the input
+    setInput('');
+    // Reset model to default
+    setModel(models[0].value);
+    console.log('New chat started');
+  }, [setMessages]);
+
   // Initialize dark mode based on system preference
   useEffect(() => {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       setDarkMode(mediaQuery.matches);
-  
+
       const handler = (e: MediaQueryListEvent) => setDarkMode(e.matches);
       mediaQuery.addEventListener('change', handler);
       return () => mediaQuery.removeEventListener('change', handler);
@@ -133,7 +144,7 @@ const ChatBotDemo = () => {
 
   return (
     <div className="flex h-screen">
-      <TopicsSidebar topics={topics} />
+      <TopicsSidebar topics={topics} onNewChat={handleNewChat} />
       <div className="flex-1 overflow-hidden">
         <div className="relative mx-auto flex h-full max-w-4xl flex-col p-6">
           <button

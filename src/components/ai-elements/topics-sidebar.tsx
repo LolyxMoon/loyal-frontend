@@ -7,11 +7,16 @@ import { ScrollArea } from "@/components/ui/scroll-area"; // shadcn/ui
 
 type Topic = { id: string; title: string; updatedAt: string };
 
-export function TopicsSidebar({ topics }: { topics: Topic[] }) {
+interface TopicsSidebarProps {
+  topics: Topic[];
+  onNewChat?: () => void;
+}
+
+export function TopicsSidebar({ topics, onNewChat }: TopicsSidebarProps) {
   return (
     <aside className="w-72 border-r h-screen flex flex-col">
       <div className="p-3 border-b flex gap-2">
-        <Button asChild><Link href="/new">New chat</Link></Button>
+        <Button onClick={onNewChat}>New chat</Button>
       </div>
       <ScrollArea className="flex-1">
         <ul className="p-2">
