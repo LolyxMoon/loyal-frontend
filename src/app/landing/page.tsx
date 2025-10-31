@@ -9,6 +9,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 import { CircleChevronRightIcon } from "@/components/ui/circle-chevron-right";
+import { ChevronLeftIcon, type ChevronLeftIconHandle } from "@/components/ui/chevron-left";
 import { CopyIcon, type CopyIconHandle } from "@/components/ui/copy";
 import { MenuIcon, type MenuIconHandle } from "@/components/ui/menu";
 import { PlusIcon, type PlusIconHandle } from "@/components/ui/plus";
@@ -42,6 +43,7 @@ export default function LandingPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const menuIconRef = useRef<MenuIconHandle>(null);
   const plusIconRef = useRef<PlusIconHandle>(null);
+  const chevronLeftRef = useRef<ChevronLeftIconHandle>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const copyIconRefs = useRef<Map<string, CopyIconHandle>>(new Map());
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -577,6 +579,94 @@ export default function LandingPage() {
           </p>
         </div>
 
+        {/* Chat Header - Shows first message as title - FIXED TO TOP OF VIEWPORT */}
+        {isChatMode && messages.length > 0 && (
+            <div
+              style={{
+                position: "fixed",
+                top: "1.5rem",
+                left: isSidebarOpen ? "22rem" : "7rem",
+                right: "12rem",  // Leave space for wallet button
+                height: "3rem",
+                display: "flex",
+                alignItems: "center",
+                background: "rgba(255, 255, 255, 0.08)",
+                backdropFilter: "blur(20px)",
+                border: "1px solid rgba(255, 255, 255, 0.15)",
+                borderRadius: "12px",
+                boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
+                zIndex: 30,
+                animation: "fadeIn 0.5s ease-out",
+                animationFillMode: "both",
+                animationDelay: "0.2s",
+                padding: "0 1rem",
+                transition: "left 0.4s cubic-bezier(0.4, 0, 0.2, 1), right 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+              }}
+            >
+              {/* Chevron button to open sidebar */}
+              <button
+                onClick={() => setIsSidebarOpen(true)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "2rem",
+                  height: "2rem",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  color: "rgba(255, 255, 255, 0.6)",
+                  padding: 0,
+                  marginRight: "0.75rem",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "rgba(255, 255, 255, 0.95)";
+                  chevronLeftRef.current?.startAnimation();
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "rgba(255, 255, 255, 0.6)";
+                  chevronLeftRef.current?.stopAnimation();
+                }}
+                title="Open sidebar"
+              >
+                <ChevronLeftIcon
+                  ref={chevronLeftRef}
+                  size={20}
+                  onMouseEnter={() => {}}
+                  onMouseLeave={() => {}}
+                />
+              </button>
+
+              {/* Chat title */}
+              <h2
+                style={{
+                  fontSize: "0.95rem",
+                  fontWeight: 400,
+                  color: "rgba(255, 255, 255, 0.85)",
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  flex: 1,
+                  letterSpacing: "0.01em",
+                  margin: 0,
+                }}
+              >
+                {messages[0]?.role === "user"
+                  ? messages[0].parts
+                      .filter((part) => part.type === "text")
+                      .map((part) => part.text)
+                      .join("")
+                      .slice(0, 80) + (messages[0].parts
+                        .filter((part) => part.type === "text")
+                        .map((part) => part.text)
+                        .join("").length > 80 ? "..." : "")
+                  : "Chat"}
+              </h2>
+            </div>
+        )}
+
         {/* Input container */}
         <div
           style={{
@@ -611,13 +701,17 @@ export default function LandingPage() {
                 display: "flex",
                 flexDirection: "column",
                 gap: "1rem",
-                padding: "2rem 1rem 2rem 0",
+                padding: messages.length > 0 ? "5rem 1rem 2rem 0" : "2rem 1rem 2rem 0",
                 animation: "fadeIn 0.5s ease-in",
                 position: "relative",
                 maskImage:
-                  "linear-gradient(to bottom, transparent 0%, black 1.5rem, black calc(100% - 1.5rem), transparent 100%)",
+                  messages.length > 0
+                    ? "linear-gradient(to bottom, transparent 0%, black 4rem, black calc(100% - 1.5rem), transparent 100%)"
+                    : "linear-gradient(to bottom, transparent 0%, black 1.5rem, black calc(100% - 1.5rem), transparent 100%)",
                 WebkitMaskImage:
-                  "linear-gradient(to bottom, transparent 0%, black 1.5rem, black calc(100% - 1.5rem), transparent 100%)",
+                  messages.length > 0
+                    ? "linear-gradient(to bottom, transparent 0%, black 4rem, black calc(100% - 1.5rem), transparent 100%)"
+                    : "linear-gradient(to bottom, transparent 0%, black 1.5rem, black calc(100% - 1.5rem), transparent 100%)",
               }}
               onClick={() => {
                 // Focus input when clicking on the message area
@@ -1147,13 +1241,14 @@ export default function LandingPage() {
         @keyframes fadeInDown {
           from {
             opacity: 0;
-            transform: translateY(-8px);
+            transform: translateX(-50%) translateY(-20px);
           }
           to {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateX(-50%) translateY(0);
           }
         }
+
 
         @keyframes slideInUp {
           from {
