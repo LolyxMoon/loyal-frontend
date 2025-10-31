@@ -11,6 +11,7 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { CircleChevronRightIcon } from "@/components/ui/circle-chevron-right";
 import { CopyIcon, type CopyIconHandle } from "@/components/ui/copy";
 import { MenuIcon, type MenuIconHandle } from "@/components/ui/menu";
+import { PlusIcon, type PlusIconHandle } from "@/components/ui/plus";
 
 const instrumentSerif = localFont({
   src: [
@@ -40,6 +41,7 @@ export default function LandingPage() {
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const menuIconRef = useRef<MenuIconHandle>(null);
+  const plusIconRef = useRef<PlusIconHandle>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const copyIconRefs = useRef<Map<string, CopyIconHandle>>(new Map());
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -305,6 +307,69 @@ export default function LandingPage() {
             onMouseLeave={() => {}}
           />
         </button>
+
+        {/* New Chat Button - Below Menu - Elegantly hides when sidebar opens */}
+        <div
+          style={{
+            position: "fixed",
+            top: "5.5rem",
+            left: "1.5rem",
+            zIndex: 45,
+            width: "3rem",
+            height: "3rem",
+            transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+            transform: isSidebarOpen
+              ? "translateX(-5rem) scale(0.7) rotate(-180deg)"
+              : "translateX(0) scale(1) rotate(0deg)",
+            opacity: isSidebarOpen ? 0 : 1,
+            pointerEvents: isSidebarOpen ? "none" : "auto",
+          }}
+        >
+          <button
+            onClick={() => {
+              setIsChatMode(false);
+              setInput("");
+              // Clear messages to start fresh
+              // Note: This would need to be implemented with the chat API
+              // For now, just reset the UI state
+              setTimeout(() => {
+                inputRef.current?.focus();
+              }, 100);
+            }}
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              background: "rgba(255, 255, 255, 0.08)",
+              backdropFilter: "blur(20px)",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
+              borderRadius: "12px",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              boxShadow:
+                "0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
+              color: "#fff",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(255, 255, 255, 0.12)";
+              e.currentTarget.style.border = "1px solid rgba(255, 255, 255, 0.25)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+              e.currentTarget.style.border = "1px solid rgba(255, 255, 255, 0.15)";
+            }}
+            title="New chat"
+          >
+            <PlusIcon
+              ref={plusIconRef}
+              size={24}
+              onMouseEnter={() => {}}
+              onMouseLeave={() => {}}
+            />
+          </button>
+        </div>
 
         {/* Sidebar */}
         <div
