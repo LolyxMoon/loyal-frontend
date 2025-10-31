@@ -743,7 +743,6 @@ export default function LandingPage() {
                         alignItems: "center",
                         gap: "0.75rem",
                         padding: "0 0.5rem",
-                        flexDirection: message.role === "user" ? "row-reverse" : "row",
                       }}
                     >
                       {/* Timestamp */}
