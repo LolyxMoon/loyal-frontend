@@ -8,6 +8,7 @@ import localFont from "next/font/local";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
+import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { ChevronRightIcon } from "@/components/ui/chevron-right";
 import { CopyIcon, type CopyIconHandle } from "@/components/ui/copy";
 import { MenuIcon, type MenuIconHandle } from "@/components/ui/menu";
@@ -784,10 +785,14 @@ export default function LandingPage() {
                         overflow: "visible",
                       }}
                     >
-                      {message.parts.map((part, index) =>
-                        part.type === "text" ? (
-                          <span key={index}>{part.text}</span>
-                        ) : null
+                      {message.role === "assistant" ? (
+                        <MarkdownRenderer content={messageText} />
+                      ) : (
+                        message.parts.map((part, index) =>
+                          part.type === "text" ? (
+                            <span key={index}>{part.text}</span>
+                          ) : null
+                        )
                       )}
                     </div>
 
