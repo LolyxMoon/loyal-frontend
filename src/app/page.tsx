@@ -193,16 +193,16 @@ export default function LandingPage() {
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (messagesEndRef.current && messagesContainerRef.current) {
-      // Use a small delay to ensure DOM is updated
+    if (messagesEndRef.current) {
+      // Use a longer delay to ensure markdown rendering is complete
       setTimeout(() => {
-        if (messagesContainerRef.current) {
-          messagesContainerRef.current.scrollTop =
-            messagesContainerRef.current.scrollHeight;
-        }
-      }, 50);
+        messagesEndRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'end'
+        });
+      }, 100);
     }
-  }, [messages]);
+  }, [messages, status]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
