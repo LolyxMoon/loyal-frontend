@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { ArrowDownIcon } from 'lucide-react';
-import type { ComponentProps } from 'react';
-import { useCallback } from 'react';
-import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
+import { ArrowDownIcon } from "lucide-react";
+import type { ComponentProps } from "react";
+import { useCallback } from "react";
+import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import type { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export type ConversationProps = ComponentProps<typeof StickToBottom>;
 
 export const Conversation = ({ className, ...props }: ConversationProps) => (
   <StickToBottom
-    className={cn('relative flex-1 overflow-y-auto', className)}
+    className={cn("relative flex-1 overflow-y-auto", className)}
     initial="smooth"
     resize="smooth"
     role="log"
@@ -28,7 +28,7 @@ export const ConversationContent = ({
   className,
   ...props
 }: ConversationContentProps) => (
-  <StickToBottom.Content className={cn('p-4', className)} {...props} />
+  <StickToBottom.Content className={cn("p-4", className)} {...props} />
 );
 
 export type ConversationScrollButtonProps = ComponentProps<typeof Button>;
@@ -44,20 +44,51 @@ export const ConversationScrollButton = ({
   }, [scrollToBottom]);
 
   return (
-    !isAtBottom && (
-      <Button
-        className={cn(
-          'absolute bottom-4 left-[50%] translate-x-[-50%] rounded-full',
-          className,
-        )}
-        onClick={handleScrollToBottom}
-        size="icon"
-        type="button"
-        variant="outline"
-        {...props}
-      >
-        <ArrowDownIcon className="size-4" />
-      </Button>
-    )
+    <button
+      className={cn(
+        "group absolute bottom-20 right-8 flex size-10 items-center justify-center",
+        className
+      )}
+      onClick={handleScrollToBottom}
+      onMouseEnter={(e) => {
+        if (!isAtBottom) {
+          e.currentTarget.style.transform = "scale(1.05)";
+          e.currentTarget.style.background = "rgba(255, 255, 255, 0.12)";
+          e.currentTarget.style.border = "1px solid rgba(255, 255, 255, 0.25)";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!isAtBottom) {
+          e.currentTarget.style.transform = "scale(1)";
+          e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+          e.currentTarget.style.border = "1px solid rgba(255, 255, 255, 0.15)";
+        }
+      }}
+      style={{
+        background: "rgba(255, 255, 255, 0.08)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        border: "1px solid rgba(255, 255, 255, 0.15)",
+        borderRadius: "50%",
+        boxShadow:
+          "0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
+        cursor: "pointer",
+        transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+        transform: !isAtBottom ? "scale(1)" : "scale(0.8)",
+        opacity: !isAtBottom ? 1 : 0,
+        visibility: !isAtBottom ? "visible" : "hidden",
+        pointerEvents: !isAtBottom ? "auto" : "none",
+        zIndex: 10,
+      }}
+      type="button"
+      {...props}
+    >
+      <ArrowDownIcon
+        className="size-[1.125rem] text-white"
+        style={{
+          filter: "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))",
+        }}
+      />
+    </button>
   );
 };

@@ -4,11 +4,11 @@ import { useChat } from "@ai-sdk/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { DefaultChatTransport } from "ai";
-import localFont from "next/font/local";
+import { ArrowDownIcon } from "lucide-react";
 import { IBM_Plex_Sans, Plus_Jakarta_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { ChevronRightIcon } from "@/components/ui/chevron-right";
 import { CopyIcon, type CopyIconHandle } from "@/components/ui/copy";
@@ -74,6 +74,7 @@ export default function LandingPage() {
   const { setVisible } = useWalletModal();
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(true);
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
   // Network status monitoring and recovery
   useEffect(() => {
@@ -220,9 +221,38 @@ export default function LandingPage() {
           behavior: "smooth",
           block: "end",
         });
+        setShowScrollButton(false);
       }, 100);
     }
   }, [messages, status]);
+
+  // Scroll detection for showing/hiding scroll button
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    let scrollTimeout: NodeJS.Timeout;
+
+    const handleScroll = () => {
+      // Clear existing timeout
+      clearTimeout(scrollTimeout);
+
+      // Add a small delay to debounce scroll events for smoother animation
+      scrollTimeout = setTimeout(() => {
+        const { scrollTop, scrollHeight, clientHeight } = container;
+        const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+        setShowScrollButton(!isNearBottom && messages.length > 0);
+      }, 50);
+    };
+
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // Check initial state
+
+    return () => {
+      container.removeEventListener("scroll", handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, [messages.length]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -272,6 +302,14 @@ export default function LandingPage() {
     }
   };
 
+  const handleScrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+    setShowScrollButton(false);
+  };
+
   // Mock data for previous chats - replace with real data later
   const previousChats = [
     { id: "1", title: "What is quantum computing?", timestamp: "2 hours ago" },
@@ -305,11 +343,11 @@ export default function LandingPage() {
         }}
       >
         <Image
-          src="/landing.png"
           alt="Landing"
           fill
           priority
           sizes="100vw"
+          src="/landing.png"
           style={{ objectFit: "cover", objectPosition: "center" }}
         />
         {/* Dark overlay for chat mode */}
@@ -328,6 +366,16 @@ export default function LandingPage() {
         {/* Menu Button - Always Visible */}
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(255, 255, 255, 0.12)";
+            e.currentTarget.style.border =
+              "1px solid rgba(255, 255, 255, 0.25)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+            e.currentTarget.style.border =
+              "1px solid rgba(255, 255, 255, 0.15)";
+          }}
           style={{
             position: "fixed",
             top: "1.5rem",
@@ -348,22 +396,12 @@ export default function LandingPage() {
               "0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
             color: "#fff",
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(255, 255, 255, 0.12)";
-            e.currentTarget.style.border =
-              "1px solid rgba(255, 255, 255, 0.25)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
-            e.currentTarget.style.border =
-              "1px solid rgba(255, 255, 255, 0.15)";
-          }}
         >
           <MenuIcon
-            ref={menuIconRef}
-            size={24}
             onMouseEnter={() => {}}
             onMouseLeave={() => {}}
+            ref={menuIconRef}
+            size={24}
           />
         </button>
 
@@ -394,6 +432,16 @@ export default function LandingPage() {
                 inputRef.current?.focus();
               }, 100);
             }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(255, 255, 255, 0.12)";
+              e.currentTarget.style.border =
+                "1px solid rgba(255, 255, 255, 0.25)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+              e.currentTarget.style.border =
+                "1px solid rgba(255, 255, 255, 0.15)";
+            }}
             style={{
               width: "100%",
               height: "100%",
@@ -410,23 +458,13 @@ export default function LandingPage() {
                 "0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
               color: "#fff",
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255, 255, 255, 0.12)";
-              e.currentTarget.style.border =
-                "1px solid rgba(255, 255, 255, 0.25)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
-              e.currentTarget.style.border =
-                "1px solid rgba(255, 255, 255, 0.15)";
-            }}
             title="New chat"
           >
             <PlusIcon
-              ref={plusIconRef}
-              size={24}
               onMouseEnter={() => {}}
               onMouseLeave={() => {}}
+              ref={plusIconRef}
+              size={24}
             />
           </button>
         </div>
@@ -486,6 +524,16 @@ export default function LandingPage() {
                   inputRef.current?.focus();
                 }, 100);
               }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)";
+                e.currentTarget.style.border =
+                  "1px solid rgba(255, 255, 255, 0.25)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
+                e.currentTarget.style.border =
+                  "1px solid rgba(255, 255, 255, 0.15)";
+              }}
               style={{
                 width: "100%",
                 padding: "0.75rem 1.25rem",
@@ -498,16 +546,6 @@ export default function LandingPage() {
                 fontWeight: 500,
                 cursor: "pointer",
                 transition: "all 0.3s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(255, 255, 255, 0.15)";
-                e.currentTarget.style.border =
-                  "1px solid rgba(255, 255, 255, 0.25)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
-                e.currentTarget.style.border =
-                  "1px solid rgba(255, 255, 255, 0.15)";
               }}
             >
               + New Chat
@@ -536,20 +574,6 @@ export default function LandingPage() {
               <button
                 key={item.label}
                 onClick={item.onClick}
-                style={{
-                  width: "100%",
-                  padding: "0.625rem 1rem",
-                  background: "rgba(255, 255, 255, 0.05)",
-                  backdropFilter: "blur(10px)",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                  borderRadius: "10px",
-                  color: "rgba(255, 255, 255, 0.85)",
-                  fontSize: "0.875rem",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
-                  textAlign: "left",
-                }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background =
                     "rgba(255, 255, 255, 0.12)";
@@ -563,6 +587,20 @@ export default function LandingPage() {
                   e.currentTarget.style.border =
                     "1px solid rgba(255, 255, 255, 0.1)";
                   e.currentTarget.style.color = "rgba(255, 255, 255, 0.85)";
+                }}
+                style={{
+                  width: "100%",
+                  padding: "0.625rem 1rem",
+                  background: "rgba(255, 255, 255, 0.05)",
+                  backdropFilter: "blur(10px)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  borderRadius: "10px",
+                  color: "rgba(255, 255, 255, 0.85)",
+                  fontSize: "0.875rem",
+                  fontWeight: 500,
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  textAlign: "left",
                 }}
               >
                 {item.label}
@@ -583,17 +621,6 @@ export default function LandingPage() {
             {previousChats.map((chat) => (
               <div
                 key={chat.id}
-                style={{
-                  padding: "0.875rem 1rem",
-                  marginBottom: hoveredChatId === chat.id ? "3rem" : "0.5rem",
-                  background: "rgba(255, 255, 255, 0.05)",
-                  backdropFilter: "blur(10px)",
-                  border: "1px solid rgba(255, 255, 255, 0.08)",
-                  borderRadius: "12px",
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
-                  position: "relative",
-                }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.background = "rgba(255, 255, 255, 0.1)";
                   e.currentTarget.style.border =
@@ -606,6 +633,17 @@ export default function LandingPage() {
                   e.currentTarget.style.border =
                     "1px solid rgba(255, 255, 255, 0.08)";
                   setHoveredChatId(null);
+                }}
+                style={{
+                  padding: "0.875rem 1rem",
+                  marginBottom: hoveredChatId === chat.id ? "3rem" : "0.5rem",
+                  background: "rgba(255, 255, 255, 0.05)",
+                  backdropFilter: "blur(10px)",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  borderRadius: "12px",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                  position: "relative",
                 }}
               >
                 {/* Tooltip */}
@@ -714,6 +752,7 @@ export default function LandingPage() {
           {/* Navigation Bar - Desktop only */}
           <nav
             className="hidden md:flex"
+            onMouseLeave={() => setHoveredNavIndex(null)}
             style={{
               position: "absolute",
               top: "1.4375rem", // 23px (2rem = 32px - 9px = 23px)
@@ -729,7 +768,6 @@ export default function LandingPage() {
               boxShadow:
                 "0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
             }}
-            onMouseLeave={() => setHoveredNavIndex(null)}
           >
             {/* Logo */}
             <div
@@ -785,13 +823,13 @@ export default function LandingPage() {
               { label: "Roadmap", href: "#" },
             ].map((item, index) => (
               <button
+                className={ibmPlexSans.className}
                 key={item.label}
+                onClick={item.onClick}
+                onMouseEnter={() => setHoveredNavIndex(index)}
                 ref={(el) => {
                   navItemRefs.current[index] = el;
                 }}
-                onClick={item.onClick}
-                onMouseEnter={() => setHoveredNavIndex(index)}
-                className={ibmPlexSans.className}
                 style={{
                   position: "relative",
                   color:
@@ -900,6 +938,12 @@ export default function LandingPage() {
 
         {/* Input container */}
         <div
+          onClick={(e) => {
+            // Focus input when clicking on the container (but not on other elements)
+            if (isChatMode && e.target === e.currentTarget) {
+              inputRef.current?.focus();
+            }
+          }}
           style={{
             position: "absolute",
             bottom: isChatMode ? "0" : "48vh",
@@ -913,18 +957,16 @@ export default function LandingPage() {
             gap: "1rem",
             padding: isChatMode ? "2rem 1rem 2rem 2rem" : "0",
           }}
-          onClick={(e) => {
-            // Focus input when clicking on the container (but not on other elements)
-            if (isChatMode && e.target === e.currentTarget) {
-              inputRef.current?.focus();
-            }
-          }}
         >
           {/* Chat messages */}
           {isChatMode && (
             <div
-              ref={messagesContainerRef}
               className="chat-messages-container"
+              onClick={() => {
+                // Focus input when clicking on the message area
+                inputRef.current?.focus();
+              }}
+              ref={messagesContainerRef}
               style={{
                 flex: 1,
                 overflowY: "auto",
@@ -945,10 +987,6 @@ export default function LandingPage() {
                     ? "linear-gradient(to bottom, transparent 0%, black 4rem, black calc(100% - 1.5rem), transparent 100%)"
                     : "linear-gradient(to bottom, transparent 0%, black 1.5rem, black calc(100% - 1.5rem), transparent 100%)",
               }}
-              onClick={() => {
-                // Focus input when clicking on the message area
-                inputRef.current?.focus();
-              }}
             >
               {messages.map((message, messageIndex) => {
                 const messageText = message.parts
@@ -958,7 +996,7 @@ export default function LandingPage() {
 
                 // Generate a timestamp for the message
                 const messageTime = new Date(
-                  Date.now() - (messages.length - messageIndex - 1) * 60000
+                  Date.now() - (messages.length - messageIndex - 1) * 60_000
                 ).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -1033,6 +1071,21 @@ export default function LandingPage() {
                         onClick={() =>
                           handleCopyMessage(message.id, messageText)
                         }
+                        onMouseEnter={(e) => {
+                          if (copiedMessageId !== message.id) {
+                            e.currentTarget.style.color =
+                              "rgba(255, 255, 255, 0.5)";
+                            e.currentTarget.style.background =
+                              "rgba(255, 255, 255, 0.05)";
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (copiedMessageId !== message.id) {
+                            e.currentTarget.style.color =
+                              "rgba(255, 255, 255, 0.3)";
+                            e.currentTarget.style.background = "transparent";
+                          }
+                        }}
                         style={{
                           padding: "0.25rem",
                           background:
@@ -1051,21 +1104,6 @@ export default function LandingPage() {
                           alignItems: "center",
                           justifyContent: "center",
                           position: "relative",
-                        }}
-                        onMouseEnter={(e) => {
-                          if (copiedMessageId !== message.id) {
-                            e.currentTarget.style.color =
-                              "rgba(255, 255, 255, 0.5)";
-                            e.currentTarget.style.background =
-                              "rgba(255, 255, 255, 0.05)";
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (copiedMessageId !== message.id) {
-                            e.currentTarget.style.color =
-                              "rgba(255, 255, 255, 0.3)";
-                            e.currentTarget.style.background = "transparent";
-                          }
                         }}
                         title={
                           copiedMessageId === message.id
@@ -1115,6 +1153,62 @@ export default function LandingPage() {
             </div>
           )}
 
+          {/* Scroll to bottom button - positioned above input */}
+          {isChatMode && (
+            <button
+              aria-label="Scroll to bottom"
+              className="scroll-to-bottom-button"
+              onClick={handleScrollToBottom}
+              onMouseEnter={(e) => {
+                if (showScrollButton) {
+                  e.currentTarget.style.transform = "scale(1.05)";
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.12)";
+                  e.currentTarget.style.border = "1px solid rgba(255, 255, 255, 0.25)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (showScrollButton) {
+                  e.currentTarget.style.transform = "scale(1)";
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+                  e.currentTarget.style.border = "1px solid rgba(255, 255, 255, 0.15)";
+                }
+              }}
+              style={{
+                position: "absolute",
+                bottom: "7rem", // Positioned above the input field with more space
+                right: "2rem",
+                width: "2.5rem",
+                height: "2.5rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "rgba(255, 255, 255, 0.08)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)", // Safari support
+                border: "1px solid rgba(255, 255, 255, 0.15)",
+                borderRadius: "50%",
+                boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
+                cursor: "pointer",
+                transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+                transform: showScrollButton ? "scale(1)" : "scale(0.8)",
+                opacity: showScrollButton ? 1 : 0,
+                visibility: showScrollButton ? "visible" : "hidden",
+                pointerEvents: showScrollButton ? "auto" : "none",
+                zIndex: 10,
+              }}
+              type="button"
+            >
+              <ArrowDownIcon
+                style={{
+                  width: "1.125rem",
+                  height: "1.125rem",
+                  color: "#fff",
+                  filter: "drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))",
+                }}
+              />
+            </button>
+          )}
+
           {/* Input form - liquid glass style with integrated send button */}
           <form
             onSubmit={handleSubmit}
@@ -1125,6 +1219,16 @@ export default function LandingPage() {
             }}
           >
             <div
+              onBlur={(e) => {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+                e.currentTarget.style.border =
+                  "1px solid rgba(255, 255, 255, 0.15)";
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.12)";
+                e.currentTarget.style.border =
+                  "1px solid rgba(255, 255, 255, 0.25)";
+              }}
               style={{
                 position: "relative",
                 display: "flex",
@@ -1137,20 +1241,12 @@ export default function LandingPage() {
                   "0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
                 transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
               }}
-              onFocus={(e) => {
-                e.currentTarget.style.background = "rgba(255, 255, 255, 0.12)";
-                e.currentTarget.style.border =
-                  "1px solid rgba(255, 255, 255, 0.25)";
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
-                e.currentTarget.style.border =
-                  "1px solid rgba(255, 255, 255, 0.15)";
-              }}
             >
               <textarea
-                ref={inputRef}
-                value={input}
+                autoFocus
+                disabled={
+                  !isOnline || status !== "ready" || (isChatMode && !connected)
+                }
                 onChange={(e) => {
                   setInput(e.target.value);
                   // Auto-resize textarea
@@ -1159,25 +1255,21 @@ export default function LandingPage() {
                     inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
                   }
                 }}
-                disabled={
-                  !isOnline || status !== "ready" || (isChatMode && !connected)
-                }
-                placeholder={
-                  !isOnline
-                    ? "No internet connection..."
-                    : isChatMode && !connected
-                    ? "Please reconnect wallet to continue..."
-                    : "Ask me anything..."
-                }
-                autoFocus
-                tabIndex={0}
-                rows={1}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     handleSubmit(e);
                   }
                 }}
+                placeholder={
+                  isOnline
+                    ? isChatMode && !connected
+                      ? "Please reconnect wallet to continue..."
+                      : "Ask me anything..."
+                    : "No internet connection..."
+                }
+                ref={inputRef}
+                rows={1}
                 style={{
                   flex: 1,
                   padding: "1.25rem 1.75rem",
@@ -1195,15 +1287,35 @@ export default function LandingPage() {
                   minHeight: "auto",
                   maxHeight: "200px",
                 }}
+                tabIndex={0}
+                value={input}
               />
               <button
-                type="submit"
                 disabled={
                   !isOnline ||
                   status !== "ready" ||
                   !input.trim() ||
                   (isChatMode && !connected)
                 }
+                onMouseEnter={(e) => {
+                  if (
+                    isOnline &&
+                    status === "ready" &&
+                    input.trim() &&
+                    (!isChatMode || connected)
+                  ) {
+                    e.currentTarget.style.opacity = "1";
+                    e.currentTarget.style.background =
+                      "rgba(255, 255, 255, 0.1)";
+                    e.currentTarget.style.transform =
+                      "translateY(-50%) scale(1.1)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = "0.7";
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.transform = "translateY(-50%) scale(1)";
+                }}
                 style={{
                   position: "absolute",
                   right: "0.75rem",
@@ -1234,25 +1346,7 @@ export default function LandingPage() {
                       ? 0.3
                       : 0.7,
                 }}
-                onMouseEnter={(e) => {
-                  if (
-                    isOnline &&
-                    status === "ready" &&
-                    input.trim() &&
-                    (!isChatMode || connected)
-                  ) {
-                    e.currentTarget.style.opacity = "1";
-                    e.currentTarget.style.background =
-                      "rgba(255, 255, 255, 0.1)";
-                    e.currentTarget.style.transform =
-                      "translateY(-50%) scale(1.1)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.opacity = "0.7";
-                  e.currentTarget.style.background = "transparent";
-                  e.currentTarget.style.transform = "translateY(-50%) scale(1)";
-                }}
+                type="submit"
               >
                 <ChevronRightIcon
                   size={24}
@@ -1419,21 +1513,6 @@ export default function LandingPage() {
             </p>
             <button
               onClick={() => setVisible(true)}
-              style={{
-                padding: "0.875rem 2rem",
-                fontSize: "1rem",
-                fontWeight: 600,
-                color: "#fff",
-                background: "rgba(255, 68, 68, 0.2)",
-                backdropFilter: "blur(10px)",
-                border: "1px solid rgba(255, 68, 68, 0.4)",
-                borderRadius: "12px",
-                cursor: "pointer",
-                transition: "all 0.3s ease",
-                boxShadow:
-                  "0 4px 20px 0 rgba(255, 68, 68, 0.2), " +
-                  "inset 0 1px 2px rgba(255, 255, 255, 0.1)",
-              }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = "rgba(255, 68, 68, 0.3)";
                 e.currentTarget.style.border =
@@ -1452,6 +1531,21 @@ export default function LandingPage() {
                   "0 4px 20px 0 rgba(255, 68, 68, 0.2), " +
                   "inset 0 1px 2px rgba(255, 255, 255, 0.1)";
               }}
+              style={{
+                padding: "0.875rem 2rem",
+                fontSize: "1rem",
+                fontWeight: 600,
+                color: "#fff",
+                background: "rgba(255, 68, 68, 0.2)",
+                backdropFilter: "blur(10px)",
+                border: "1px solid rgba(255, 68, 68, 0.4)",
+                borderRadius: "12px",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                boxShadow:
+                  "0 4px 20px 0 rgba(255, 68, 68, 0.2), " +
+                  "inset 0 1px 2px rgba(255, 255, 255, 0.1)",
+              }}
             >
               Reconnect Wallet
             </button>
@@ -1462,6 +1556,7 @@ export default function LandingPage() {
       {/* Modal for testers message */}
       {isModalOpen && (
         <div
+          onClick={() => setIsModalOpen(false)}
           style={{
             position: "fixed",
             inset: 0,
@@ -1472,7 +1567,6 @@ export default function LandingPage() {
             padding: "1rem",
             animation: "fadeIn 0.3s ease-out",
           }}
-          onClick={() => setIsModalOpen(false)}
         >
           {/* Backdrop */}
           <div
@@ -1486,6 +1580,7 @@ export default function LandingPage() {
 
           {/* Modal content */}
           <div
+            onClick={(e) => e.stopPropagation()}
             style={{
               position: "relative",
               maxWidth: "600px",
@@ -1503,7 +1598,6 @@ export default function LandingPage() {
                 "inset 0 -1px 2px rgba(0, 0, 0, 0.3)",
               animation: "slideInUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
             }}
-            onClick={(e) => e.stopPropagation()}
           >
             {/* Modal header */}
             <h2
@@ -1563,23 +1657,6 @@ export default function LandingPage() {
             {/* Close button */}
             <button
               onClick={() => setIsModalOpen(false)}
-              style={{
-                marginTop: "2rem",
-                width: "100%",
-                padding: "1rem 1.5rem",
-                fontSize: "1rem",
-                fontWeight: 600,
-                color: "#fff",
-                background: "rgba(255, 255, 255, 0.15)",
-                backdropFilter: "blur(10px)",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-                borderRadius: "12px",
-                cursor: "pointer",
-                transition: "all 0.3s ease",
-                boxShadow:
-                  "0 4px 20px 0 rgba(0, 0, 0, 0.3), " +
-                  "inset 0 1px 2px rgba(255, 255, 255, 0.1)",
-              }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = "rgba(255, 255, 255, 0.2)";
                 e.currentTarget.style.border =
@@ -1597,6 +1674,23 @@ export default function LandingPage() {
                 e.currentTarget.style.boxShadow =
                   "0 4px 20px 0 rgba(0, 0, 0, 0.3), " +
                   "inset 0 1px 2px rgba(255, 255, 255, 0.1)";
+              }}
+              style={{
+                marginTop: "2rem",
+                width: "100%",
+                padding: "1rem 1.5rem",
+                fontSize: "1rem",
+                fontWeight: 600,
+                color: "#fff",
+                background: "rgba(255, 255, 255, 0.15)",
+                backdropFilter: "blur(10px)",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                borderRadius: "12px",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                boxShadow:
+                  "0 4px 20px 0 rgba(0, 0, 0, 0.3), " +
+                  "inset 0 1px 2px rgba(255, 255, 255, 0.1)",
               }}
             >
               I understand
