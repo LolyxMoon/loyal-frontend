@@ -5,6 +5,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { DefaultChatTransport } from "ai";
 import localFont from "next/font/local";
+import { IBM_Plex_Sans, Plus_Jakarta_Sans } from "next/font/google";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
@@ -27,6 +28,23 @@ const instrumentSerif = localFont({
       style: "italic",
     },
   ],
+  display: "swap",
+});
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  display: "swap",
+});
+
+const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+});
+
+const dirtyline = localFont({
+  src: "../../public/fonts/Dirtyline 36daysoftype 2022.woff2",
   display: "swap",
 });
 
@@ -199,8 +217,8 @@ export default function LandingPage() {
       // Use a longer delay to ensure markdown rendering is complete
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'end'
+          behavior: "smooth",
+          block: "end",
         });
       }, 100);
     }
@@ -263,6 +281,7 @@ export default function LandingPage() {
 
   return (
     <main
+      className={ibmPlexSans.className}
       style={{
         margin: 0,
         minHeight: "100vh",
@@ -276,7 +295,9 @@ export default function LandingPage() {
     >
       {/* Desktop margin wrapper - only pushes content on desktop */}
       <div
-        className={`transition-all duration-400 ${isSidebarOpen ? "md:ml-[300px]" : ""}`}
+        className={`transition-all duration-400 ${
+          isSidebarOpen ? "md:ml-[300px]" : ""
+        }`}
         style={{
           position: "relative",
           width: "100%",
@@ -528,16 +549,17 @@ export default function LandingPage() {
                   cursor: "pointer",
                   transition: "all 0.3s ease",
                   textAlign: "left",
-                  fontFamily: "system-ui, -apple-system, sans-serif",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.12)";
+                  e.currentTarget.style.background =
+                    "rgba(255, 255, 255, 0.12)";
                   e.currentTarget.style.border =
                     "1px solid rgba(255, 255, 255, 0.25)";
                   e.currentTarget.style.color = "rgba(255, 255, 255, 1)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
+                  e.currentTarget.style.background =
+                    "rgba(255, 255, 255, 0.05)";
                   e.currentTarget.style.border =
                     "1px solid rgba(255, 255, 255, 0.1)";
                   e.currentTarget.style.color = "rgba(255, 255, 255, 0.85)";
@@ -608,7 +630,6 @@ export default function LandingPage() {
                       pointerEvents: "none",
                       zIndex: 1000,
                       animation: "tooltipFadeInDown 0.2s ease-out",
-                      fontFamily: "system-ui, -apple-system, sans-serif",
                       letterSpacing: "0.025em",
                     }}
                   >
@@ -699,7 +720,7 @@ export default function LandingPage() {
               left: "50%",
               transform: "translateX(-50%)",
               alignItems: "center",
-              gap: "0.25rem",
+              gap: "0.5rem",
               background: "rgba(255, 255, 255, 0.08)",
               backdropFilter: "blur(20px)",
               border: "1px solid rgba(255, 255, 255, 0.15)",
@@ -707,30 +728,54 @@ export default function LandingPage() {
               padding: "0.5rem 0.75rem",
               boxShadow:
                 "0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
-              fontFamily: "system-ui, -apple-system, sans-serif",
             }}
             onMouseLeave={() => setHoveredNavIndex(null)}
           >
+            {/* Logo */}
+            <div
+              style={{
+                fontSize: "1.125rem",
+                fontWeight: 500,
+                color: "rgba(255, 255, 255, 0.95)",
+                letterSpacing: "0.03em",
+                paddingRight: "0.5rem",
+                marginRight: "0.25rem",
+                borderRight: "1px solid rgba(255, 255, 255, 0.15)",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <span
+                className={dirtyline.className}
+                style={{ fontSize: "1.8rem", marginRight: "-0.1rem" }}
+              >
+                L
+              </span>
+              <span className={plusJakartaSans.className}>oyal</span>
+            </div>
             {/* Sliding liquid glass indicator */}
-            {hoveredNavIndex !== null && navItemRefs.current[hoveredNavIndex] && (
-              <div
-                style={{
-                  position: "absolute",
-                  top: "50%",
-                  left: navItemRefs.current[hoveredNavIndex]?.offsetLeft || 0,
-                  width: navItemRefs.current[hoveredNavIndex]?.offsetWidth || 0,
-                  height: navItemRefs.current[hoveredNavIndex]?.offsetHeight || 0,
-                  transform: "translateY(-50%)",
-                  background: "rgba(255, 255, 255, 0.12)",
-                  border: "1px solid rgba(255, 255, 255, 0.25)",
-                  borderRadius: "14px",
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-                  transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                  pointerEvents: "none",
-                  zIndex: 0,
-                }}
-              />
-            )}
+            {hoveredNavIndex !== null &&
+              navItemRefs.current[hoveredNavIndex] && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: navItemRefs.current[hoveredNavIndex]?.offsetLeft || 0,
+                    width:
+                      navItemRefs.current[hoveredNavIndex]?.offsetWidth || 0,
+                    height:
+                      navItemRefs.current[hoveredNavIndex]?.offsetHeight || 0,
+                    transform: "translateY(-50%)",
+                    background: "rgba(255, 255, 255, 0.12)",
+                    border: "1px solid rgba(255, 255, 255, 0.25)",
+                    borderRadius: "14px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                    pointerEvents: "none",
+                    zIndex: 0,
+                  }}
+                />
+              )}
             {[
               { label: "For testers", onClick: () => setIsModalOpen(true) },
               { label: "Blog", href: "#" },
@@ -746,12 +791,16 @@ export default function LandingPage() {
                 }}
                 onClick={item.onClick}
                 onMouseEnter={() => setHoveredNavIndex(index)}
+                className={ibmPlexSans.className}
                 style={{
                   position: "relative",
-                  color: hoveredNavIndex === index ? "rgba(255, 255, 255, 1)" : "rgba(255, 255, 255, 0.85)",
-                  fontSize: "0.875rem", // Increased from 0.8125rem (13px) to 0.875rem (14px)
+                  color:
+                    hoveredNavIndex === index
+                      ? "rgba(255, 255, 255, 1)"
+                      : "rgba(255, 255, 255, 0.85)",
+                  fontSize: "1rem",
                   fontWeight: 500,
-                  letterSpacing: "0.015em", // Slightly tighter to compensate for larger font
+                  letterSpacing: "-0.02em",
                   padding: "0.375rem 0.75rem",
                   background: "transparent",
                   border: "1px solid transparent",
@@ -823,7 +872,6 @@ export default function LandingPage() {
                 fontSize: "0.95rem",
                 fontWeight: 400,
                 color: "rgba(255, 255, 255, 0.85)",
-                fontFamily: "system-ui, -apple-system, sans-serif",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
@@ -974,7 +1022,6 @@ export default function LandingPage() {
                         style={{
                           fontSize: "0.75rem",
                           color: "rgba(255, 255, 255, 0.3)",
-                          fontFamily: "system-ui, -apple-system, sans-serif",
                           letterSpacing: "0.025em",
                         }}
                       >
@@ -1269,7 +1316,6 @@ export default function LandingPage() {
                 fontWeight: 600,
                 color: "#fff",
                 marginBottom: "1rem",
-                fontFamily: "system-ui, -apple-system, sans-serif",
               }}
             >
               No Internet Connection
@@ -1280,7 +1326,6 @@ export default function LandingPage() {
                 fontSize: "1rem",
                 lineHeight: 1.6,
                 marginBottom: "1.5rem",
-                fontFamily: "system-ui, -apple-system, sans-serif",
               }}
             >
               Your internet connection has been lost. The input will be
@@ -1294,7 +1339,6 @@ export default function LandingPage() {
                 gap: "0.5rem",
                 color: "rgba(255, 255, 255, 0.7)",
                 fontSize: "0.875rem",
-                fontFamily: "system-ui, -apple-system, sans-serif",
               }}
             >
               <div
@@ -1358,7 +1402,6 @@ export default function LandingPage() {
                 fontWeight: 600,
                 color: "#fff",
                 marginBottom: "1rem",
-                fontFamily: "system-ui, -apple-system, sans-serif",
               }}
             >
               Wallet Disconnected
@@ -1369,7 +1412,6 @@ export default function LandingPage() {
                 fontSize: "1rem",
                 lineHeight: 1.6,
                 marginBottom: "1.5rem",
-                fontFamily: "system-ui, -apple-system, sans-serif",
               }}
             >
               Your wallet has been disconnected. Please reconnect to continue
@@ -1391,7 +1433,6 @@ export default function LandingPage() {
                 boxShadow:
                   "0 4px 20px 0 rgba(255, 68, 68, 0.2), " +
                   "inset 0 1px 2px rgba(255, 255, 255, 0.1)",
-                fontFamily: "system-ui, -apple-system, sans-serif",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = "rgba(255, 68, 68, 0.3)";
@@ -1472,7 +1513,6 @@ export default function LandingPage() {
                 color: "#fff",
                 marginBottom: "1.5rem",
                 lineHeight: 1.3,
-                fontFamily: "system-ui, -apple-system, sans-serif",
               }}
             >
               Thank you for joining the first test batch!
@@ -1484,7 +1524,6 @@ export default function LandingPage() {
                 color: "rgba(255, 255, 255, 0.9)",
                 fontSize: "1rem",
                 lineHeight: 1.7,
-                fontFamily: "system-ui, -apple-system, sans-serif",
                 display: "flex",
                 flexDirection: "column",
                 gap: "1rem",
@@ -1540,7 +1579,6 @@ export default function LandingPage() {
                 boxShadow:
                   "0 4px 20px 0 rgba(0, 0, 0, 0.3), " +
                   "inset 0 1px 2px rgba(255, 255, 255, 0.1)",
-                fontFamily: "system-ui, -apple-system, sans-serif",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = "rgba(255, 255, 255, 0.2)";
