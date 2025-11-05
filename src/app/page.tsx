@@ -375,6 +375,115 @@ export default function LandingPage() {
             }}
           />
 
+          {/* Navigation Bar - Desktop only - Fixed to viewport */}
+          <nav
+            className="hidden md:flex"
+            onMouseLeave={() => setHoveredNavIndex(null)}
+            style={{
+              position: "fixed",
+              top: "1.4375rem",
+              left: "50%",
+              transform: "translateX(-50%)",
+              alignItems: "center",
+              gap: "0.5rem",
+              background: "rgba(255, 255, 255, 0.08)",
+              backdropFilter: "blur(20px)",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
+              borderRadius: "20px",
+              padding: "0.5rem 0.75rem",
+              boxShadow:
+                "0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
+              zIndex: 60,
+              opacity: isChatMode ? 0 : 1,
+              pointerEvents: isChatMode ? "none" : "auto",
+              transition: "opacity 0.3s ease",
+            }}
+          >
+            {/* Logo */}
+            <div
+              style={{
+                fontSize: "1.125rem",
+                fontWeight: 500,
+                color: "rgba(255, 255, 255, 0.95)",
+                letterSpacing: "0.03em",
+                paddingRight: "0.5rem",
+                marginRight: "0.25rem",
+                borderRight: "1px solid rgba(255, 255, 255, 0.15)",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              <span
+                className={dirtyline.className}
+                style={{ fontSize: "1.8rem", marginRight: "-0.1rem" }}
+              >
+                L
+              </span>
+              <span className={plusJakartaSans.className}>oyal</span>
+            </div>
+            {/* Sliding liquid glass indicator */}
+            {hoveredNavIndex !== null &&
+              navItemRefs.current[hoveredNavIndex] && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: navItemRefs.current[hoveredNavIndex]?.offsetLeft || 0,
+                    width:
+                      navItemRefs.current[hoveredNavIndex]?.offsetWidth || 0,
+                    height:
+                      navItemRefs.current[hoveredNavIndex]?.offsetHeight || 0,
+                    transform: "translateY(-50%)",
+                    background: "rgba(255, 255, 255, 0.12)",
+                    border: "1px solid rgba(255, 255, 255, 0.25)",
+                    borderRadius: "14px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                    transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                    pointerEvents: "none",
+                    zIndex: 0,
+                  }}
+                />
+              )}
+            {[
+              { label: "For testers", onClick: () => setIsModalOpen(true) },
+              { label: "About", onClick: handleScrollToAbout },
+              { label: "Roadmap", href: "#" },
+              { label: "Blog", href: "#" },
+              { label: "Docs", href: "#" },
+            ].map((item, index) => (
+              <button
+                className={ibmPlexSans.className}
+                key={item.label}
+                onClick={item.onClick}
+                onMouseEnter={() => setHoveredNavIndex(index)}
+                ref={(el) => {
+                  navItemRefs.current[index] = el;
+                }}
+                style={{
+                  position: "relative",
+                  color:
+                    hoveredNavIndex === index
+                      ? "rgba(255, 255, 255, 1)"
+                      : "rgba(255, 255, 255, 0.85)",
+                  fontSize: "1rem",
+                  fontWeight: 500,
+                  letterSpacing: "-0.02em",
+                  padding: "0.375rem 0.75rem",
+                  background: "transparent",
+                  border: "1px solid transparent",
+                  borderRadius: "14px",
+                  cursor: "pointer",
+                  transition: "color 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                  outline: "none",
+                  animation: `fadeIn 0.5s ease-out ${index * 0.1}s both`,
+                  zIndex: 1,
+                }}
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+
           {/* Menu Button - Always Visible */}
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -578,8 +687,6 @@ export default function LandingPage() {
             >
               {[
                 { label: "For testers", onClick: () => setIsModalOpen(true) },
-                { label: "Blog", href: "#" },
-                { label: "Docs", href: "#" },
                 {
                   label: "About",
                   onClick: () => {
@@ -587,8 +694,9 @@ export default function LandingPage() {
                     setIsSidebarOpen(false); // Close sidebar after clicking
                   },
                 },
-                { label: "Manifesto", href: "#" },
                 { label: "Roadmap", href: "#" },
+                { label: "Blog", href: "#" },
+                { label: "Docs", href: "#" },
               ].map((item) => (
                 <button
                   key={item.label}
@@ -769,113 +877,6 @@ export default function LandingPage() {
               transform: isChatMode ? "translateY(-100vh)" : "translateY(0)",
             }}
           >
-            {/* Navigation Bar - Desktop only */}
-            <nav
-              className="hidden md:flex"
-              onMouseLeave={() => setHoveredNavIndex(null)}
-              style={{
-                position: "absolute",
-                top: "1.4375rem", // 23px (2rem = 32px - 9px = 23px)
-                left: "50%",
-                transform: "translateX(-50%)",
-                alignItems: "center",
-                gap: "0.5rem",
-                background: "rgba(255, 255, 255, 0.08)",
-                backdropFilter: "blur(20px)",
-                border: "1px solid rgba(255, 255, 255, 0.15)",
-                borderRadius: "20px",
-                padding: "0.5rem 0.75rem",
-                boxShadow:
-                  "0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
-              }}
-            >
-              {/* Logo */}
-              <div
-                style={{
-                  fontSize: "1.125rem",
-                  fontWeight: 500,
-                  color: "rgba(255, 255, 255, 0.95)",
-                  letterSpacing: "0.03em",
-                  paddingRight: "0.5rem",
-                  marginRight: "0.25rem",
-                  borderRight: "1px solid rgba(255, 255, 255, 0.15)",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <span
-                  className={dirtyline.className}
-                  style={{ fontSize: "1.8rem", marginRight: "-0.1rem" }}
-                >
-                  L
-                </span>
-                <span className={plusJakartaSans.className}>oyal</span>
-              </div>
-              {/* Sliding liquid glass indicator */}
-              {hoveredNavIndex !== null &&
-                navItemRefs.current[hoveredNavIndex] && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "50%",
-                      left:
-                        navItemRefs.current[hoveredNavIndex]?.offsetLeft || 0,
-                      width:
-                        navItemRefs.current[hoveredNavIndex]?.offsetWidth || 0,
-                      height:
-                        navItemRefs.current[hoveredNavIndex]?.offsetHeight || 0,
-                      transform: "translateY(-50%)",
-                      background: "rgba(255, 255, 255, 0.12)",
-                      border: "1px solid rgba(255, 255, 255, 0.25)",
-                      borderRadius: "14px",
-                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-                      transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                      pointerEvents: "none",
-                      zIndex: 0,
-                    }}
-                  />
-                )}
-              {[
-                { label: "For testers", onClick: () => setIsModalOpen(true) },
-                { label: "Blog", href: "#" },
-                { label: "Docs", href: "#" },
-                { label: "About", onClick: handleScrollToAbout },
-                { label: "Manifesto", href: "#" },
-                { label: "Roadmap", href: "#" },
-              ].map((item, index) => (
-                <button
-                  className={ibmPlexSans.className}
-                  key={item.label}
-                  onClick={item.onClick}
-                  onMouseEnter={() => setHoveredNavIndex(index)}
-                  ref={(el) => {
-                    navItemRefs.current[index] = el;
-                  }}
-                  style={{
-                    position: "relative",
-                    color:
-                      hoveredNavIndex === index
-                        ? "rgba(255, 255, 255, 1)"
-                        : "rgba(255, 255, 255, 0.85)",
-                    fontSize: "1rem",
-                    fontWeight: 500,
-                    letterSpacing: "-0.02em",
-                    padding: "0.375rem 0.75rem",
-                    background: "transparent",
-                    border: "1px solid transparent",
-                    borderRadius: "14px",
-                    cursor: "pointer",
-                    transition: "color 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                    outline: "none",
-                    animation: `fadeIn 0.5s ease-out ${index * 0.1}s both`,
-                    zIndex: 1,
-                  }}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </nav>
-
             <h1
               style={{
                 fontSize: "clamp(2rem, 5vw, 4.25rem)",
