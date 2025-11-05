@@ -4,7 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { DefaultChatTransport } from "ai";
-import { ArrowDownIcon } from "lucide-react";
+import { ArrowDownIcon, ArrowUpToLine } from "lucide-react";
 import { IBM_Plex_Sans, Plus_Jakarta_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import Image from "next/image";
@@ -76,6 +76,7 @@ export default function LandingPage() {
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
   const [isOnline, setIsOnline] = useState(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [isScrolledToAbout, setIsScrolledToAbout] = useState(false);
 
   // Network status monitoring and recovery
   useEffect(() => {
@@ -255,6 +256,42 @@ export default function LandingPage() {
     };
   }, [messages.length]);
 
+  // Detect when user scrolls to About section
+  useEffect(() => {
+    if (isChatMode) return; // Don't track scroll in chat mode
+
+    const handlePageScroll = () => {
+      const aboutSection = document.getElementById("about-section");
+      if (aboutSection) {
+        const rect = aboutSection.getBoundingClientRect();
+        const isInView = rect.top <= 100 && rect.bottom >= 100;
+        setIsScrolledToAbout(isInView);
+      }
+    };
+
+    window.addEventListener("scroll", handlePageScroll, { passive: true });
+    handlePageScroll(); // Check initial state
+
+    return () => {
+      window.removeEventListener("scroll", handlePageScroll);
+    };
+  }, [isChatMode]);
+
+  // Reset hover state when About button changes to/from icon mode
+  // This forces the hover indicator to recalculate its position after DOM updates
+  useEffect(() => {
+    if (hoveredNavIndex === 1) {
+      // Index 1 is the About button
+      setHoveredNavIndex(null);
+      // Use double requestAnimationFrame to ensure layout has been recalculated
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setHoveredNavIndex(1);
+        });
+      });
+    }
+  }, [isScrolledToAbout]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -314,11 +351,22 @@ export default function LandingPage() {
   const handleScrollToAbout = () => {
     const aboutSection = document.getElementById("about-section");
     if (aboutSection) {
-      aboutSection.scrollIntoView({
+      const navHeight = 80; // Height of nav + extra spacing
+      const elementPosition = aboutSection.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - navHeight;
+
+      window.scrollTo({
+        top: offsetPosition,
         behavior: "smooth",
-        block: "start",
       });
     }
+  };
+
+  const handleBackToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   // Mock data for previous chats - replace with real data later
@@ -446,7 +494,13 @@ export default function LandingPage() {
               )}
             {[
               { label: "For testers", onClick: () => setIsModalOpen(true) },
-              { label: "About", onClick: handleScrollToAbout },
+              {
+                label: "About",
+                onClick: isScrolledToAbout
+                  ? handleBackToTop
+                  : handleScrollToAbout,
+                isAbout: true,
+              },
               { label: "Roadmap", href: "#" },
               { label: "Blog", href: "#" },
               { label: "Docs", href: "#" },
@@ -473,13 +527,63 @@ export default function LandingPage() {
                   border: "1px solid transparent",
                   borderRadius: "14px",
                   cursor: "pointer",
-                  transition: "color 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                   outline: "none",
                   animation: `fadeIn 0.5s ease-out ${index * 0.1}s both`,
                   zIndex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.375rem",
+                  filter:
+                    item.isAbout && isScrolledToAbout
+                      ? "drop-shadow(0 0 8px rgba(255, 255, 255, 0.6))"
+                      : "none",
+                  overflow: "hidden",
                 }}
               >
-                {item.label}
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: item.isAbout && isScrolledToAbout ? 1 : 0,
+                    transform:
+                      item.isAbout && isScrolledToAbout
+                        ? "scale(1) translateY(0)"
+                        : "scale(0.8) translateY(4px)",
+                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    position:
+                      item.isAbout && isScrolledToAbout
+                        ? "relative"
+                        : "absolute",
+                    pointerEvents:
+                      item.isAbout && isScrolledToAbout ? "auto" : "none",
+                  }}
+                >
+                  {item.isAbout && <ArrowUpToLine size={18} />}
+                </span>
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: item.isAbout && isScrolledToAbout ? 0 : 1,
+                    transform:
+                      item.isAbout && isScrolledToAbout
+                        ? "scale(0.8) translateY(-4px)"
+                        : "scale(1) translateY(0)",
+                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                    position:
+                      item.isAbout && isScrolledToAbout
+                        ? "absolute"
+                        : "relative",
+                    pointerEvents:
+                      item.isAbout && isScrolledToAbout ? "none" : "auto",
+                  }}
+                >
+                  {item.label}
+                </span>
               </button>
             ))}
           </nav>
@@ -690,9 +794,14 @@ export default function LandingPage() {
                 {
                   label: "About",
                   onClick: () => {
-                    handleScrollToAbout();
+                    if (isScrolledToAbout) {
+                      handleBackToTop();
+                    } else {
+                      handleScrollToAbout();
+                    }
                     setIsSidebarOpen(false); // Close sidebar after clicking
                   },
+                  isAbout: true,
                 },
                 { label: "Roadmap", href: "#" },
                 { label: "Blog", href: "#" },
@@ -728,9 +837,63 @@ export default function LandingPage() {
                     cursor: "pointer",
                     transition: "all 0.3s ease",
                     textAlign: "left",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent:
+                      item.isAbout && isScrolledToAbout
+                        ? "center"
+                        : "flex-start",
+                    gap: "0.5rem",
+                    filter:
+                      item.isAbout && isScrolledToAbout
+                        ? "drop-shadow(0 0 6px rgba(255, 255, 255, 0.5))"
+                        : "none",
+                    overflow: "hidden",
+                    position: "relative",
                   }}
                 >
-                  {item.label}
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      opacity: item.isAbout && isScrolledToAbout ? 1 : 0,
+                      transform:
+                        item.isAbout && isScrolledToAbout
+                          ? "scale(1) translateY(0)"
+                          : "scale(0.8) translateY(4px)",
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                      position:
+                        item.isAbout && isScrolledToAbout
+                          ? "relative"
+                          : "absolute",
+                      pointerEvents:
+                        item.isAbout && isScrolledToAbout ? "auto" : "none",
+                    }}
+                  >
+                    {item.isAbout && <ArrowUpToLine size={16} />}
+                  </span>
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      opacity: item.isAbout && isScrolledToAbout ? 0 : 1,
+                      transform:
+                        item.isAbout && isScrolledToAbout
+                          ? "scale(0.8) translateY(-4px)"
+                          : "scale(1) translateY(0)",
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                      position:
+                        item.isAbout && isScrolledToAbout
+                          ? "absolute"
+                          : "relative",
+                      pointerEvents:
+                        item.isAbout && isScrolledToAbout ? "none" : "auto",
+                    }}
+                  >
+                    {item.label}
+                  </span>
                 </button>
               ))}
             </div>
