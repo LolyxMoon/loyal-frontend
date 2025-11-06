@@ -84,13 +84,11 @@ export default function HorizontalEventTimelineCarousel() {
       scale: 1,
       opacity: 1,
       zIndex: 10,
-      transition: { duration: 0.3, ease: "easeInOut" },
     },
     inactive: {
       scale: 0.9,
       opacity: 0.7,
       zIndex: 0,
-      transition: { duration: 0.3, ease: "easeInOut" },
     },
   };
 
