@@ -215,7 +215,10 @@ export const SkillsTextarea = forwardRef<
           ...props.style,
           position: "relative",
           zIndex: 1,
-          backgroundColor: props.style?.background || "transparent",
+          backgroundColor:
+            (typeof props.style?.background === "string"
+              ? props.style.background
+              : undefined) || "transparent",
           caretColor: props.style?.color || "#fff",
         }}
       />
@@ -292,7 +295,9 @@ export const SkillsTextarea = forwardRef<
           position={dropdownPosition}
           selectedIndex={selectedSkillIndex}
           skills={filteredSkills}
-          textareaRef={internalRef}
+          textareaRef={
+            internalRef as React.RefObject<HTMLTextAreaElement>
+          }
         />
       )}
     </div>

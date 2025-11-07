@@ -44,7 +44,7 @@ export const SkillHighlightOverlay = ({
           const isActionSkill = segment.skill?.category === "action";
 
           // All skills get base styling, only action skills get colored background
-          const finalStyle: CSSProperties = isActionSkill
+          const finalStyle: CSSProperties | undefined = isActionSkill
             ? skillStyle
             : {
                 ...skillStyle,
