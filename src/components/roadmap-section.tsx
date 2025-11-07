@@ -30,7 +30,7 @@ const ibmPlexSans = IBM_Plex_Sans({
 
 function RoadmapSectionComponent() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isDetailsExpanded, setIsDetailsExpanded] = useState(false);
+  const [isDetailsExpanded, setIsDetailsExpanded] = useState(true);
 
   const formatPeriod = (item: (typeof roadmapEvents)[0]) => {
     if (item.periodType === "Q") {

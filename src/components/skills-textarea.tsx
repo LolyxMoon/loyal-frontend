@@ -242,7 +242,7 @@ export const SkillsTextarea = forwardRef<
               "0 8px 32px 0 rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.15)",
           }}
         >
-          💰 Enter amount (e.g., 10) then{" "}
+          Enter amount then{" "}
           <kbd
             style={{
               padding: "0.25rem 0.5rem",

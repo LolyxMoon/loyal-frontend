@@ -55,10 +55,12 @@ export const PromptInputTextarea = forwardRef<
         form.requestSubmit();
       }
     }
+    onKeyDown?.(e);
   };
 
   return (
     <Textarea
+      ref={ref}
       className={cn(
         "w-full resize-none rounded-none border-none p-3 shadow-none outline-none ring-0",
         "field-sizing-content max-h-[6lh] bg-transparent dark:bg-transparent",
@@ -74,7 +76,9 @@ export const PromptInputTextarea = forwardRef<
       {...props}
     />
   );
-};
+});
+
+PromptInputTextarea.displayName = "PromptInputTextarea";
 
 export type PromptInputToolbarProps = HTMLAttributes<HTMLDivElement>;
 

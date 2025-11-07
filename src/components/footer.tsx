@@ -23,8 +23,8 @@ const ibmPlexSans = IBM_Plex_Sans({
 
 const socialLinks = [
   {
-    name: "Twitter",
-    url: "https://twitter.com/loyal",
+    name: "X",
+    url: "https://x.com/loyal_hq",
     icon: (
       <svg
         fill="currentColor"
@@ -38,8 +38,38 @@ const socialLinks = [
     ),
   },
   {
+    name: "Email",
+    url: "mailto:main@askloyal.com",
+    icon: (
+      <svg
+        fill="currentColor"
+        height="20"
+        viewBox="0 0 24 24"
+        width="20"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+      </svg>
+    ),
+  },
+  {
+    name: "Telegram",
+    url: "https://t.me/loyal_tgchat",
+    icon: (
+      <svg
+        fill="currentColor"
+        height="20"
+        viewBox="0 0 24 24"
+        width="20"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z" />
+      </svg>
+    ),
+  },
+  {
     name: "Discord",
-    url: "https://discord.gg/loyal",
+    url: "https://discord.gg/HSeXaVhzWU",
     icon: (
       <svg
         fill="currentColor"
@@ -54,7 +84,7 @@ const socialLinks = [
   },
   {
     name: "GitHub",
-    url: "https://github.com/loyal",
+    url: "https://github.com/loyal-labs",
     icon: (
       <svg
         fill="currentColor"
@@ -70,15 +100,18 @@ const socialLinks = [
 ];
 
 const legalLinks = [
-  { name: "Privacy Policy", url: "/privacy" },
-  { name: "Terms of Service", url: "/terms" },
-  { name: "Cookie Policy", url: "/cookies" },
-  { name: "Contact", url: "/contact" },
+  {
+    name: "Trade $LOYAL on Jupiter",
+    url: "https://jup.ag/tokens/LYLikzBQtpa9ZgVrJsqYGQpR3cC1WMJrBHaXGrQmeta",
+  },
+  { name: "Join Discord community", url: "https://discord.gg/HSeXaVhzWU" },
+  { name: "Join Telegram community", url: "https://t.me/loyal_tgchat" },
 ];
 
 export function Footer() {
   return (
     <footer
+      id="footer-section"
       style={{
         background: "rgba(0, 0, 0, 0.95)",
         borderTop: "1px solid rgba(255, 255, 255, 0.1)",
@@ -141,7 +174,7 @@ export function Footer() {
           ))}
         </div>
 
-        {/* Legal Links */}
+        {/* Regular Links */}
         <div
           className={ibmPlexSans.className}
           style={{
@@ -163,6 +196,7 @@ export function Footer() {
               onMouseLeave={(e) => {
                 e.currentTarget.style.color = "rgba(255, 255, 255, 0.5)";
               }}
+              rel="noopener noreferrer"
               style={{
                 fontSize: "0.875rem",
                 fontWeight: 400,
@@ -171,6 +205,7 @@ export function Footer() {
                 transition: "all 0.3s ease",
                 position: "relative",
               }}
+              target="_blank"
               whileHover={{ y: -2 }}
             >
               {link.name}
@@ -191,7 +226,7 @@ export function Footer() {
           ))}
         </div>
 
-        {/* Stay Loyal Slogan */}
+        {/* Stay Loyal */}
         <div
           style={{
             position: "relative",

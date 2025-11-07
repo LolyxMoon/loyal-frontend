@@ -82,8 +82,10 @@ export default function LandingPage() {
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isScrolledToAbout, setIsScrolledToAbout] = useState(false);
   const [isScrolledToRoadmap, setIsScrolledToRoadmap] = useState(false);
+  const [isScrolledToLinks, setIsScrolledToLinks] = useState(false);
   const prevScrolledToAbout = useRef(false);
   const prevScrolledToRoadmap = useRef(false);
+  const prevScrolledToLinks = useRef(false);
   const sanitizedInput = stripSkillMarkers(input).trim();
   const hasUsableInput = sanitizedInput.length > 0;
 
@@ -279,17 +281,54 @@ export default function LandingPage() {
     const handlePageScroll = () => {
       const aboutSection = document.getElementById("about-section");
       const roadmapSection = document.getElementById("roadmap-section");
+      const footerSection = document.getElementById("footer-section");
 
-      if (aboutSection) {
-        const rect = aboutSection.getBoundingClientRect();
-        const isInView = rect.top <= 100 && rect.bottom >= 100;
-        setIsScrolledToAbout(isInView);
+      // Check if we're at the bottom of the page
+      const isAtBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 10;
+
+      // If at bottom, activate links section
+      if (isAtBottom && footerSection) {
+        setIsScrolledToAbout(false);
+        setIsScrolledToRoadmap(false);
+        setIsScrolledToLinks(true);
+        return;
       }
 
-      if (roadmapSection) {
-        const rect = roadmapSection.getBoundingClientRect();
-        const isInView = rect.top <= 100 && rect.bottom >= 100;
-        setIsScrolledToRoadmap(isInView);
+      // Calculate which section is closest to the top threshold
+      const sections = [
+        { id: "about", element: aboutSection, setter: setIsScrolledToAbout },
+        {
+          id: "roadmap",
+          element: roadmapSection,
+          setter: setIsScrolledToRoadmap,
+        },
+        { id: "links", element: footerSection, setter: setIsScrolledToLinks },
+      ];
+
+      let closestSection = null;
+      let closestDistance = Number.POSITIVE_INFINITY;
+
+      for (const section of sections) {
+        if (section.element) {
+          const rect = section.element.getBoundingClientRect();
+          const isInView = rect.top <= 100 && rect.bottom >= 100;
+
+          if (isInView) {
+            // Calculate distance from top of section to threshold
+            const distance = Math.abs(rect.top - 100);
+            if (distance < closestDistance) {
+              closestDistance = distance;
+              closestSection = section;
+            }
+          }
+        }
+      }
+
+      // Set only the closest section as active
+      for (const section of sections) {
+        section.setter(section === closestSection);
       }
     };
 
@@ -308,12 +347,13 @@ export default function LandingPage() {
     const aboutChanged = prevScrolledToAbout.current !== isScrolledToAbout;
     const roadmapChanged =
       prevScrolledToRoadmap.current !== isScrolledToRoadmap;
+    const linksChanged = prevScrolledToLinks.current !== isScrolledToLinks;
 
     if (
-      (aboutChanged || roadmapChanged) &&
-      (hoveredNavIndex === 0 || hoveredNavIndex === 1)
+      (aboutChanged || roadmapChanged || linksChanged) &&
+      (hoveredNavIndex === 0 || hoveredNavIndex === 1 || hoveredNavIndex === 2)
     ) {
-      // Index 0 is About, Index 1 is Roadmap
+      // Index 0 is About, Index 1 is Roadmap, Index 2 is Links
       const currentIndex = hoveredNavIndex;
       setHoveredNavIndex(null);
       // Use double requestAnimationFrame to ensure layout has been recalculated
@@ -326,8 +366,9 @@ export default function LandingPage() {
 
     prevScrolledToAbout.current = isScrolledToAbout;
     prevScrolledToRoadmap.current = isScrolledToRoadmap;
+    prevScrolledToLinks.current = isScrolledToLinks;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isScrolledToAbout, isScrolledToRoadmap]);
+  }, [isScrolledToAbout, isScrolledToRoadmap, isScrolledToLinks]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -418,6 +459,20 @@ export default function LandingPage() {
     if (roadmapSection) {
       const navHeight = 80;
       const elementPosition = roadmapSection.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - navHeight;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const handleScrollToLinks = () => {
+    const footerSection = document.getElementById("footer-section");
+    if (footerSection) {
+      const navHeight = 80;
+      const elementPosition = footerSection.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.scrollY - navHeight;
 
       window.scrollTo({
@@ -565,6 +620,13 @@ export default function LandingPage() {
                   : handleScrollToRoadmap,
                 isRoadmap: true,
               },
+              {
+                label: "Links",
+                onClick: isScrolledToLinks
+                  ? handleBackToTop
+                  : handleScrollToLinks,
+                isLinks: true,
+              },
               { label: "Blog", href: "#" },
               { label: "Docs", href: "#" },
             ].map((item, index) => (
@@ -600,7 +662,8 @@ export default function LandingPage() {
                   gap: "0.375rem",
                   filter:
                     (item.isAbout && isScrolledToAbout) ||
-                    (item.isRoadmap && isScrolledToRoadmap)
+                    (item.isRoadmap && isScrolledToRoadmap) ||
+                    (item.isLinks && isScrolledToLinks)
                       ? "drop-shadow(0 0 8px rgba(255, 255, 255, 0.6))"
                       : "none",
                   overflow: "hidden",
@@ -613,28 +676,32 @@ export default function LandingPage() {
                     justifyContent: "center",
                     opacity:
                       (item.isAbout && isScrolledToAbout) ||
-                      (item.isRoadmap && isScrolledToRoadmap)
+                      (item.isRoadmap && isScrolledToRoadmap) ||
+                      (item.isLinks && isScrolledToLinks)
                         ? 1
                         : 0,
                     transform:
                       (item.isAbout && isScrolledToAbout) ||
-                      (item.isRoadmap && isScrolledToRoadmap)
+                      (item.isRoadmap && isScrolledToRoadmap) ||
+                      (item.isLinks && isScrolledToLinks)
                         ? "scale(1) translateY(0)"
                         : "scale(0.8) translateY(4px)",
                     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     position:
                       (item.isAbout && isScrolledToAbout) ||
-                      (item.isRoadmap && isScrolledToRoadmap)
+                      (item.isRoadmap && isScrolledToRoadmap) ||
+                      (item.isLinks && isScrolledToLinks)
                         ? "relative"
                         : "absolute",
                     pointerEvents:
                       (item.isAbout && isScrolledToAbout) ||
-                      (item.isRoadmap && isScrolledToRoadmap)
+                      (item.isRoadmap && isScrolledToRoadmap) ||
+                      (item.isLinks && isScrolledToLinks)
                         ? "auto"
                         : "none",
                   }}
                 >
-                  {(item.isAbout || item.isRoadmap) && (
+                  {(item.isAbout || item.isRoadmap || item.isLinks) && (
                     <ArrowUpToLine size={18} />
                   )}
                 </span>
@@ -645,22 +712,28 @@ export default function LandingPage() {
                     justifyContent: "center",
                     opacity:
                       (item.isAbout && isScrolledToAbout) ||
-                      (item.isRoadmap && isScrolledToRoadmap)
+                      (item.isRoadmap && isScrolledToRoadmap) ||
+                      (item.isLinks && isScrolledToLinks)
                         ? 0
                         : 1,
                     transform:
                       (item.isAbout && isScrolledToAbout) ||
-                      (item.isRoadmap && isScrolledToRoadmap)
+                      (item.isRoadmap && isScrolledToRoadmap) ||
+                      (item.isLinks && isScrolledToLinks)
                         ? "scale(0.8) translateY(-4px)"
                         : "scale(1) translateY(0)",
                     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     position:
                       (item.isAbout && isScrolledToAbout) ||
-                      (item.isRoadmap && isScrolledToRoadmap)
+                      (item.isRoadmap && isScrolledToRoadmap) ||
+                      (item.isLinks && isScrolledToLinks)
                         ? "absolute"
                         : "relative",
                     pointerEvents:
-                      item.isAbout && isScrolledToAbout ? "none" : "auto",
+                      (item.isAbout && isScrolledToAbout) ||
+                      (item.isLinks && isScrolledToLinks)
+                        ? "none"
+                        : "auto",
                   }}
                 >
                   {item.label}
@@ -882,7 +955,30 @@ export default function LandingPage() {
                   },
                   isAbout: true,
                 },
-                { label: "Roadmap", href: "#" },
+                {
+                  label: "Roadmap",
+                  onClick: () => {
+                    if (isScrolledToRoadmap) {
+                      handleBackToTop();
+                    } else {
+                      handleScrollToRoadmap();
+                    }
+                    setIsSidebarOpen(false);
+                  },
+                  isRoadmap: true,
+                },
+                {
+                  label: "Links",
+                  onClick: () => {
+                    if (isScrolledToLinks) {
+                      handleBackToTop();
+                    } else {
+                      handleScrollToLinks();
+                    }
+                    setIsSidebarOpen(false);
+                  },
+                  isLinks: true,
+                },
                 { label: "Blog", href: "#" },
                 { label: "Docs", href: "#" },
               ].map((item) => (
@@ -919,12 +1015,16 @@ export default function LandingPage() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent:
-                      item.isAbout && isScrolledToAbout
+                      (item.isAbout && isScrolledToAbout) ||
+                      (item.isRoadmap && isScrolledToRoadmap) ||
+                      (item.isLinks && isScrolledToLinks)
                         ? "center"
                         : "flex-start",
                     gap: "0.5rem",
                     filter:
-                      item.isAbout && isScrolledToAbout
+                      (item.isAbout && isScrolledToAbout) ||
+                      (item.isRoadmap && isScrolledToRoadmap) ||
+                      (item.isLinks && isScrolledToLinks)
                         ? "drop-shadow(0 0 6px rgba(255, 255, 255, 0.5))"
                         : "none",
                     overflow: "hidden",
@@ -936,39 +1036,66 @@ export default function LandingPage() {
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      opacity: item.isAbout && isScrolledToAbout ? 1 : 0,
+                      opacity:
+                        (item.isAbout && isScrolledToAbout) ||
+                        (item.isRoadmap && isScrolledToRoadmap) ||
+                        (item.isLinks && isScrolledToLinks)
+                          ? 1
+                          : 0,
                       transform:
-                        item.isAbout && isScrolledToAbout
+                        (item.isAbout && isScrolledToAbout) ||
+                        (item.isRoadmap && isScrolledToRoadmap) ||
+                        (item.isLinks && isScrolledToLinks)
                           ? "scale(1) translateY(0)"
                           : "scale(0.8) translateY(4px)",
                       transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                       position:
-                        item.isAbout && isScrolledToAbout
+                        (item.isAbout && isScrolledToAbout) ||
+                        (item.isRoadmap && isScrolledToRoadmap) ||
+                        (item.isLinks && isScrolledToLinks)
                           ? "relative"
                           : "absolute",
                       pointerEvents:
-                        item.isAbout && isScrolledToAbout ? "auto" : "none",
+                        (item.isAbout && isScrolledToAbout) ||
+                        (item.isRoadmap && isScrolledToRoadmap) ||
+                        (item.isLinks && isScrolledToLinks)
+                          ? "auto"
+                          : "none",
                     }}
                   >
-                    {item.isAbout && <ArrowUpToLine size={16} />}
+                    {(item.isAbout || item.isRoadmap || item.isLinks) && (
+                      <ArrowUpToLine size={16} />
+                    )}
                   </span>
                   <span
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      opacity: item.isAbout && isScrolledToAbout ? 0 : 1,
+                      opacity:
+                        (item.isAbout && isScrolledToAbout) ||
+                        (item.isRoadmap && isScrolledToRoadmap) ||
+                        (item.isLinks && isScrolledToLinks)
+                          ? 0
+                          : 1,
                       transform:
-                        item.isAbout && isScrolledToAbout
+                        (item.isAbout && isScrolledToAbout) ||
+                        (item.isRoadmap && isScrolledToRoadmap) ||
+                        (item.isLinks && isScrolledToLinks)
                           ? "scale(0.8) translateY(-4px)"
                           : "scale(1) translateY(0)",
                       transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                       position:
-                        item.isAbout && isScrolledToAbout
+                        (item.isAbout && isScrolledToAbout) ||
+                        (item.isRoadmap && isScrolledToRoadmap) ||
+                        (item.isLinks && isScrolledToLinks)
                           ? "absolute"
                           : "relative",
                       pointerEvents:
-                        item.isAbout && isScrolledToAbout ? "none" : "auto",
+                        (item.isAbout && isScrolledToAbout) ||
+                        (item.isLinks && isScrolledToLinks)
+                          ? "none"
+                          : "auto",
                     }}
                   >
                     {item.label}
