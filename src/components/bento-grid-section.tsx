@@ -8,10 +8,10 @@ import {
 } from "@tabler/icons-react";
 import { motion } from "motion/react";
 import localFont from "next/font/local";
-import { memo, useRef, useState, ReactNode } from "react";
+import { memo, type ReactNode, useRef, useState } from "react";
+import { type BentoItemVisualKey, bentoTabs } from "@/data/bento";
 import { cn } from "@/lib/utils";
 import { BentoGrid, BentoGridItem } from "./ui/bento-grid";
-import { bentoTabs, type BentoItemVisualKey } from "@/data/bento";
 
 const instrumentSerif = localFont({
   src: [
@@ -506,9 +506,7 @@ const tabs = bentoTabs.map((tab) => ({
     return {
       ...visuals,
       title: item.title,
-      description: (
-        <span className="text-sm">{item.description}</span>
-      ),
+      description: <span className="text-sm">{item.description}</span>,
     };
   }),
 }));

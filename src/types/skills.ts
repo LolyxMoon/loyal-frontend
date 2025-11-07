@@ -1,4 +1,4 @@
-export type SkillCategory = "action" | "recipient";
+export type SkillCategory = "action" | "recipient" | "currency" | "amount";
 
 export type LoyalSkill = {
   id: string;
@@ -34,5 +34,15 @@ export const AVAILABLE_SKILLS: LoyalSkill[] = [
     id: "recipient-eden",
     label: "@eden",
     category: "recipient",
+  },
+  {
+    id: "currency-sol",
+    label: "SOL",
+    category: "currency",
+  },
+  {
+    id: "currency-usd",
+    label: "USD",
+    category: "currency",
   },
 ];

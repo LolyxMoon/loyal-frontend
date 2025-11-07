@@ -10,9 +10,9 @@ import localFont from "next/font/local";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { BentoGridSection } from "@/components/bento-grid-section";
-import { RoadmapSection } from "@/components/roadmap-section";
 import { Footer } from "@/components/footer";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
+import { RoadmapSection } from "@/components/roadmap-section";
 import { SkillsTextarea } from "@/components/skills-textarea";
 import { ChevronRightIcon } from "@/components/ui/chevron-right";
 import { CopyIcon, type CopyIconHandle } from "@/components/ui/copy";
@@ -135,6 +135,13 @@ export default function LandingPage() {
       sendMessage({ text: pendingMessage });
       setInput("");
       setPendingMessage(null);
+
+      // Manually clear textarea value
+      if (inputRef.current) {
+        inputRef.current.value = "";
+        inputRef.current.style.height = "auto";
+      }
+
       setIsChatMode(true);
 
       // Reset textarea height and ensure focus
@@ -299,9 +306,13 @@ export default function LandingPage() {
   useEffect(() => {
     // Only recalculate if the state actually changed (not just on every render)
     const aboutChanged = prevScrolledToAbout.current !== isScrolledToAbout;
-    const roadmapChanged = prevScrolledToRoadmap.current !== isScrolledToRoadmap;
+    const roadmapChanged =
+      prevScrolledToRoadmap.current !== isScrolledToRoadmap;
 
-    if ((aboutChanged || roadmapChanged) && (hoveredNavIndex === 0 || hoveredNavIndex === 1)) {
+    if (
+      (aboutChanged || roadmapChanged) &&
+      (hoveredNavIndex === 0 || hoveredNavIndex === 1)
+    ) {
       // Index 0 is About, Index 1 is Roadmap
       const currentIndex = hoveredNavIndex;
       setHoveredNavIndex(null);
@@ -335,6 +346,13 @@ export default function LandingPage() {
     if (hasUsableInput && status === "ready") {
       sendMessage({ text: sanitizedInput });
       setInput("");
+
+      // Manually clear textarea value
+      if (inputRef.current) {
+        inputRef.current.value = "";
+        inputRef.current.style.height = "auto";
+      }
+
       setIsChatMode(true);
 
       // Reset textarea height and ensure focus
@@ -1117,7 +1135,8 @@ export default function LandingPage() {
                 ) as HTMLElement;
                 if (radialGlow) radialGlow.style.opacity = "1";
                 if (bottomGlow) bottomGlow.style.opacity = "0.4";
-                if (innerDiv) innerDiv.style.background = "rgba(255, 255, 255, 0.08)";
+                if (innerDiv)
+                  innerDiv.style.background = "rgba(255, 255, 255, 0.08)";
               }}
               onMouseLeave={(e) => {
                 const radialGlow = e.currentTarget.querySelector(
@@ -1131,7 +1150,8 @@ export default function LandingPage() {
                 ) as HTMLElement;
                 if (radialGlow) radialGlow.style.opacity = "0";
                 if (bottomGlow) bottomGlow.style.opacity = "0";
-                if (innerDiv) innerDiv.style.background = "rgba(255, 255, 255, 0.03)";
+                if (innerDiv)
+                  innerDiv.style.background = "rgba(255, 255, 255, 0.03)";
               }}
               style={{
                 position: "relative",

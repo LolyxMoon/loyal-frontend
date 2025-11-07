@@ -41,15 +41,26 @@ export const SkillHighlightOverlay = ({
         const key = `${segment.isSkill ? "skill" : "text"}-${index}`;
 
         if (segment.isSkill) {
+          const isActionSkill = segment.skill?.category === "action";
+
+          // All skills get base styling, only action skills get colored background
+          const finalStyle: CSSProperties = isActionSkill
+            ? skillStyle
+            : {
+                ...skillStyle,
+                background: "rgba(255, 255, 255, 0.1)",
+                boxShadow: "none",
+              };
+
           return (
             <span
-              key={key}
               className={cn(
-                "inline rounded-full border border-primary/40 bg-primary/15 px-1 text-transparent",
-                "shadow-[0_0_0_1px_rgba(0,0,0,0.08)]",
+                "inline rounded-full border text-transparent",
+                isActionSkill ? "border-primary/40" : "border-white/25",
                 skillClassName
               )}
-              style={skillStyle}
+              key={key}
+              style={finalStyle}
             >
               {segment.text}
             </span>
@@ -58,8 +69,8 @@ export const SkillHighlightOverlay = ({
 
         return (
           <span
-            key={key}
             className={cn("opacity-0", textClassName)}
+            key={key}
             style={textStyle}
           >
             {segment.text}
