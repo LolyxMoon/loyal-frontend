@@ -269,7 +269,7 @@ const SkeletonTwo = () => {
       },
     },
   };
-  const arr = new Array(6).fill(0);
+  const widths = [82, 64, 75, 90, 68, 58];
   return (
     <motion.div
       animate="animate"
@@ -277,12 +277,12 @@ const SkeletonTwo = () => {
       initial="initial"
       whileHover="hover"
     >
-      {arr.map((_, i) => (
+      {widths.map((width, i) => (
         <motion.div
           className="flex h-4 w-full flex-row items-center space-x-2 rounded-full border border-neutral-700 bg-neutral-900 p-2"
           key={"skelenton-two" + i}
           style={{
-            maxWidth: Math.random() * (100 - 40) + 40 + "%",
+            maxWidth: `${width}%`,
           }}
           variants={variants}
         />

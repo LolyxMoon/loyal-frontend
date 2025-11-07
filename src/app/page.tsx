@@ -1666,14 +1666,14 @@ export default function LandingPage() {
                   disabled={
                     !isOnline ||
                     status !== "ready" ||
-                    !input.trim() ||
+                    !hasUsableInput ||
                     (isChatMode && !connected)
                   }
                   onMouseEnter={(e) => {
                     if (
                       isOnline &&
                       status === "ready" &&
-                      input.trim() &&
+                      hasUsableInput &&
                       (!isChatMode || connected)
                     ) {
                       e.currentTarget.style.opacity = "1";
@@ -1705,7 +1705,7 @@ export default function LandingPage() {
                     cursor:
                       !isOnline ||
                       status !== "ready" ||
-                      !input.trim() ||
+                      !hasUsableInput ||
                       (isChatMode && !connected)
                         ? "not-allowed"
                         : "pointer",
@@ -1714,7 +1714,7 @@ export default function LandingPage() {
                     opacity:
                       !isOnline ||
                       status !== "ready" ||
-                      !input.trim() ||
+                      !hasUsableInput ||
                       (isChatMode && !connected)
                         ? 0.3
                         : 0.7,
