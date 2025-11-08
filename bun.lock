@@ -42,7 +42,7 @@
         "harden-react-markdown": "^1.0.4",
         "highlight.js": "^11.11.1",
         "katex": "^0.16.22",
-        "lucide-react": "^0.539.0",
+        "lucide-react": "^0.553.0",
         "magic-router-sdk": "^1.0.10",
         "motion": "^12.23.24",
         "next": "15.4.6",
@@ -2135,7 +2135,7 @@
 
     "lru-cache": ["lru-cache@11.2.2", "", {}, "sha512-F9ODfyqML2coTIsQpSkRHnLSZMtkU8Q+mSfcaIyKwy58u+8k5nvAYeiNhsyMARvzNcXJ9QfWVrcPsC9e9rAxtg=="],
 
-    "lucide-react": ["lucide-react@0.539.0", "", { "peerDependencies": { "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-VVISr+VF2krO91FeuCrm1rSOLACQUYVy7NQkzrOty52Y8TlTPcXcMdQFj9bYzBgXbWCiywlwSZ3Z8u6a+6bMlg=="],
+    "lucide-react": ["lucide-react@0.553.0", "", { "peerDependencies": { "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-BRgX5zrWmNy/lkVAe0dXBgd7XQdZ3HTf+Hwe3c9WK6dqgnj9h+hxV+MDncM88xDWlCq27+TKvHGE70ViODNILw=="],
 
     "magic-router-sdk": ["magic-router-sdk@1.0.10", "", { "dependencies": { "@solana/web3.js": "^1.98.2", "bs58": "^6.0.0" } }, "sha512-N06E03QfRes2U/04yc1hRUJd24T3dSKAsEozifvwr3vtPxwDaiYsfWCMI14nRWHB24Hf+muvGlK/aSt3IUeA6A=="],
 

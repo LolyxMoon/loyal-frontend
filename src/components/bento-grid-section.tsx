@@ -12,6 +12,7 @@ import { memo, type ReactNode, useRef, useState } from "react";
 import { type BentoItemVisualKey, bentoTabs } from "@/data/bento";
 import { cn } from "@/lib/utils";
 import { BentoGrid, BentoGridItem } from "./ui/bento-grid";
+import { Spotlight } from "./ui/spotlight-new";
 
 const instrumentSerif = localFont({
   src: [
@@ -50,12 +51,15 @@ function BentoGridSectionComponent() {
     <section
       id="about-section"
       style={{
+        position: "relative",
         padding: "4rem 1rem",
         background: "#000",
         borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+        overflow: "hidden",
       }}
     >
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+      <Spotlight />
+      <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 10 }}>
         <h2
           className={instrumentSerif.className}
           style={{

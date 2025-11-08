@@ -5,6 +5,8 @@ import { IBM_Plex_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import { memo, useState } from "react";
 import { roadmapEvents } from "@/data/roadmap";
+import { Spotlight } from "./ui/spotlight-new";
+import { GlowingEffect } from "./ui/glowing-effect";
 
 const instrumentSerif = localFont({
   src: [
@@ -120,12 +122,15 @@ function RoadmapSectionComponent() {
     <section
       id="roadmap-section"
       style={{
+        position: "relative",
         padding: "4rem 1rem",
         background: "#000",
         borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+        overflow: "hidden",
       }}
     >
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
+      <Spotlight />
+      <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 10 }}>
         <h2
           className={instrumentSerif.className}
           style={{
@@ -336,17 +341,35 @@ function RoadmapSectionComponent() {
                       transition={{ duration: 0.3, ease: "easeInOut" }}
                     >
                       <div
-                        className={ibmPlexSans.className}
                         style={{
-                          background: "rgba(255, 255, 255, 0.08)",
-                          backdropFilter: "blur(20px)",
-                          border: "1px solid rgba(255, 255, 255, 0.15)",
+                          position: "relative",
+                          border: "1px solid transparent",
                           borderRadius: "20px",
-                          overflow: "hidden",
-                          boxShadow:
-                            "0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
+                          padding: "2px",
                         }}
                       >
+                        <GlowingEffect
+                          blur={0}
+                          borderWidth={3}
+                          disabled={false}
+                          glow={true}
+                          inactiveZone={0.01}
+                          proximity={64}
+                          spread={40}
+                        />
+                        <div
+                          className={ibmPlexSans.className}
+                          style={{
+                            position: "relative",
+                            background: "rgba(255, 255, 255, 0.08)",
+                            backdropFilter: "blur(20px)",
+                            border: "1px solid rgba(255, 255, 255, 0.15)",
+                            borderRadius: "18px",
+                            overflow: "hidden",
+                            boxShadow:
+                              "0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
+                          }}
+                        >
                         {/* Card header */}
                         <div
                           onClick={() => toggleExpand(index)}
@@ -517,6 +540,7 @@ function RoadmapSectionComponent() {
                             </motion.div>
                           )}
                         </AnimatePresence>
+                        </div>
                       </div>
                     </motion.div>
                   </motion.div>
