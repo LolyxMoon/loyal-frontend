@@ -1658,6 +1658,74 @@ export default function LandingPage() {
                     </div>
                   );
                 })}
+
+                {/* Thinking indicator */}
+                {status === "submitted" && (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      gap: "0.5rem",
+                      animation: "slideInUp 0.3s ease-out",
+                      animationFillMode: "both",
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: "relative",
+                        padding: "1rem 1.5rem",
+                        borderRadius: "16px",
+                        background: "rgba(255, 255, 255, 0.05)",
+                        backdropFilter: "blur(10px)",
+                        border: "1px solid rgba(255, 255, 255, 0.1)",
+                        color: "rgba(255, 255, 255, 0.6)",
+                        fontSize: "1rem",
+                        lineHeight: 1.5,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                      }}
+                    >
+                      <span>Thinking</span>
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          gap: "0.125rem",
+                        }}
+                      >
+                        <span
+                          style={{
+                            animation:
+                              "dotBounce 1.4s infinite ease-in-out both",
+                            animationDelay: "0s",
+                          }}
+                        >
+                          .
+                        </span>
+                        <span
+                          style={{
+                            animation:
+                              "dotBounce 1.4s infinite ease-in-out both",
+                            animationDelay: "0.2s",
+                          }}
+                        >
+                          .
+                        </span>
+                        <span
+                          style={{
+                            animation:
+                              "dotBounce 1.4s infinite ease-in-out both",
+                            animationDelay: "0.4s",
+                          }}
+                        >
+                          .
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 <div ref={messagesEndRef} style={{ height: "1rem" }} />
               </div>
             )}
@@ -1809,31 +1877,23 @@ export default function LandingPage() {
                   value={input}
                 />
                 <button
-                  disabled={
-                    !isOnline ||
-                    status !== "ready" ||
-                    !hasUsableInput ||
-                    (isChatMode && !connected)
-                  }
+                  disabled={!hasUsableInput}
                   onMouseEnter={(e) => {
-                    if (
-                      isOnline &&
-                      status === "ready" &&
-                      hasUsableInput &&
-                      (!isChatMode || connected)
-                    ) {
+                    if (hasUsableInput) {
                       e.currentTarget.style.opacity = "1";
                       e.currentTarget.style.background =
-                        "rgba(255, 255, 255, 0.1)";
+                        "rgba(255, 255, 255, 0.15)";
                       e.currentTarget.style.transform =
                         "translateY(-50%) scale(1.1)";
                     }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.opacity = "0.7";
-                    e.currentTarget.style.background = "transparent";
-                    e.currentTarget.style.transform =
-                      "translateY(-50%) scale(1)";
+                    if (hasUsableInput) {
+                      e.currentTarget.style.opacity = "0.8";
+                      e.currentTarget.style.background = "transparent";
+                      e.currentTarget.style.transform =
+                        "translateY(-50%) scale(1)";
+                    }
                   }}
                   style={{
                     position: "absolute",
@@ -1848,22 +1908,11 @@ export default function LandingPage() {
                     background: "transparent",
                     border: "none",
                     borderRadius: "12px",
-                    cursor:
-                      !isOnline ||
-                      status !== "ready" ||
-                      !hasUsableInput ||
-                      (isChatMode && !connected)
-                        ? "not-allowed"
-                        : "pointer",
+                    cursor: hasUsableInput ? "pointer" : "not-allowed",
                     outline: "none",
                     transition: "all 0.3s ease",
-                    opacity:
-                      !isOnline ||
-                      status !== "ready" ||
-                      !hasUsableInput ||
-                      (isChatMode && !connected)
-                        ? 0.3
-                        : 0.7,
+                    opacity: hasUsableInput ? 0.8 : 0.3,
+                    zIndex: 2,
                   }}
                   type="submit"
                 >
