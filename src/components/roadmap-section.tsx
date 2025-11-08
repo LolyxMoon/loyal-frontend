@@ -5,7 +5,6 @@ import { IBM_Plex_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import { memo, useState } from "react";
 import { roadmapEvents } from "@/data/roadmap";
-import { Spotlight } from "./ui/spotlight-new";
 import { GlowingEffect } from "./ui/glowing-effect";
 
 const instrumentSerif = localFont({
@@ -122,15 +121,12 @@ function RoadmapSectionComponent() {
     <section
       id="roadmap-section"
       style={{
-        position: "relative",
         padding: "4rem 1rem",
         background: "#000",
         borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-        overflow: "hidden",
       }}
     >
-      <Spotlight />
-      <div style={{ maxWidth: "1200px", margin: "0 auto", position: "relative", zIndex: 10 }}>
+      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
         <h2
           className={instrumentSerif.className}
           style={{
