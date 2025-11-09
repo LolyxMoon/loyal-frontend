@@ -1253,119 +1253,131 @@ const SkeletonNine = () => {
 
   return (
     <motion.div className="flex h-full min-h-[6rem] w-full flex-1 items-center justify-center bg-dot-white/[0.2] p-4">
-      <div className="flex w-full items-center justify-between gap-2">
-        {/* Input Node */}
-        <motion.div
-          animate={{
-            scale: activeStep === 0 ? [1, 1.1, 1] : 1,
-          }}
-          className="flex flex-col items-center gap-1.5"
-          transition={{ duration: 0.5 }}
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-neutral-600/40 bg-neutral-700/10">
-            <IconMessage className="h-6 w-6 text-neutral-400" />
-          </div>
-          <span className="font-mono text-[10px] text-neutral-400">Input</span>
-        </motion.div>
-
-        {/* Flow line 1 */}
-        <div className="relative h-0.5 flex-1 bg-neutral-700">
+      <div className="flex w-full flex-col gap-1">
+        {/* Nodes and flow lines row */}
+        <div className="flex w-full items-center justify-between gap-2">
+          {/* Input Node */}
           <motion.div
             animate={{
-              scaleX: activeStep >= 1 ? 1 : 0,
+              scale: activeStep === 0 ? [1, 1.1, 1] : 1,
             }}
-            className="absolute inset-0 origin-left bg-gradient-to-r from-neutral-500 to-neutral-600"
-            transition={{ duration: 0.6 }}
-          />
-          {/* Flowing particle */}
-          {activeStep === 0 && (
-            <motion.div
-              animate={{ x: ["0%", "100%"] }}
-              className="-translate-y-1/2 absolute top-1/2 h-2 w-2 rounded-full bg-red-500 shadow-lg"
-              transition={{ duration: 0.8, ease: "linear" }}
-            />
-          )}
-        </div>
+            transition={{ duration: 0.5 }}
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-neutral-600/40 bg-neutral-700/10">
+              <IconMessage className="h-6 w-6 text-neutral-400" />
+            </div>
+          </motion.div>
 
-        {/* Process Node */}
-        <motion.div
-          animate={{
-            scale: activeStep === 1 ? [1, 1.1, 1] : 1,
-          }}
-          className="flex flex-col items-center gap-1.5"
-          transition={{ duration: 0.5 }}
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-neutral-600/40 bg-neutral-700/10">
+          {/* Flow line 1 */}
+          <div className="relative h-0.5 flex-1 bg-neutral-700">
             <motion.div
               animate={{
-                rotate: activeStep === 1 ? 360 : 0,
+                scaleX: activeStep >= 1 ? 1 : 0,
               }}
-              transition={{
-                duration: 1,
-                ease: "linear",
-                repeat: activeStep === 1 ? Number.POSITIVE_INFINITY : 0,
-              }}
-            >
-              <IconTableColumn className="h-6 w-6 text-neutral-400" />
-            </motion.div>
+              className="absolute inset-0 origin-left bg-gradient-to-r from-neutral-500 to-neutral-600"
+              transition={{ duration: 0.6 }}
+            />
+            {/* Flowing particle */}
+            {activeStep === 0 && (
+              <motion.div
+                animate={{ x: ["0%", "100%"] }}
+                className="-translate-y-1/2 absolute top-1/2 h-2 w-2 rounded-full bg-red-500 shadow-lg"
+                transition={{ duration: 0.8, ease: "linear" }}
+              />
+            )}
           </div>
-          <span className="font-mono text-[10px] text-neutral-400">
+
+          {/* Process Node */}
+          <motion.div
+            animate={{
+              scale: activeStep === 1 ? [1, 1.1, 1] : 1,
+            }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-neutral-600/40 bg-neutral-700/10">
+              <motion.div
+                animate={{
+                  rotate: activeStep === 1 ? 360 : 0,
+                }}
+                transition={{
+                  duration: 1,
+                  ease: "linear",
+                  repeat: activeStep === 1 ? Number.POSITIVE_INFINITY : 0,
+                }}
+              >
+                <IconTableColumn
+                  className={`h-6 w-6 ${activeStep === 1 ? "text-red-500" : "text-neutral-400"}`}
+                />
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* Flow line 2 */}
+          <div className="relative h-0.5 flex-1 bg-neutral-700">
+            <motion.div
+              animate={{
+                scaleX: activeStep >= 2 ? 1 : 0,
+              }}
+              className="absolute inset-0 origin-left bg-gradient-to-r from-neutral-500 to-neutral-600"
+              transition={{ duration: 0.6 }}
+            />
+            {/* Flowing particle */}
+            {activeStep === 1 && (
+              <motion.div
+                animate={{ x: ["0%", "100%"] }}
+                className="-translate-y-1/2 absolute top-1/2 h-2 w-2 rounded-full bg-red-500 shadow-lg"
+                transition={{ duration: 0.8, ease: "linear" }}
+              />
+            )}
+          </div>
+
+          {/* Output Node */}
+          <motion.div
+            animate={{
+              scale: activeStep === 2 ? [1, 1.1, 1] : 1,
+            }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-neutral-600/40 bg-neutral-700/10">
+              <motion.div
+                animate={{
+                  scale: activeStep === 2 ? [0, 1] : 1,
+                  rotate: activeStep === 2 ? [0, 360] : 0,
+                }}
+                transition={{ duration: 0.5 }}
+              >
+                <svg
+                  className="h-6 w-6 text-neutral-400"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M5 13l4 4L19 7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Labels row */}
+        <div className="flex w-full items-center justify-between gap-2">
+          <span className="w-12 text-center font-mono text-[10px] text-neutral-400">
+            Input
+          </span>
+          <div className="flex-1" />
+          <span className="w-12 text-center font-mono text-[10px] text-neutral-400">
             Process
           </span>
-        </motion.div>
-
-        {/* Flow line 2 */}
-        <div className="relative h-0.5 flex-1 bg-neutral-700">
-          <motion.div
-            animate={{
-              scaleX: activeStep >= 2 ? 1 : 0,
-            }}
-            className="absolute inset-0 origin-left bg-gradient-to-r from-neutral-500 to-neutral-600"
-            transition={{ duration: 0.6 }}
-          />
-          {/* Flowing particle */}
-          {activeStep === 1 && (
-            <motion.div
-              animate={{ x: ["0%", "100%"] }}
-              className="-translate-y-1/2 absolute top-1/2 h-2 w-2 rounded-full bg-red-500 shadow-lg"
-              transition={{ duration: 0.8, ease: "linear" }}
-            />
-          )}
+          <div className="flex-1" />
+          <span className="w-12 text-center font-mono text-[10px] text-neutral-400">
+            Done
+          </span>
         </div>
-
-        {/* Output Node */}
-        <motion.div
-          animate={{
-            scale: activeStep === 2 ? [1, 1.1, 1] : 1,
-          }}
-          className="flex flex-col items-center gap-1.5"
-          transition={{ duration: 0.5 }}
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-neutral-600/40 bg-neutral-700/10">
-            <motion.div
-              animate={{
-                scale: activeStep === 2 ? [0, 1] : 1,
-                rotate: activeStep === 2 ? [0, 360] : 0,
-              }}
-              transition={{ duration: 0.5 }}
-            >
-              <svg
-                className="h-6 w-6 text-neutral-400"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={3}
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M5 13l4 4L19 7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </motion.div>
-          </div>
-          <span className="font-mono text-[10px] text-neutral-400">Done</span>
-        </motion.div>
       </div>
     </motion.div>
   );
