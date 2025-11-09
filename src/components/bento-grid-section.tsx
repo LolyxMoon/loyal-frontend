@@ -210,119 +210,116 @@ function BentoGridSectionComponent() {
 export const BentoGridSection = memo(BentoGridSectionComponent);
 
 const SkeletonOne = () => {
-  const [stage, setStage] = useState<"incoming" | "processing" | "complete">(
-    "incoming"
-  );
-  const CYCLE_DURATION = 4000;
-  const INCOMING_DURATION = 1000;
-  const PROCESSING_DURATION = 1500;
+  const [particleStage, setParticleStage] = useState(0);
 
   useEffect(() => {
-    const sequence = async () => {
-      setStage("incoming");
-      await new Promise((resolve) => setTimeout(resolve, INCOMING_DURATION));
-      setStage("processing");
-      await new Promise((resolve) => setTimeout(resolve, PROCESSING_DURATION));
-      setStage("complete");
-      await new Promise((resolve) =>
-        setTimeout(
-          resolve,
-          CYCLE_DURATION - INCOMING_DURATION - PROCESSING_DURATION
-        )
-      );
-    };
-
-    sequence();
-    const interval = setInterval(sequence, CYCLE_DURATION);
+    const interval = setInterval(() => {
+      setParticleStage((prev) => (prev + 1) % 3);
+    }, 2000);
     return () => clearInterval(interval);
   }, []);
 
-  return (
-    <motion.div className="flex h-full min-h-[6rem] w-full flex-1 items-center justify-between gap-3 bg-dot-white/[0.2] p-3">
-      {/* Left side - incoming documents/messages */}
-      <div className="flex flex-col gap-2">
-        {[0, 1, 2].map((index) => (
-          <motion.div
-            animate={{
-              x: stage === "incoming" ? 0 : stage === "processing" ? 20 : 40,
-              opacity:
-                stage === "incoming" ? 1 : stage === "processing" ? 0.3 : 0,
-              scale:
-                stage === "incoming" ? 1 : stage === "processing" ? 0.8 : 0.6,
-            }}
-            className="flex items-center gap-1.5 rounded border border-neutral-700 bg-neutral-900/50 px-2 py-1"
-            key={`doc-${index}`}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-          >
-            <div className="h-3 w-3 shrink-0 rounded bg-neutral-600" />
-            <div className="h-1 w-8 rounded-full bg-neutral-700" />
-          </motion.div>
-        ))}
-      </div>
+  // Generate particles that appear to "encrypt" the document
+  const particles = Array.from({ length: 12 }, (_, i) => ({
+    id: i,
+    delay: i * 0.08,
+    angle: (i / 12) * Math.PI * 2,
+    radius: 35,
+  }));
 
-      {/* Center - shield with lock (processing) */}
+  return (
+    <motion.div className="flex h-full min-h-[6rem] w-full flex-1 items-center justify-center gap-6 bg-dot-white/[0.2] p-4">
+      {/* Left - Document being encrypted */}
       <motion.div
         animate={{
-          scale: stage === "processing" ? [1, 1.2, 1] : 1,
-          opacity: stage === "processing" ? 1 : 0.4,
+          scale: particleStage === 0 ? 1 : 0.85,
+          opacity: particleStage === 0 ? 1 : 0.3,
         }}
-        className="relative flex h-16 w-16 items-center justify-center"
-        transition={{ duration: 0.6 }}
+        className="relative"
+        transition={{ duration: 0.5 }}
       >
-        {/* Shield glow */}
-        <motion.div
-          animate={{
-            opacity: stage === "processing" ? [0.3, 0.6, 0.3] : 0.1,
-          }}
-          className="absolute inset-0 rounded-full bg-neutral-500/20 blur-lg"
-          transition={{
-            duration: 1,
-            repeat: stage === "processing" ? Number.POSITIVE_INFINITY : 0,
-            repeatType: "loop",
-          }}
-        />
-
-        {/* Shield icon */}
-        <svg
-          className="relative z-10 h-12 w-12 text-neutral-400"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={1.5}
-          viewBox="0 0 24 24"
-        >
-          <path
-            d="M12 2L4 6v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-8-4z"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-
-        {/* Lock icon in center */}
-        <motion.div
-          animate={{
-            scale: stage === "processing" ? 1 : 0.7,
-            opacity: stage === "processing" ? 1 : 0.5,
-          }}
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-          transition={{ duration: 0.4 }}
-        >
-          <IconLock className="h-5 w-5 text-neutral-300" />
-        </motion.div>
+        <div className="flex h-16 w-12 flex-col gap-1 rounded-lg border-2 border-neutral-600 bg-neutral-800/50 p-2">
+          <div className="h-1 w-full rounded-full bg-neutral-600" />
+          <div className="h-1 w-full rounded-full bg-neutral-600" />
+          <div className="h-1 w-5 rounded-full bg-neutral-600" />
+        </div>
       </motion.div>
 
-      {/* Right side - processed output */}
-      <div className="flex flex-col gap-2">
+      {/* Center - Encryption vault with particles */}
+      <div className="relative flex h-24 w-24 items-center justify-center">
+        {/* Particles orbiting */}
+        {particles.map((particle) => {
+          const x = Math.cos(particle.angle) * particle.radius;
+          const y = Math.sin(particle.angle) * particle.radius;
+
+          return (
+            <motion.div
+              animate={{
+                opacity: particleStage === 1 ? [0, 1, 0.6] : particleStage === 2 ? 0.6 : 0,
+                scale: particleStage === 1 ? [0, 1, 1] : particleStage === 2 ? 1 : 0,
+              }}
+              className="absolute h-1.5 w-1.5 rounded-full bg-neutral-500"
+              key={particle.id}
+              style={{
+                left: `calc(50% + ${x}px)`,
+                top: `calc(50% + ${y}px)`,
+              }}
+              transition={{
+                duration: 0.6,
+                delay: particle.delay,
+              }}
+            />
+          );
+        })}
+
+        {/* Vault/Safe icon */}
         <motion.div
           animate={{
-            x: stage === "complete" ? 0 : -20,
-            opacity: stage === "complete" ? 1 : 0,
-            scale: stage === "complete" ? 1 : 0.8,
+            scale: particleStage === 2 ? [1, 1.1, 1] : 1,
           }}
-          className="flex items-center gap-1.5 rounded border border-neutral-600 bg-neutral-800/50 px-2 py-1.5"
-          transition={{ duration: 0.5 }}
+          className="relative z-10 flex h-20 w-20 items-center justify-center rounded-2xl border-2 border-neutral-600 bg-neutral-900"
+          transition={{ duration: 0.4 }}
         >
+          {/* Vault door */}
+          <div className="relative flex h-full w-full items-center justify-center">
+            {/* Circular lock mechanism */}
+            <motion.div
+              animate={{
+                rotate: particleStage === 1 ? [0, 180] : particleStage === 2 ? 180 : 0,
+              }}
+              className="absolute h-10 w-10 rounded-full border-2 border-neutral-500"
+              transition={{ duration: 0.8 }}
+            >
+              <div className="absolute left-1/2 top-0 h-1 w-1 -translate-x-1/2 rounded-full bg-neutral-400" />
+              <div className="absolute bottom-0 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-neutral-400" />
+            </motion.div>
+
+            {/* Lock icon appears when encrypted */}
+            <motion.div
+              animate={{
+                opacity: particleStage === 2 ? 1 : 0,
+                scale: particleStage === 2 ? 1 : 0.5,
+              }}
+              transition={{ duration: 0.3, delay: 0.4 }}
+            >
+              <IconLock className="h-5 w-5 text-neutral-400" />
+            </motion.div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Right - Encrypted indicator */}
+      <motion.div
+        animate={{
+          opacity: particleStage === 2 ? 1 : 0,
+          x: particleStage === 2 ? 0 : -10,
+        }}
+        className="flex flex-col items-center gap-1"
+        transition={{ duration: 0.4, delay: 0.5 }}
+      >
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-neutral-600 bg-neutral-800/50">
           <svg
-            className="h-3 w-3 shrink-0 text-neutral-400"
+            className="h-5 w-5 text-neutral-400"
             fill="none"
             stroke="currentColor"
             strokeWidth={2}
@@ -334,354 +331,277 @@ const SkeletonOne = () => {
               strokeLinejoin="round"
             />
           </svg>
-          <div className="h-1 w-10 rounded-full bg-neutral-600" />
-        </motion.div>
-      </div>
+        </div>
+        <span className="font-mono text-[8px] text-neutral-500">Secured</span>
+      </motion.div>
     </motion.div>
   );
 };
 
 const SkeletonTwo = () => {
-  const [txState, setTxState] = useState<
-    "idle" | "encrypting" | "transmitting" | "complete"
-  >("idle");
-  const CYCLE_DURATION = 5000;
-  const ENCRYPTING_DURATION = 800;
-  const TRANSMITTING_DURATION = 1200;
-  const COMPLETE_DURATION = 1000;
+  const [activeNode, setActiveNode] = useState(0);
 
   useEffect(() => {
-    const sequence = async () => {
-      setTxState("idle");
-      await new Promise((resolve) =>
-        setTimeout(resolve, CYCLE_DURATION - ENCRYPTING_DURATION - TRANSMITTING_DURATION - COMPLETE_DURATION)
-      );
-      setTxState("encrypting");
-      await new Promise((resolve) =>
-        setTimeout(resolve, ENCRYPTING_DURATION)
-      );
-      setTxState("transmitting");
-      await new Promise((resolve) =>
-        setTimeout(resolve, TRANSMITTING_DURATION)
-      );
-      setTxState("complete");
-      await new Promise((resolve) =>
-        setTimeout(resolve, COMPLETE_DURATION)
-      );
-    };
-
-    sequence();
-    const interval = setInterval(sequence, CYCLE_DURATION);
+    const interval = setInterval(() => {
+      setActiveNode((prev) => (prev + 1) % 5);
+    }, 1400);
     return () => clearInterval(interval);
   }, []);
 
+  // Anonymous network nodes in a hexagonal pattern
+  const nodes = [
+    { x: 50, y: 20, id: 0 },  // Top
+    { x: 80, y: 40, id: 1 },  // Top right
+    { x: 80, y: 70, id: 2 },  // Bottom right
+    { x: 50, y: 90, id: 3 },  // Bottom
+    { x: 20, y: 70, id: 4 },  // Bottom left
+    { x: 20, y: 40, id: 5 },  // Top left
+  ];
+
+  const connections = [
+    [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0],
+  ];
+
   return (
-    <motion.div className="flex h-full min-h-[6rem] w-full flex-1 items-center justify-between gap-4 bg-dot-white/[0.2] p-4">
-      {/* Left - Sender wallet */}
-      <motion.div
-        animate={{
-          scale: txState === "idle" || txState === "encrypting" ? 1 : 0.9,
-          opacity: txState === "idle" || txState === "encrypting" ? 1 : 0.5,
-        }}
-        className="flex flex-col items-center gap-2"
-        transition={{ duration: 0.4 }}
-      >
-        <div className="relative flex h-12 w-12 items-center justify-center rounded-lg border border-neutral-700 bg-neutral-900">
-          <svg
-            className="h-6 w-6 text-neutral-400"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-        <span className="font-mono text-[10px] text-neutral-500">Wallet</span>
-      </motion.div>
+    <motion.div className="relative flex h-full min-h-[6rem] w-full flex-1 items-center justify-center bg-dot-white/[0.2] p-4">
+      <div className="relative h-28 w-28">
+        {/* SVG for connection lines */}
+        <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100">
+          {connections.map(([from, to], idx) => {
+            const fromNode = nodes[from];
+            const toNode = nodes[to];
+            const isActive = activeNode === from || activeNode === to;
 
-      {/* Center - Privacy shield with encrypted data flow */}
-      <div className="relative flex flex-1 items-center justify-center">
-        {/* Encrypted data packet traveling */}
-        <motion.div
-          animate={{
-            x:
-              txState === "idle"
-                ? "-100%"
-                : txState === "encrypting"
-                  ? "-50%"
-                  : txState === "transmitting"
-                    ? "50%"
-                    : "100%",
-            opacity:
-              txState === "idle" || txState === "complete" ? 0 : 1,
-          }}
-          className="absolute"
-          transition={{ duration: 0.6, ease: "easeInOut" }}
-        >
-          <div className="flex items-center gap-1 rounded-full border border-neutral-700 bg-neutral-900/80 px-2 py-1 backdrop-blur-sm">
-            <IconLock className="h-3 w-3 text-neutral-500" />
-            <div className="flex gap-0.5">
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={`dot-${i}`}
-                  className="h-1 w-1 rounded-full bg-neutral-600"
-                />
-              ))}
-            </div>
-          </div>
-        </motion.div>
+            return (
+              <motion.line
+                animate={{
+                  opacity: isActive ? 0.6 : 0.15,
+                  strokeWidth: isActive ? 1.5 : 1,
+                }}
+                key={`line-${idx}`}
+                stroke="currentColor"
+                strokeLinecap="round"
+                style={{ color: '#737373' }}
+                transition={{ duration: 0.3 }}
+                x1={fromNode.x}
+                x2={toNode.x}
+                y1={fromNode.y}
+                y2={toNode.y}
+              />
+            );
+          })}
 
-        {/* Center shield */}
-        <motion.div
-          animate={{
-            scale: txState === "encrypting" ? [1, 1.15, 1] : 1,
-            opacity: txState === "encrypting" || txState === "transmitting" ? 1 : 0.3,
-          }}
-          className="relative"
-          transition={{ duration: 0.5 }}
-        >
-          <motion.div
+          {/* Transaction path pulse */}
+          <motion.circle
             animate={{
-              opacity: txState === "encrypting" ? [0.2, 0.4, 0.2] : 0.1,
+              cx: [nodes[activeNode].x, nodes[(activeNode + 1) % 6].x],
+              cy: [nodes[activeNode].y, nodes[(activeNode + 1) % 6].y],
             }}
-            className="absolute inset-0 rounded-full bg-neutral-500/10 blur-md"
-            transition={{
-              duration: 0.8,
-              repeat: txState === "encrypting" ? Number.POSITIVE_INFINITY : 0,
-              repeatType: "loop",
-            }}
+            className="fill-neutral-400"
+            r="2"
+            transition={{ duration: 1.4, ease: "linear" }}
           />
-          <svg
-            className="h-10 w-10 text-neutral-600"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.5}
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </motion.div>
+        </svg>
 
-        {/* "No trace" indicator */}
-        <motion.div
-          animate={{
-            opacity: txState === "transmitting" ? 1 : 0,
-            y: txState === "transmitting" ? 0 : 10,
-          }}
-          className="absolute -bottom-2 rounded-full border border-neutral-700 bg-neutral-900 px-2 py-0.5"
-          transition={{ duration: 0.3 }}
-        >
-          <span className="font-mono text-[9px] text-neutral-500">
-            No trace
-          </span>
-        </motion.div>
-      </div>
+        {/* Anonymous nodes */}
+        {nodes.map((node) => {
+          const isActive = activeNode === node.id;
 
-      {/* Right - Receiver */}
-      <motion.div
-        animate={{
-          scale: txState === "complete" ? [1, 1.1, 1] : txState === "transmitting" ? 1 : 0.9,
-          opacity: txState === "complete" || txState === "transmitting" ? 1 : 0.5,
-        }}
-        className="flex flex-col items-center gap-2"
-        transition={{ duration: 0.4 }}
-      >
-        <div className="relative flex h-12 w-12 items-center justify-center rounded-lg border border-neutral-700 bg-neutral-900">
-          <svg
-            className="h-6 w-6 text-neutral-400"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          {/* Success pulse */}
-          {txState === "complete" && (
+          return (
             <motion.div
-              animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
-              className="absolute inset-0 rounded-lg border border-neutral-600"
-              transition={{ duration: 0.6 }}
-            />
-          )}
+              animate={{
+                scale: isActive ? 1.3 : 1,
+                opacity: isActive ? 1 : 0.4,
+              }}
+              className="absolute"
+              key={node.id}
+              style={{
+                left: `${node.x}%`,
+                top: `${node.y}%`,
+                transform: 'translate(-50%, -50%)',
+              }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex h-6 w-6 items-center justify-center rounded-full border border-neutral-600 bg-neutral-900">
+                {/* Anonymous icon */}
+                <div className="h-2.5 w-2.5 rounded-full bg-neutral-500" />
+              </div>
+
+              {/* Active glow */}
+              {isActive && (
+                <motion.div
+                  animate={{
+                    opacity: [0.3, 0.6, 0.3],
+                    scale: [1, 1.4, 1],
+                  }}
+                  className="absolute inset-0 rounded-full bg-neutral-500/20 blur-sm"
+                  transition={{
+                    duration: 1,
+                    repeat: Number.POSITIVE_INFINITY,
+                    repeatType: "loop",
+                  }}
+                />
+              )}
+            </motion.div>
+          );
+        })}
+
+        {/* Center label */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="flex flex-col items-center gap-1 rounded-lg border border-neutral-700 bg-neutral-900/90 px-3 py-1.5 backdrop-blur-sm">
+            <IconLock className="h-4 w-4 text-neutral-500" />
+            <span className="font-mono text-[8px] text-neutral-500">
+              Private
+            </span>
+          </div>
         </div>
-        <span className="font-mono text-[10px] text-neutral-500">
-          Complete
-        </span>
-      </motion.div>
+      </div>
     </motion.div>
   );
 };
 
 const SkeletonThree = () => {
-  const [activeTask, setActiveTask] = useState(0);
-  const TASK_DURATION = 1200;
-  const TOTAL_TASKS = 3;
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveTask((prev) => (prev + 1) % TOTAL_TASKS);
-    }, TASK_DURATION);
+      setProgress((prev) => (prev + 1) % 4);
+    }, 1500);
     return () => clearInterval(interval);
   }, []);
 
-  const tasks = [
-    { icon: "wallet", label: "Transfer" },
-    { icon: "repeat", label: "Schedule" },
-    { icon: "check", label: "Execute" },
+  // Circular workflow steps
+  const steps = [
+    { label: "Trigger", angle: 0 },
+    { label: "Process", angle: 120 },
+    { label: "Complete", angle: 240 },
   ];
 
   return (
-    <motion.div className="flex h-full min-h-[6rem] w-full flex-1 flex-col justify-center gap-3 bg-dot-white/[0.2] p-4">
-      {/* Automation engine indicator */}
-      <div className="flex items-center justify-center gap-2">
-        <motion.div
-          animate={{
-            rotate: [0, 360],
-          }}
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-neutral-700 bg-neutral-900"
-          transition={{
-            duration: 3,
-            repeat: Number.POSITIVE_INFINITY,
-            ease: "linear",
-          }}
-        >
-          <svg
-            className="h-4 w-4 text-neutral-400"
+    <motion.div className="flex h-full min-h-[6rem] w-full flex-1 items-center justify-center bg-dot-white/[0.2] p-4">
+      <div className="relative h-28 w-28">
+        {/* Circular progress track */}
+        <svg className="absolute inset-0 -rotate-90" viewBox="0 0 100 100">
+          {/* Background circle */}
+          <circle
+            className="stroke-neutral-800"
+            cx="50"
+            cy="50"
             fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M4.5 12a7.5 7.5 0 0015 0m-15 0a7.5 7.5 0 1115 0m-15 0H3m16.5 0H21m-1.5 0H12m-8.457 3.077l1.41-.513m14.095-5.13l1.41-.513M5.106 17.785l1.15-.964m11.49-9.642l1.149-.964M7.501 19.795l.75-1.3m7.5-12.99l.75-1.3m-6.063 16.658l.26-1.477m2.605-14.772l.26-1.477m0 17.726l-.26-1.477M10.698 4.614l-.26-1.477M16.5 19.794l-.75-1.299M7.5 4.205L12 12m6.894 5.785l-1.149-.964M6.256 7.178l-1.15-.964m15.352 8.864l-1.41-.513M4.954 9.435l-1.41-.514M12.002 12l-1.06 4.46m-1.039-7.877l.548-2.937M18.5 12l-1.5.667M6.5 12l-1.5-.667"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </motion.div>
-        <span className="font-mono text-[10px] text-neutral-500">
-          Auto Engine
-        </span>
-      </div>
+            r="40"
+            strokeWidth="2"
+          />
 
-      {/* Task workflow */}
-      <div className="flex items-center justify-between gap-2">
-        {tasks.map((task, index) => {
-          const isActive = activeTask === index;
-          const isCompleted = index < activeTask;
+          {/* Animated progress circle */}
+          <motion.circle
+            animate={{
+              strokeDashoffset: [251, 251 - (251 * progress) / 3],
+            }}
+            className="stroke-neutral-500"
+            cx="50"
+            cy="50"
+            fill="none"
+            r="40"
+            strokeDasharray="251"
+            strokeLinecap="round"
+            strokeWidth="2"
+            transition={{ duration: 1.5, ease: "easeInOut" }}
+          />
 
-          return (
-            <div key={task.label} className="flex flex-1 flex-col items-center gap-1.5">
-              {/* Task node */}
-              <motion.div
-                animate={{
-                  scale: isActive ? [1, 1.15, 1] : 1,
-                  borderColor: isActive
-                    ? "rgb(115, 115, 115)"
-                    : isCompleted
-                      ? "rgb(82, 82, 82)"
-                      : "rgb(64, 64, 64)",
-                }}
-                className="relative flex h-10 w-10 items-center justify-center rounded-lg border bg-neutral-900"
-                transition={{ duration: 0.5 }}
-              >
-                {task.icon === "wallet" && (
-                  <svg
-                    className="h-5 w-5 text-neutral-500"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                )}
-                {task.icon === "repeat" && (
-                  <svg
-                    className="h-5 w-5 text-neutral-500"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                )}
-                {task.icon === "check" && (
-                  <motion.svg
-                    animate={{
-                      scale: isCompleted ? 1 : 0.8,
-                      opacity: isCompleted ? 1 : 0.5,
-                    }}
-                    className="h-5 w-5 text-neutral-500"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    transition={{ duration: 0.3 }}
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </motion.svg>
-                )}
+          {/* Workflow steps as dots on the circle */}
+          {steps.map((step, index) => {
+            const angleRad = (step.angle * Math.PI) / 180;
+            const x = 50 + 40 * Math.cos(angleRad);
+            const y = 50 + 40 * Math.sin(angleRad);
+            const isActive = progress === index + 1 || (progress === 0 && index === 2);
 
-                {/* Active pulse */}
+            return (
+              <g key={step.label}>
+                {/* Dot */}
+                <motion.circle
+                  animate={{
+                    r: isActive ? 4 : 2.5,
+                    fill: isActive ? '#a3a3a3' : '#737373',
+                  }}
+                  cx={x}
+                  cy={y}
+                  transition={{ duration: 0.3 }}
+                />
+
+                {/* Pulse when active */}
                 {isActive && (
-                  <motion.div
-                    animate={{ scale: [1, 1.4], opacity: [0.5, 0] }}
-                    className="absolute inset-0 rounded-lg border border-neutral-600"
+                  <motion.circle
+                    animate={{
+                      r: [4, 8],
+                      opacity: [0.6, 0],
+                    }}
+                    cx={x}
+                    cy={y}
+                    fill="#a3a3a3"
                     transition={{
                       duration: 1,
                       repeat: Number.POSITIVE_INFINITY,
                     }}
                   />
                 )}
-              </motion.div>
+              </g>
+            );
+          })}
+        </svg>
 
-              {/* Task label */}
-              <span
-                className={`font-mono text-[9px] ${isActive ? "text-neutral-400" : "text-neutral-600"}`}
+        {/* Center automation icon */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <motion.div
+            animate={{
+              rotate: progress * 120,
+            }}
+            className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-neutral-700 bg-neutral-900"
+            transition={{ duration: 1.5, ease: "easeInOut" }}
+          >
+            <svg
+              className="h-6 w-6 text-neutral-400"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M4.5 12a7.5 7.5 0 0015 0m-15 0a7.5 7.5 0 1115 0m-15 0H3m16.5 0H21m-1.5 0H12m-8.457 3.077l1.41-.513m14.095-5.13l1.41-.513M5.106 17.785l1.15-.964m11.49-9.642l1.149-.964M7.501 19.795l.75-1.3m7.5-12.99l.75-1.3m-6.063 16.658l.26-1.477m2.605-14.772l.26-1.477m0 17.726l-.26-1.477M10.698 4.614l-.26-1.477M16.5 19.794l-.75-1.299M7.5 4.205L12 12m6.894 5.785l-1.149-.964M6.256 7.178l-1.15-.964m15.352 8.864l-1.41-.513M4.954 9.435l-1.41-.514M12.002 12l-1.06 4.46m-1.039-7.877l.548-2.937M18.5 12l-1.5.667M6.5 12l-1.5-.667"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </motion.div>
+        </div>
+
+        {/* Step labels positioned around the circle */}
+        {steps.map((step, index) => {
+          const angleRad = (step.angle * Math.PI) / 180;
+          const labelRadius = 58;
+          const x = 50 + labelRadius * Math.cos(angleRad);
+          const y = 50 + labelRadius * Math.sin(angleRad);
+          const isActive = progress === index + 1 || (progress === 0 && index === 2);
+
+          return (
+            <div
+              className="absolute"
+              key={`label-${step.label}`}
+              style={{
+                left: `${x}%`,
+                top: `${y}%`,
+                transform: 'translate(-50%, -50%)',
+              }}
+            >
+              <motion.span
+                animate={{
+                  opacity: isActive ? 1 : 0.4,
+                  scale: isActive ? 1 : 0.9,
+                }}
+                className="whitespace-nowrap font-mono text-[9px] text-neutral-500"
+                transition={{ duration: 0.3 }}
               >
-                {task.label}
-              </span>
-
-              {/* Connection line to next task */}
-              {index < tasks.length - 1 && (
-                <div className="absolute left-[calc(33.33%+1.25rem)] top-[2.5rem] h-0.5 w-[calc(33.33%-2.5rem)] bg-neutral-800">
-                  <motion.div
-                    animate={{
-                      scaleX: index < activeTask ? 1 : 0,
-                    }}
-                    className="h-full origin-left bg-neutral-600"
-                    transition={{ duration: 0.4 }}
-                  />
-                </div>
-              )}
+                {step.label}
+              </motion.span>
             </div>
           );
         })}
@@ -691,205 +611,126 @@ const SkeletonThree = () => {
 };
 
 const SkeletonFour = () => {
-  const [completedTasks, setCompletedTasks] = useState<number[]>([]);
-  const [currentTask, setCurrentTask] = useState(0);
-  const TASK_COMPLETION_INTERVAL = 1500;
-  const TOTAL_TASKS = 3;
+  const [batchProgress, setBatchProgress] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentTask((prev) => {
-        const next = (prev + 1) % TOTAL_TASKS;
-        if (next === 0) {
-          setCompletedTasks([]);
-        } else {
-          setCompletedTasks((completed) => [...completed, prev]);
-        }
-        return next;
-      });
-    }, TASK_COMPLETION_INTERVAL);
+      setBatchProgress((prev) => (prev + 1) % 5);
+    }, 1200);
     return () => clearInterval(interval);
   }, []);
 
-  const tasks = [
-    { icon: "invoice", label: "Invoice" },
-    { icon: "payment", label: "Payment" },
-    { icon: "transfer", label: "Transfer" },
+  // Batch processing items
+  const items = [
+    { id: 0, y: 20 },
+    { id: 1, y: 50 },
+    { id: 2, y: 80 },
   ];
 
   return (
-    <motion.div className="flex h-full min-h-[6rem] w-full flex-1 items-center justify-between gap-4 bg-dot-white/[0.2] p-4">
-      {/* Left - Task queue */}
-      <div className="flex flex-col gap-2">
-        {tasks.map((task, index) => {
-          const isCompleted = completedTasks.includes(index);
-          const isCurrent = currentTask === index;
+    <motion.div className="relative flex h-full min-h-[6rem] w-full flex-1 items-center justify-center bg-dot-white/[0.2] p-4">
+      <div className="relative h-28 w-full">
+        {/* Conveyor belt lines */}
+        <div className="absolute left-0 top-[30%] h-0.5 w-full bg-neutral-800" />
+        <div className="absolute left-0 top-[70%] h-0.5 w-full bg-neutral-800" />
+
+        {/* Processing items moving across */}
+        {items.map((item, index) => {
+          const xProgress = ((batchProgress + index) % 4) / 3;
+          const xPercent = xProgress * 100;
+          const isProcessing = xProgress > 0.3 && xProgress < 0.7;
+          const isDone = xProgress >= 0.7;
 
           return (
             <motion.div
-              key={task.label}
               animate={{
-                opacity: isCompleted ? 0.3 : 1,
-                x: isCompleted ? 10 : 0,
-                scale: isCurrent ? 1.05 : 1,
+                left: `${xPercent}%`,
               }}
-              className="flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2"
-              transition={{ duration: 0.3 }}
+              className="absolute"
+              key={item.id}
+              style={{
+                top: `${item.y}%`,
+              }}
+              transition={{
+                duration: 1.2,
+                ease: "linear",
+              }}
             >
-              {/* Task icon */}
-              <div className="flex h-6 w-6 items-center justify-center rounded bg-neutral-800">
-                {task.icon === "invoice" && (
+              <div className="flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-lg border border-neutral-700 bg-neutral-900">
+                {isDone ? (
                   <svg
                     className="h-4 w-4 text-neutral-500"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth={2}
+                    strokeWidth={2.5}
                     viewBox="0 0 24 24"
                   >
                     <path
-                      d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
+                      d="M5 13l4 4L19 7"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
                   </svg>
-                )}
-                {task.icon === "payment" && (
-                  <svg
-                    className="h-4 w-4 text-neutral-500"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                )}
-                {task.icon === "transfer" && (
-                  <svg
-                    className="h-4 w-4 text-neutral-500"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                ) : (
+                  <div className="h-3 w-3 rounded-sm bg-neutral-600" />
                 )}
               </div>
 
-              {/* Task label */}
-              <span className="font-mono text-[10px] text-neutral-400">
-                {task.label}
-              </span>
-
-              {/* Checkmark when completed */}
-              {isCompleted && (
-                <motion.svg
-                  animate={{ scale: [0, 1.2, 1], opacity: [0, 1] }}
-                  className="ml-auto h-3 w-3 text-neutral-500"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                  transition={{ duration: 0.3 }}
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    d="M5 13l4 4L19 7"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </motion.svg>
+              {/* Processing glow */}
+              {isProcessing && (
+                <motion.div
+                  animate={{
+                    opacity: [0.3, 0.6, 0.3],
+                  }}
+                  className="absolute inset-0 rounded-lg bg-neutral-500/20 blur-md"
+                  transition={{
+                    duration: 0.8,
+                    repeat: Number.POSITIVE_INFINITY,
+                    repeatType: "loop",
+                  }}
+                />
               )}
             </motion.div>
           );
         })}
-      </div>
 
-      {/* Center - Automation indicator */}
-      <motion.div
-        animate={{
-          scale: [1, 1.1, 1],
-        }}
-        className="flex flex-col items-center gap-2"
-        transition={{
-          duration: 1.5,
-          repeat: Number.POSITIVE_INFINITY,
-          repeatType: "loop",
-        }}
-      >
-        {/* Robot/automation hand icon */}
-        <div className="relative flex h-14 w-14 items-center justify-center rounded-full border border-neutral-700 bg-neutral-900">
+        {/* Center processor */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <motion.div
             animate={{
-              opacity: [0.2, 0.4, 0.2],
+              scale: [1, 1.05, 1],
             }}
-            className="absolute inset-0 rounded-full bg-neutral-600/10 blur-lg"
+            className="flex h-16 w-16 items-center justify-center rounded-xl border-2 border-neutral-700 bg-neutral-900"
             transition={{
-              duration: 2,
+              duration: 1.5,
               repeat: Number.POSITIVE_INFINITY,
               repeatType: "loop",
             }}
-          />
-          <svg
-            className="relative z-10 h-7 w-7 text-neutral-400"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.5}
-            viewBox="0 0 24 24"
           >
-            <path
-              d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+            <svg
+              className="h-8 w-8 text-neutral-400"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={1.5}
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </motion.div>
         </div>
-        <span className="font-mono text-[9px] text-neutral-500">
-          Auto-pilot
-        </span>
-      </motion.div>
 
-      {/* Right - Completed indicator */}
-      <motion.div
-        animate={{
-          scale: completedTasks.length === TOTAL_TASKS ? [1, 1.15, 1] : 1,
-          opacity: completedTasks.length > 0 ? 1 : 0.3,
-        }}
-        className="flex flex-col items-center gap-2"
-        transition={{ duration: 0.5 }}
-      >
-        <div className="relative flex h-12 w-12 items-center justify-center rounded-lg border border-neutral-700 bg-neutral-900">
-          <svg
-            className="h-6 w-6 text-neutral-500"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          {completedTasks.length === TOTAL_TASKS && (
-            <motion.div
-              animate={{ scale: [1, 1.8], opacity: [0.6, 0] }}
-              className="absolute inset-0 rounded-lg border-2 border-neutral-600"
-              transition={{ duration: 0.8 }}
-            />
-          )}
+        {/* Labels */}
+        <div className="absolute bottom-0 left-0">
+          <span className="font-mono text-[9px] text-neutral-500">Queue</span>
         </div>
-        <span className="font-mono text-[9px] text-neutral-500">Done</span>
-      </motion.div>
+        <div className="absolute bottom-0 right-0">
+          <span className="font-mono text-[9px] text-neutral-500">Done</span>
+        </div>
+      </div>
     </motion.div>
   );
 };
