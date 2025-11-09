@@ -10,11 +10,17 @@ import localFont from "next/font/local";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { BentoGridSection } from "@/components/bento-grid-section";
+import { Footer } from "@/components/footer";
+import { LoyalTokenTicker } from "@/components/loyal-token-ticker";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
+import { RoadmapSection } from "@/components/roadmap-section";
+import { SkillsTextarea } from "@/components/skills-textarea";
+import AnimatedBadge from "@/components/ui/animated-badge";
 import { ChevronRightIcon } from "@/components/ui/chevron-right";
 import { CopyIcon, type CopyIconHandle } from "@/components/ui/copy";
 import { MenuIcon, type MenuIconHandle } from "@/components/ui/menu";
 import { PlusIcon, type PlusIconHandle } from "@/components/ui/plus";
+import { stripSkillMarkers } from "@/lib/skills-text";
 
 const instrumentSerif = localFont({
   src: [
@@ -60,6 +66,7 @@ export default function LandingPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [hasShownModal, setHasShownModal] = useState(false);
   const [hoveredChatId, setHoveredChatId] = useState<string | null>(null);
   const [hoveredNavIndex, setHoveredNavIndex] = useState<number | null>(null);
   const menuIconRef = useRef<MenuIconHandle>(null);
@@ -77,6 +84,13 @@ export default function LandingPage() {
   const [isOnline, setIsOnline] = useState(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isScrolledToAbout, setIsScrolledToAbout] = useState(false);
+  const [isScrolledToRoadmap, setIsScrolledToRoadmap] = useState(false);
+  const [isScrolledToLinks, setIsScrolledToLinks] = useState(false);
+  const prevScrolledToAbout = useRef(false);
+  const prevScrolledToRoadmap = useRef(false);
+  const prevScrolledToLinks = useRef(false);
+  const sanitizedInput = stripSkillMarkers(input).trim();
+  const hasUsableInput = sanitizedInput.length > 0;
 
   // Network status monitoring and recovery
   useEffect(() => {
@@ -111,6 +125,14 @@ export default function LandingPage() {
     };
   }, []);
 
+  // Check if testers modal has been shown before
+  useEffect(() => {
+    const modalShown = localStorage.getItem("loyal-testers-modal-shown");
+    if (modalShown === "true") {
+      setHasShownModal(true);
+    }
+  }, []);
+
   // Control menu icon animation based on sidebar state
   useEffect(() => {
     if (isSidebarOpen) {
@@ -126,6 +148,13 @@ export default function LandingPage() {
       sendMessage({ text: pendingMessage });
       setInput("");
       setPendingMessage(null);
+
+      // Manually clear textarea value
+      if (inputRef.current) {
+        inputRef.current.value = "";
+        inputRef.current.style.height = "auto";
+      }
+
       setIsChatMode(true);
 
       // Reset textarea height and ensure focus
@@ -262,10 +291,55 @@ export default function LandingPage() {
 
     const handlePageScroll = () => {
       const aboutSection = document.getElementById("about-section");
-      if (aboutSection) {
-        const rect = aboutSection.getBoundingClientRect();
-        const isInView = rect.top <= 100 && rect.bottom >= 100;
-        setIsScrolledToAbout(isInView);
+      const roadmapSection = document.getElementById("roadmap-section");
+      const footerSection = document.getElementById("footer-section");
+
+      // Check if we're at the bottom of the page
+      const isAtBottom =
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 10;
+
+      // If at bottom, activate links section
+      if (isAtBottom && footerSection) {
+        setIsScrolledToAbout(false);
+        setIsScrolledToRoadmap(false);
+        setIsScrolledToLinks(true);
+        return;
+      }
+
+      // Calculate which section is closest to the top threshold
+      const sections = [
+        { id: "about", element: aboutSection, setter: setIsScrolledToAbout },
+        {
+          id: "roadmap",
+          element: roadmapSection,
+          setter: setIsScrolledToRoadmap,
+        },
+        { id: "links", element: footerSection, setter: setIsScrolledToLinks },
+      ];
+
+      let closestSection = null;
+      let closestDistance = Number.POSITIVE_INFINITY;
+
+      for (const section of sections) {
+        if (section.element) {
+          const rect = section.element.getBoundingClientRect();
+          const isInView = rect.top <= 100 && rect.bottom >= 100;
+
+          if (isInView) {
+            // Calculate distance from top of section to threshold
+            const distance = Math.abs(rect.top - 100);
+            if (distance < closestDistance) {
+              closestDistance = distance;
+              closestSection = section;
+            }
+          }
+        }
+      }
+
+      // Set only the closest section as active
+      for (const section of sections) {
+        section.setter(section === closestSection);
       }
     };
 
@@ -277,20 +351,35 @@ export default function LandingPage() {
     };
   }, [isChatMode]);
 
-  // Reset hover state when About button changes to/from icon mode
+  // Reset hover state when About or Roadmap button changes to/from icon mode
   // This forces the hover indicator to recalculate its position after DOM updates
   useEffect(() => {
-    if (hoveredNavIndex === 1) {
-      // Index 1 is the About button
+    // Only recalculate if the state actually changed (not just on every render)
+    const aboutChanged = prevScrolledToAbout.current !== isScrolledToAbout;
+    const roadmapChanged =
+      prevScrolledToRoadmap.current !== isScrolledToRoadmap;
+    const linksChanged = prevScrolledToLinks.current !== isScrolledToLinks;
+
+    if (
+      (aboutChanged || roadmapChanged || linksChanged) &&
+      (hoveredNavIndex === 0 || hoveredNavIndex === 1 || hoveredNavIndex === 2)
+    ) {
+      // Index 0 is About, Index 1 is Roadmap, Index 2 is Links
+      const currentIndex = hoveredNavIndex;
       setHoveredNavIndex(null);
       // Use double requestAnimationFrame to ensure layout has been recalculated
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          setHoveredNavIndex(1);
+          setHoveredNavIndex(currentIndex);
         });
       });
     }
-  }, [isScrolledToAbout]);
+
+    prevScrolledToAbout.current = isScrolledToAbout;
+    prevScrolledToRoadmap.current = isScrolledToRoadmap;
+    prevScrolledToLinks.current = isScrolledToLinks;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isScrolledToAbout, isScrolledToRoadmap, isScrolledToLinks]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -298,17 +387,24 @@ export default function LandingPage() {
     // Always check if wallet is connected before sending any message
     if (!connected) {
       // Save the message to send after connection
-      if (input.trim()) {
-        setPendingMessage(input);
+      if (hasUsableInput) {
+        setPendingMessage(sanitizedInput);
       }
       // Open wallet connection modal
       setVisible(true);
       return;
     }
 
-    if (input.trim() && status === "ready") {
-      sendMessage({ text: input });
+    if (hasUsableInput && status === "ready") {
+      sendMessage({ text: sanitizedInput });
       setInput("");
+
+      // Manually clear textarea value
+      if (inputRef.current) {
+        inputRef.current.value = "";
+        inputRef.current.style.height = "auto";
+      }
+
       setIsChatMode(true);
 
       // Reset textarea height and ensure focus
@@ -367,6 +463,34 @@ export default function LandingPage() {
       top: 0,
       behavior: "smooth",
     });
+  };
+
+  const handleScrollToRoadmap = () => {
+    const roadmapSection = document.getElementById("roadmap-section");
+    if (roadmapSection) {
+      const navHeight = 80;
+      const elementPosition = roadmapSection.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - navHeight;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const handleScrollToLinks = () => {
+    const footerSection = document.getElementById("footer-section");
+    if (footerSection) {
+      const navHeight = 80;
+      const elementPosition = footerSection.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - navHeight;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+    }
   };
 
   // Mock data for previous chats - replace with real data later
@@ -449,6 +573,7 @@ export default function LandingPage() {
           >
             {/* Logo */}
             <div
+              className={plusJakartaSans.className}
               style={{
                 fontSize: "1.125rem",
                 fontWeight: 500,
@@ -461,13 +586,7 @@ export default function LandingPage() {
                 alignItems: "center",
               }}
             >
-              <span
-                className={dirtyline.className}
-                style={{ fontSize: "1.8rem", marginRight: "-0.1rem" }}
-              >
-                L
-              </span>
-              <span className={plusJakartaSans.className}>oyal</span>
+              Loyal
             </div>
             {/* Sliding liquid glass indicator */}
             {hoveredNavIndex !== null &&
@@ -493,7 +612,6 @@ export default function LandingPage() {
                 />
               )}
             {[
-              { label: "For testers", onClick: () => setIsModalOpen(true) },
               {
                 label: "About",
                 onClick: isScrolledToAbout
@@ -501,14 +619,31 @@ export default function LandingPage() {
                   : handleScrollToAbout,
                 isAbout: true,
               },
-              { label: "Roadmap", href: "#" },
-              { label: "Blog", href: "#" },
-              { label: "Docs", href: "#" },
+              {
+                label: "Roadmap",
+                onClick: isScrolledToRoadmap
+                  ? handleBackToTop
+                  : handleScrollToRoadmap,
+                isRoadmap: true,
+              },
+              {
+                label: "Links",
+                onClick: isScrolledToLinks
+                  ? handleBackToTop
+                  : handleScrollToLinks,
+                isLinks: true,
+              },
+              { label: "Docs", href: "https://docs.askloyal.com/" },
             ].map((item, index) => (
               <button
                 className={ibmPlexSans.className}
                 key={item.label}
-                onClick={item.onClick}
+                onClick={
+                  item.href
+                    ? () =>
+                        window.open(item.href, "_blank", "noopener,noreferrer")
+                    : item.onClick
+                }
                 onMouseEnter={() => setHoveredNavIndex(index)}
                 ref={(el) => {
                   navItemRefs.current[index] = el;
@@ -536,7 +671,9 @@ export default function LandingPage() {
                   justifyContent: "center",
                   gap: "0.375rem",
                   filter:
-                    item.isAbout && isScrolledToAbout
+                    (item.isAbout && isScrolledToAbout) ||
+                    (item.isRoadmap && isScrolledToRoadmap) ||
+                    (item.isLinks && isScrolledToLinks)
                       ? "drop-shadow(0 0 8px rgba(255, 255, 255, 0.6))"
                       : "none",
                   overflow: "hidden",
@@ -547,39 +684,66 @@ export default function LandingPage() {
                     display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    opacity: item.isAbout && isScrolledToAbout ? 1 : 0,
+                    opacity:
+                      (item.isAbout && isScrolledToAbout) ||
+                      (item.isRoadmap && isScrolledToRoadmap) ||
+                      (item.isLinks && isScrolledToLinks)
+                        ? 1
+                        : 0,
                     transform:
-                      item.isAbout && isScrolledToAbout
+                      (item.isAbout && isScrolledToAbout) ||
+                      (item.isRoadmap && isScrolledToRoadmap) ||
+                      (item.isLinks && isScrolledToLinks)
                         ? "scale(1) translateY(0)"
                         : "scale(0.8) translateY(4px)",
                     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     position:
-                      item.isAbout && isScrolledToAbout
+                      (item.isAbout && isScrolledToAbout) ||
+                      (item.isRoadmap && isScrolledToRoadmap) ||
+                      (item.isLinks && isScrolledToLinks)
                         ? "relative"
                         : "absolute",
                     pointerEvents:
-                      item.isAbout && isScrolledToAbout ? "auto" : "none",
+                      (item.isAbout && isScrolledToAbout) ||
+                      (item.isRoadmap && isScrolledToRoadmap) ||
+                      (item.isLinks && isScrolledToLinks)
+                        ? "auto"
+                        : "none",
                   }}
                 >
-                  {item.isAbout && <ArrowUpToLine size={18} />}
+                  {(item.isAbout || item.isRoadmap || item.isLinks) && (
+                    <ArrowUpToLine size={18} />
+                  )}
                 </span>
                 <span
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    opacity: item.isAbout && isScrolledToAbout ? 0 : 1,
+                    opacity:
+                      (item.isAbout && isScrolledToAbout) ||
+                      (item.isRoadmap && isScrolledToRoadmap) ||
+                      (item.isLinks && isScrolledToLinks)
+                        ? 0
+                        : 1,
                     transform:
-                      item.isAbout && isScrolledToAbout
+                      (item.isAbout && isScrolledToAbout) ||
+                      (item.isRoadmap && isScrolledToRoadmap) ||
+                      (item.isLinks && isScrolledToLinks)
                         ? "scale(0.8) translateY(-4px)"
                         : "scale(1) translateY(0)",
                     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                     position:
-                      item.isAbout && isScrolledToAbout
+                      (item.isAbout && isScrolledToAbout) ||
+                      (item.isRoadmap && isScrolledToRoadmap) ||
+                      (item.isLinks && isScrolledToLinks)
                         ? "absolute"
                         : "relative",
                     pointerEvents:
-                      item.isAbout && isScrolledToAbout ? "none" : "auto",
+                      (item.isAbout && isScrolledToAbout) ||
+                      (item.isLinks && isScrolledToLinks)
+                        ? "none"
+                        : "auto",
                   }}
                 >
                   {item.label}
@@ -587,6 +751,45 @@ export default function LandingPage() {
               </button>
             ))}
           </nav>
+
+          {/* Token Ticker */}
+          <div
+            className="loyal-token-ticker-container"
+            style={{
+              position: "fixed",
+              top: "4.5rem",
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 50,
+              opacity: isChatMode ? 0 : 1,
+              pointerEvents: isChatMode ? "none" : "auto",
+              transition: "opacity 0.3s ease",
+              background: "rgba(255, 255, 255, 0.05)",
+              backdropFilter: "blur(20px)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              borderTop: "none",
+              borderRadius: "0 0 10px 10px",
+              padding: "0.6rem 0.625rem 0.4rem",
+              boxShadow:
+                "0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px rgba(255, 255, 255, 0.1)",
+            }}
+          >
+            <LoyalTokenTicker />
+          </div>
+          <style>{`
+            @media (max-width: 768px) {
+              .loyal-token-ticker-container {
+                top: 5rem !important;
+                left: auto !important;
+                right: 1.5rem !important;
+                transform: none !important;
+                border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+                border-radius: 10px !important;
+                padding: 0.4rem 0.5rem 0.3rem !important;
+                font-size: 0.75rem !important;
+              }
+            }
+          `}</style>
 
           {/* Menu Button - Always Visible */}
           <button
@@ -780,17 +983,15 @@ export default function LandingPage() {
 
             {/* Navigation Menu - Mobile only */}
             <div
-              className="md:hidden"
+              className="flex md:hidden"
               style={{
                 padding: "1rem 1.5rem",
                 borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
-                display: "flex",
                 flexDirection: "column",
                 gap: "0.5rem",
               }}
             >
               {[
-                { label: "For testers", onClick: () => setIsModalOpen(true) },
                 {
                   label: "About",
                   onClick: () => {
@@ -803,9 +1004,31 @@ export default function LandingPage() {
                   },
                   isAbout: true,
                 },
-                { label: "Roadmap", href: "#" },
-                { label: "Blog", href: "#" },
-                { label: "Docs", href: "#" },
+                {
+                  label: "Roadmap",
+                  onClick: () => {
+                    if (isScrolledToRoadmap) {
+                      handleBackToTop();
+                    } else {
+                      handleScrollToRoadmap();
+                    }
+                    setIsSidebarOpen(false);
+                  },
+                  isRoadmap: true,
+                },
+                {
+                  label: "Links",
+                  onClick: () => {
+                    if (isScrolledToLinks) {
+                      handleBackToTop();
+                    } else {
+                      handleScrollToLinks();
+                    }
+                    setIsSidebarOpen(false);
+                  },
+                  isLinks: true,
+                },
+                { label: "Docs", href: "https://docs.askloyal.com/" },
               ].map((item) => (
                 <button
                   key={item.label}
@@ -840,12 +1063,16 @@ export default function LandingPage() {
                     display: "flex",
                     alignItems: "center",
                     justifyContent:
-                      item.isAbout && isScrolledToAbout
+                      (item.isAbout && isScrolledToAbout) ||
+                      (item.isRoadmap && isScrolledToRoadmap) ||
+                      (item.isLinks && isScrolledToLinks)
                         ? "center"
                         : "flex-start",
                     gap: "0.5rem",
                     filter:
-                      item.isAbout && isScrolledToAbout
+                      (item.isAbout && isScrolledToAbout) ||
+                      (item.isRoadmap && isScrolledToRoadmap) ||
+                      (item.isLinks && isScrolledToLinks)
                         ? "drop-shadow(0 0 6px rgba(255, 255, 255, 0.5))"
                         : "none",
                     overflow: "hidden",
@@ -857,39 +1084,66 @@ export default function LandingPage() {
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      opacity: item.isAbout && isScrolledToAbout ? 1 : 0,
+                      opacity:
+                        (item.isAbout && isScrolledToAbout) ||
+                        (item.isRoadmap && isScrolledToRoadmap) ||
+                        (item.isLinks && isScrolledToLinks)
+                          ? 1
+                          : 0,
                       transform:
-                        item.isAbout && isScrolledToAbout
+                        (item.isAbout && isScrolledToAbout) ||
+                        (item.isRoadmap && isScrolledToRoadmap) ||
+                        (item.isLinks && isScrolledToLinks)
                           ? "scale(1) translateY(0)"
                           : "scale(0.8) translateY(4px)",
                       transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                       position:
-                        item.isAbout && isScrolledToAbout
+                        (item.isAbout && isScrolledToAbout) ||
+                        (item.isRoadmap && isScrolledToRoadmap) ||
+                        (item.isLinks && isScrolledToLinks)
                           ? "relative"
                           : "absolute",
                       pointerEvents:
-                        item.isAbout && isScrolledToAbout ? "auto" : "none",
+                        (item.isAbout && isScrolledToAbout) ||
+                        (item.isRoadmap && isScrolledToRoadmap) ||
+                        (item.isLinks && isScrolledToLinks)
+                          ? "auto"
+                          : "none",
                     }}
                   >
-                    {item.isAbout && <ArrowUpToLine size={16} />}
+                    {(item.isAbout || item.isRoadmap || item.isLinks) && (
+                      <ArrowUpToLine size={16} />
+                    )}
                   </span>
                   <span
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      opacity: item.isAbout && isScrolledToAbout ? 0 : 1,
+                      opacity:
+                        (item.isAbout && isScrolledToAbout) ||
+                        (item.isRoadmap && isScrolledToRoadmap) ||
+                        (item.isLinks && isScrolledToLinks)
+                          ? 0
+                          : 1,
                       transform:
-                        item.isAbout && isScrolledToAbout
+                        (item.isAbout && isScrolledToAbout) ||
+                        (item.isRoadmap && isScrolledToRoadmap) ||
+                        (item.isLinks && isScrolledToLinks)
                           ? "scale(0.8) translateY(-4px)"
                           : "scale(1) translateY(0)",
                       transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                       position:
-                        item.isAbout && isScrolledToAbout
+                        (item.isAbout && isScrolledToAbout) ||
+                        (item.isRoadmap && isScrolledToRoadmap) ||
+                        (item.isLinks && isScrolledToLinks)
                           ? "absolute"
                           : "relative",
                       pointerEvents:
-                        item.isAbout && isScrolledToAbout ? "none" : "auto",
+                        (item.isAbout && isScrolledToAbout) ||
+                        (item.isLinks && isScrolledToLinks)
+                          ? "none"
+                          : "auto",
                     }}
                   >
                     {item.label}
@@ -1033,13 +1287,25 @@ export default function LandingPage() {
               alignItems: "center",
               justifyContent: "flex-start",
               textAlign: "center",
-              padding: "22vh 1.5rem 0",
+              padding: "calc(22vh + 40px) 1.5rem 0",
               gap: "0.75rem",
               color: "#fff",
               transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
               transform: isChatMode ? "translateY(-100vh)" : "translateY(0)",
             }}
           >
+            {/* For testers pill badge */}
+            <div
+              onClick={() => setIsModalOpen(true)}
+              style={{
+                marginBottom: "0.75rem",
+                animation: "fadeIn 0.6s ease-out",
+                fontFamily: "var(--font-geist-sans)",
+              }}
+            >
+              <AnimatedBadge color="#ef4444" text="Message for testers" />
+            </div>
+
             <h1
               style={{
                 fontSize: "clamp(2rem, 5vw, 4.25rem)",
@@ -1048,7 +1314,7 @@ export default function LandingPage() {
                 maxWidth: "100%",
               }}
             >
-              <em>Private</em> intelligence for <em>private</em> people
+              Agentic <em>computer</em> for private <em>people</em>
             </h1>
             <p
               style={{
@@ -1058,8 +1324,7 @@ export default function LandingPage() {
                 lineHeight: 1.45,
               }}
             >
-              Loyal is built for those who want to ask questions with no
-              repercussions.
+              Private onchain intelligence with web2 performance.
             </p>
           </div>
 
@@ -1130,7 +1395,7 @@ export default function LandingPage() {
             }}
             style={{
               position: "absolute",
-              bottom: isChatMode ? "0" : "48vh",
+              bottom: isChatMode ? "0" : "calc(48vh - 40px)",
               left: "50%",
               transform: "translateX(-50%)",
               width: isChatMode ? "min(920px, 90%)" : "min(600px, 90%)",
@@ -1335,6 +1600,74 @@ export default function LandingPage() {
                     </div>
                   );
                 })}
+
+                {/* Thinking indicator */}
+                {status === "submitted" && (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      gap: "0.5rem",
+                      animation: "slideInUp 0.3s ease-out",
+                      animationFillMode: "both",
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: "relative",
+                        padding: "1rem 1.5rem",
+                        borderRadius: "16px",
+                        background: "rgba(255, 255, 255, 0.05)",
+                        backdropFilter: "blur(10px)",
+                        border: "1px solid rgba(255, 255, 255, 0.1)",
+                        color: "rgba(255, 255, 255, 0.6)",
+                        fontSize: "1rem",
+                        lineHeight: 1.5,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                      }}
+                    >
+                      <span>Thinking</span>
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          gap: "0.125rem",
+                        }}
+                      >
+                        <span
+                          style={{
+                            animation:
+                              "dotBounce 1.4s infinite ease-in-out both",
+                            animationDelay: "0s",
+                          }}
+                        >
+                          .
+                        </span>
+                        <span
+                          style={{
+                            animation:
+                              "dotBounce 1.4s infinite ease-in-out both",
+                            animationDelay: "0.2s",
+                          }}
+                        >
+                          .
+                        </span>
+                        <span
+                          style={{
+                            animation:
+                              "dotBounce 1.4s infinite ease-in-out both",
+                            animationDelay: "0.4s",
+                          }}
+                        >
+                          .
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 <div ref={messagesEndRef} style={{ height: "1rem" }} />
               </div>
             )}
@@ -1435,7 +1768,7 @@ export default function LandingPage() {
                   transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
               >
-                <textarea
+                <SkillsTextarea
                   autoFocus
                   disabled={
                     !isOnline ||
@@ -1444,6 +1777,14 @@ export default function LandingPage() {
                   }
                   onChange={(e) => {
                     setInput(e.target.value);
+
+                    // Show modal on first typing
+                    if (!hasShownModal && e.target.value.length > 0) {
+                      setIsModalOpen(true);
+                      setHasShownModal(true);
+                      localStorage.setItem("loyal-testers-modal-shown", "true");
+                    }
+
                     // Auto-resize textarea
                     if (inputRef.current) {
                       inputRef.current.style.height = "auto";
@@ -1486,31 +1827,23 @@ export default function LandingPage() {
                   value={input}
                 />
                 <button
-                  disabled={
-                    !isOnline ||
-                    status !== "ready" ||
-                    !input.trim() ||
-                    (isChatMode && !connected)
-                  }
+                  disabled={!hasUsableInput}
                   onMouseEnter={(e) => {
-                    if (
-                      isOnline &&
-                      status === "ready" &&
-                      input.trim() &&
-                      (!isChatMode || connected)
-                    ) {
+                    if (hasUsableInput) {
                       e.currentTarget.style.opacity = "1";
                       e.currentTarget.style.background =
-                        "rgba(255, 255, 255, 0.1)";
+                        "rgba(255, 255, 255, 0.15)";
                       e.currentTarget.style.transform =
                         "translateY(-50%) scale(1.1)";
                     }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.opacity = "0.7";
-                    e.currentTarget.style.background = "transparent";
-                    e.currentTarget.style.transform =
-                      "translateY(-50%) scale(1)";
+                    if (hasUsableInput) {
+                      e.currentTarget.style.opacity = "0.8";
+                      e.currentTarget.style.background = "transparent";
+                      e.currentTarget.style.transform =
+                        "translateY(-50%) scale(1)";
+                    }
                   }}
                   style={{
                     position: "absolute",
@@ -1525,22 +1858,11 @@ export default function LandingPage() {
                     background: "transparent",
                     border: "none",
                     borderRadius: "12px",
-                    cursor:
-                      !isOnline ||
-                      status !== "ready" ||
-                      !input.trim() ||
-                      (isChatMode && !connected)
-                        ? "not-allowed"
-                        : "pointer",
+                    cursor: hasUsableInput ? "pointer" : "not-allowed",
                     outline: "none",
                     transition: "all 0.3s ease",
-                    opacity:
-                      !isOnline ||
-                      status !== "ready" ||
-                      !input.trim() ||
-                      (isChatMode && !connected)
-                        ? 0.3
-                        : 0.7,
+                    opacity: hasUsableInput ? 0.8 : 0.3,
+                    zIndex: 2,
                   }}
                   type="submit"
                 >
@@ -1562,6 +1884,10 @@ export default function LandingPage() {
 
         {/* BentoGrid Section - Only show when not in chat mode */}
         {!isChatMode && <BentoGridSection />}
+
+        {/* Roadmap Section - Only show when not in chat mode */}
+        {!isChatMode && <RoadmapSection />}
+        {!isChatMode && <Footer />}
       </div>
 
       {/* Network offline overlay */}
@@ -1810,7 +2136,7 @@ export default function LandingPage() {
                 lineHeight: 1.3,
               }}
             >
-              Thank you for joining the first test batch!
+              Thank you for joining Loyal open test!
             </h2>
 
             {/* Modal body */}
@@ -1825,33 +2151,42 @@ export default function LandingPage() {
               }}
             >
               <p style={{ margin: 0 }}>
-                Please note: Loyal is a test product for evaluation purposes
-                only. Functionality may be incomplete, may change without
-                notice, and may contain errors.
-              </p>
-
-              <p style={{ margin: 0 }}>
                 <strong style={{ color: "#fff", fontWeight: 600 }}>
-                  What makes Loyal different from regular LLM chats:
+                  What is it:
                 </strong>{" "}
-                your queries run in fully private, confidential compute—even the
-                Loyal team cannot access them. Conversation state is written
-                on-chain and anchored to a per-user Solana PDA.
+                you&apos;re looking at fully private on-chain AI. Every message
+                is encrypted and facilitated on-chain with AI itself running in
+                confidential VM. Neither Loyal devs nor compute node owners can
+                access your data.
               </p>
 
               <p style={{ margin: 0 }}>
-                This app may look like a simple chat, but under the hood
-                you&apos;re talking to a fully on-chain AI. In the coming weeks,
-                we&apos;ll ship more AI apps built on this Loyal backbone.
-              </p>
-
-              <p style={{ margin: 0 }}>
-                For this test run, there&apos;s no per-query fee—only wallet
+                For this open test, there&apos;s no per-query fee but the wallet
                 verification is required.
               </p>
 
               <p style={{ margin: 0 }}>
-                Please report any bugs to our discord testing channel.
+                <strong style={{ color: "#ef4444", fontWeight: 600 }}>
+                  WARNING:
+                </strong>{" "}
+                this is an early stage product and some features may be
+                incomplete or contain errors.
+              </p>
+
+              <p style={{ margin: 0 }}>
+                You will help our cause if you report any bugs/drop your
+                feedback or ideas in our discord community:{" "}
+                <a
+                  href="https://discord.askloyal.com"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: "#60a5fa",
+                    textDecoration: "underline",
+                  }}
+                  target="_blank"
+                >
+                  https://discord.askloyal.com
+                </a>
               </p>
             </div>
 
