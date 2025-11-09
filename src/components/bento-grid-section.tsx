@@ -259,13 +259,13 @@ const SkeletonOne = () => {
           {/* Data icon stack showing multiple items being protected */}
           <div className="relative flex h-14 w-14 items-center justify-center">
             {/* Background stacked documents */}
-            <div className="absolute top-1 left-1 h-12 w-10 rounded-md border border-red-600 bg-neutral-800/60" />
-            <div className="absolute top-0.5 left-0.5 h-12 w-10 rounded-md border border-red-600 bg-neutral-800/80" />
+            <div className="absolute top-1 left-1 h-12 w-10 rounded-md border border-neutral-600 bg-neutral-800/60" />
+            <div className="absolute top-0.5 left-0.5 h-12 w-10 rounded-md border border-neutral-600 bg-neutral-800/80" />
 
             {/* Main document with content preview */}
-            <div className="relative z-10 flex h-12 w-10 flex-col gap-1 rounded-md border border-red-500 bg-neutral-900 p-1.5">
-              <div className="h-1 w-full rounded-full bg-neutral-600" />
-              <div className="h-1 w-4 rounded-full bg-neutral-600" />
+            <div className="relative z-10 flex h-12 w-10 flex-col gap-1 rounded-md border border-neutral-500 bg-neutral-900 p-1.5">
+              <div className="h-1 w-full rounded-full bg-red-500" />
+              <div className="h-1 w-4 rounded-full bg-red-500" />
 
               {/* Lock overlay showing protection */}
               <motion.div
@@ -947,27 +947,26 @@ const SkeletonFiveApp = () => {
             repeatType: "loop",
           }}
         >
-          {/* Wallet glow */}
-          <motion.div
-            animate={{
-              opacity: [0.2, 0.4, 0.2],
-            }}
-            className="absolute inset-0 rounded-xl bg-red-500/10 blur-lg"
-            transition={{
-              duration: 2,
-              repeat: Number.POSITIVE_INFINITY,
-              repeatType: "loop",
-            }}
-          />
-
           {/* Wallet icon */}
           <svg
-            className="relative z-10 h-10 w-10 text-neutral-400"
+            className="relative z-10 h-10 w-10"
             fill="none"
-            stroke="currentColor"
+            stroke="url(#wallet-gradient)"
             strokeWidth={1.5}
             viewBox="0 0 24 24"
           >
+            <defs>
+              <linearGradient
+                id="wallet-gradient"
+                x1="0%"
+                x2="100%"
+                y1="0%"
+                y2="100%"
+              >
+                <stop offset="0%" stopColor="#ef4444" />
+                <stop offset="100%" stopColor="#dc2626" />
+              </linearGradient>
+            </defs>
             <path
               d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3"
               strokeLinecap="round"
