@@ -259,11 +259,11 @@ const SkeletonOne = () => {
           {/* Data icon stack showing multiple items being protected */}
           <div className="relative flex h-14 w-14 items-center justify-center">
             {/* Background stacked documents */}
-            <div className="absolute top-1 left-1 h-12 w-10 rounded-md border border-neutral-600 bg-neutral-800/60" />
-            <div className="absolute top-0.5 left-0.5 h-12 w-10 rounded-md border border-neutral-600 bg-neutral-800/80" />
+            <div className="absolute top-1 left-1 h-12 w-10 rounded-md border border-red-600 bg-neutral-800/60" />
+            <div className="absolute top-0.5 left-0.5 h-12 w-10 rounded-md border border-red-600 bg-neutral-800/80" />
 
             {/* Main document with content preview */}
-            <div className="relative z-10 flex h-12 w-10 flex-col gap-1 rounded-md border border-neutral-500 bg-neutral-900 p-1.5">
+            <div className="relative z-10 flex h-12 w-10 flex-col gap-1 rounded-md border border-red-500 bg-neutral-900 p-1.5">
               <div className="h-1 w-full rounded-full bg-neutral-600" />
               <div className="h-1 w-4 rounded-full bg-neutral-600" />
 
@@ -394,7 +394,7 @@ const SkeletonTwo = () => {
                     opacity: wavePhase < 30 ? 1 : 0.3,
                     scale: wavePhase < 30 ? 1 : 0.95,
                   }}
-                  className="h-3 w-3 rounded-sm bg-neutral-600"
+                  className={`h-3 w-3 rounded-sm ${i === 1 || i === 3 ? "bg-red-500" : "bg-neutral-600"}`}
                   key={`block-0-${i}`}
                   transition={{ duration: 0.6, delay: i * 0.05 }}
                 />
@@ -407,7 +407,7 @@ const SkeletonTwo = () => {
                     opacity: wavePhase < 30 ? 1 : 0.3,
                     scale: wavePhase < 30 ? 1 : 0.95,
                   }}
-                  className="h-3 w-3 rounded-sm bg-neutral-600"
+                  className={`h-3 w-3 rounded-sm ${i === 0 || i === 2 ? "bg-red-500" : "bg-neutral-600"}`}
                   key={`block-1-${i}`}
                   transition={{ duration: 0.6, delay: i * 0.05 }}
                 />
