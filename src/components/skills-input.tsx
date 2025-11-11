@@ -4,7 +4,6 @@ import * as React from "react";
 import { XIcon } from "lucide-react";
 
 import { SkillDropdown } from "@/components/ai-elements/skill-dropdown";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AVAILABLE_SKILLS, type LoyalSkill } from "@/types/skills";
 
@@ -198,6 +197,7 @@ const SkillsInput = React.forwardRef<HTMLInputElement, SkillsInputProps>(
       if (skillToRemove.id === "swap") {
         setSwapStep(null);
         setSwapData({ fromCurrency: null, amount: null, toCurrency: null });
+        setIsDropdownOpen(false);
       }
     };
 
@@ -412,37 +412,35 @@ const SkillsInput = React.forwardRef<HTMLInputElement, SkillsInputProps>(
           {value.map((skill) => (
             <span
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium",
+                "inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium",
                 "backdrop-blur-[18px] shadow-lg",
                 getSkillColor(skill)
               )}
               key={skill.id}
             >
               {skill.label}
-              <Button
-                className="h-3 w-3 p-0 hover:bg-white/20"
+              <button
+                className="h-3 w-3 p-0 ml-1 bg-transparent border-0 cursor-pointer hover:scale-125 transition-transform duration-200"
                 onClick={() => removeSkill(skill)}
                 onFocus={(e) => e.currentTarget.blur()} // Prevent button from stealing focus
-                size="icon"
                 tabIndex={-1} // Remove from tab order
                 type="button" // Prevent form submission
-                variant="ghost"
               >
                 <XIcon className="h-2.5 w-2.5" />
-              </Button>
+              </button>
             </span>
           ))}
           {swapData.fromCurrency && (
             <span
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium",
+                "inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium",
                 "backdrop-blur-[18px] shadow-lg",
                 "bg-white/10 border-white/25 text-white"
               )}
             >
               {swapData.fromCurrency}
-              <Button
-                className="h-3 w-3 p-0 hover:bg-white/20"
+              <button
+                className="h-3 w-3 p-0 ml-1 bg-transparent border-0 cursor-pointer hover:scale-125 transition-transform duration-200"
                 onClick={() => {
                   setSwapData({
                     fromCurrency: null,
@@ -456,52 +454,48 @@ const SkillsInput = React.forwardRef<HTMLInputElement, SkillsInputProps>(
                   calculateDropdownPosition();
                 }}
                 onFocus={(e) => e.currentTarget.blur()}
-                size="icon"
                 tabIndex={-1}
                 type="button"
-                variant="ghost"
               >
                 <XIcon className="h-2.5 w-2.5" />
-              </Button>
+              </button>
             </span>
           )}
           {swapData.amount && (
             <span
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium",
+                "inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium",
                 "backdrop-blur-[18px] shadow-lg",
                 "bg-green-400/25 border-green-400/40 text-white"
               )}
             >
               {swapData.amount}
-              <Button
-                className="h-3 w-3 p-0 hover:bg-white/20"
+              <button
+                className="h-3 w-3 p-0 ml-1 bg-transparent border-0 cursor-pointer hover:scale-125 transition-transform duration-200"
                 onClick={() => {
                   setSwapData({ ...swapData, amount: null, toCurrency: null });
                   setSwapStep("amount");
                   setPendingInput("");
                 }}
                 onFocus={(e) => e.currentTarget.blur()}
-                size="icon"
                 tabIndex={-1}
                 type="button"
-                variant="ghost"
               >
                 <XIcon className="h-2.5 w-2.5" />
-              </Button>
+              </button>
             </span>
           )}
           {swapData.toCurrency && (
             <span
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium",
+                "inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium",
                 "backdrop-blur-[18px] shadow-lg",
                 "bg-white/10 border-white/25 text-white"
               )}
             >
               {swapData.toCurrency}
-              <Button
-                className="h-3 w-3 p-0 hover:bg-white/20"
+              <button
+                className="h-3 w-3 p-0 ml-1 bg-transparent border-0 cursor-pointer hover:scale-125 transition-transform duration-200"
                 onClick={() => {
                   setSwapData({ ...swapData, toCurrency: null });
                   setSwapStep("to_currency");
@@ -514,13 +508,11 @@ const SkillsInput = React.forwardRef<HTMLInputElement, SkillsInputProps>(
                   calculateDropdownPosition();
                 }}
                 onFocus={(e) => e.currentTarget.blur()}
-                size="icon"
                 tabIndex={-1}
                 type="button"
-                variant="ghost"
               >
                 <XIcon className="h-2.5 w-2.5" />
-              </Button>
+              </button>
             </span>
           )}
           <input
