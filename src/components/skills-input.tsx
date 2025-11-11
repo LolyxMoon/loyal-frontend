@@ -1,14 +1,14 @@
 "use client";
 
-import * as React from "react";
 import { XIcon } from "lucide-react";
+import * as React from "react";
 
 import { SkillDropdown } from "@/components/ai-elements/skill-dropdown";
 import { cn } from "@/lib/utils";
 import { AVAILABLE_SKILLS, type LoyalSkill } from "@/types/skills";
 
 type SkillsInputProps = Omit<
-  React.InputHTMLAttributes<HTMLInputElement>,
+  React.TextareaHTMLAttributes<HTMLTextAreaElement>,
   "value" | "onChange"
 > & {
   value: LoyalSkill[];
@@ -38,7 +38,7 @@ const RECIPIENT_SKILLS = AVAILABLE_SKILLS.filter(
   (s) => s.category === "recipient"
 );
 
-const SkillsInput = React.forwardRef<HTMLInputElement, SkillsInputProps>(
+const SkillsInput = React.forwardRef<HTMLTextAreaElement, SkillsInputProps>(
   (
     {
       className,
@@ -51,7 +51,7 @@ const SkillsInput = React.forwardRef<HTMLInputElement, SkillsInputProps>(
     },
     ref
   ) => {
-    const inputRef = React.useRef<HTMLInputElement>(null);
+    const inputRef = React.useRef<HTMLTextAreaElement>(null);
     const containerRef = React.useRef<HTMLDivElement>(null);
     const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
     const [selectedSkillIndex, setSelectedSkillIndex] = React.useState(0);
@@ -79,24 +79,36 @@ const SkillsInput = React.forwardRef<HTMLInputElement, SkillsInputProps>(
 
     const hasSwapSkill = value.some((skill) => skill.id === "swap");
 
-    // Expose clear method to parent while maintaining input element methods
+    // Auto-resize textarea on mount and when pendingInput changes
+    React.useEffect(() => {
+      if (inputRef.current) {
+        inputRef.current.style.height = "auto";
+        inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
+      }
+    }, [pendingInput]);
+
+    // Expose clear method to parent while maintaining textarea element methods
     React.useImperativeHandle(ref, () => {
-      const input = inputRef.current!;
-      return new Proxy(input, {
+      const textarea = inputRef.current!;
+      return new Proxy(textarea, {
         get(target, prop) {
-          if (prop === 'clear') {
+          if (prop === "clear") {
             return () => {
               setPendingInput("");
               setSwapStep(null);
-              setSwapData({ fromCurrency: null, amount: null, toCurrency: null });
+              setSwapData({
+                fromCurrency: null,
+                amount: null,
+                toCurrency: null,
+              });
               setIsDropdownOpen(false);
             };
           }
-          const value = target[prop as keyof HTMLInputElement];
-          return typeof value === 'function' ? value.bind(target) : value;
+          const value = target[prop as keyof HTMLTextAreaElement];
+          return typeof value === "function" ? value.bind(target) : value;
         },
         has(target, prop) {
-          if (prop === 'clear') {
+          if (prop === "clear") {
             return true;
           }
           return prop in target;
@@ -201,13 +213,21 @@ const SkillsInput = React.forwardRef<HTMLInputElement, SkillsInputProps>(
       }
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      // Allow Shift+Enter to create new lines
+      if (e.key === "Enter" && e.shiftKey) {
+        return; // Let default behavior create new line
+      }
+
       // Handle amount input during swap
       if (swapStep === "amount") {
+        // Prevent default Enter behavior (new line) for swap amount entry
+        if (e.key === "Enter") {
+          e.preventDefault();
+        }
         if (e.key === "Enter" && pendingInput.trim()) {
           const amount = Number.parseFloat(pendingInput.trim());
           if (amount > 0) {
-            e.preventDefault();
             setSwapData({ ...swapData, amount: pendingInput.trim() });
             setSwapStep("to_currency");
             setPendingInput("");
@@ -245,6 +265,7 @@ const SkillsInput = React.forwardRef<HTMLInputElement, SkillsInputProps>(
               inputRef.current?.focus();
             }, 0);
           }
+          return;
         } else if (e.key === "Escape") {
           e.preventDefault();
           setIsDropdownOpen(false);
@@ -267,6 +288,17 @@ const SkillsInput = React.forwardRef<HTMLInputElement, SkillsInputProps>(
         } else {
           return;
         }
+      }
+
+      // Handle regular Enter press to submit form (let default form submit happen)
+      if (e.key === "Enter") {
+        e.preventDefault();
+        // Let the form handle submission by finding and submitting parent form
+        const form = e.currentTarget.closest("form");
+        if (form) {
+          form.requestSubmit();
+        }
+        return;
       }
 
       // Handle slash to open skill dropdown
@@ -319,9 +351,15 @@ const SkillsInput = React.forwardRef<HTMLInputElement, SkillsInputProps>(
       }
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const newValue = e.target.value;
       setPendingInput(newValue);
+
+      // Auto-resize textarea based on content
+      if (inputRef.current) {
+        inputRef.current.style.height = "auto";
+        inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
+      }
 
       // Don't open dropdown during amount input
       if (swapStep === "amount" || swapStep === "to_currency") {
@@ -397,7 +435,7 @@ const SkillsInput = React.forwardRef<HTMLInputElement, SkillsInputProps>(
       <div style={{ position: "relative", width: "100%", flex: 1 }}>
         <div
           className={cn(
-            "min-h-[60px] flex w-full flex-wrap items-center gap-2 rounded-[20px] px-7 py-5 text-base ring-offset-white transition-all",
+            "flex min-h-[60px] w-full flex-wrap items-center gap-2 rounded-[20px] px-7 py-5 text-base ring-offset-white transition-all",
             "bg-white/5 backdrop-blur-[40px]",
             hasSwapSkill && !isSwapComplete
               ? "shadow-[0_0_0_2px_rgba(255,255,255,0.6),0_0_20px_rgba(255,255,255,0.4),0_0_40px_rgba(255,255,255,0.2)]"
@@ -412,15 +450,15 @@ const SkillsInput = React.forwardRef<HTMLInputElement, SkillsInputProps>(
           {value.map((skill) => (
             <span
               className={cn(
-                "inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium",
-                "backdrop-blur-[18px] shadow-lg",
+                "inline-flex items-center gap-1 rounded-full border px-3 py-1.5 font-medium text-sm",
+                "shadow-lg backdrop-blur-[18px]",
                 getSkillColor(skill)
               )}
               key={skill.id}
             >
               {skill.label}
               <button
-                className="h-3 w-3 p-0 ml-1 bg-transparent border-0 cursor-pointer hover:scale-125 transition-transform duration-200"
+                className="ml-1 h-3 w-3 cursor-pointer border-0 bg-transparent p-0 transition-transform duration-200 hover:scale-125"
                 onClick={() => removeSkill(skill)}
                 onFocus={(e) => e.currentTarget.blur()} // Prevent button from stealing focus
                 tabIndex={-1} // Remove from tab order
@@ -433,14 +471,14 @@ const SkillsInput = React.forwardRef<HTMLInputElement, SkillsInputProps>(
           {swapData.fromCurrency && (
             <span
               className={cn(
-                "inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium",
-                "backdrop-blur-[18px] shadow-lg",
-                "bg-white/10 border-white/25 text-white"
+                "inline-flex items-center gap-1 rounded-full border px-3 py-1.5 font-medium text-sm",
+                "shadow-lg backdrop-blur-[18px]",
+                "border-white/25 bg-white/10 text-white"
               )}
             >
               {swapData.fromCurrency}
               <button
-                className="h-3 w-3 p-0 ml-1 bg-transparent border-0 cursor-pointer hover:scale-125 transition-transform duration-200"
+                className="ml-1 h-3 w-3 cursor-pointer border-0 bg-transparent p-0 transition-transform duration-200 hover:scale-125"
                 onClick={() => {
                   setSwapData({
                     fromCurrency: null,
@@ -464,14 +502,14 @@ const SkillsInput = React.forwardRef<HTMLInputElement, SkillsInputProps>(
           {swapData.amount && (
             <span
               className={cn(
-                "inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium",
-                "backdrop-blur-[18px] shadow-lg",
-                "bg-green-400/25 border-green-400/40 text-white"
+                "inline-flex items-center gap-1 rounded-full border px-3 py-1.5 font-medium text-sm",
+                "shadow-lg backdrop-blur-[18px]",
+                "border-green-400/40 bg-green-400/25 text-white"
               )}
             >
               {swapData.amount}
               <button
-                className="h-3 w-3 p-0 ml-1 bg-transparent border-0 cursor-pointer hover:scale-125 transition-transform duration-200"
+                className="ml-1 h-3 w-3 cursor-pointer border-0 bg-transparent p-0 transition-transform duration-200 hover:scale-125"
                 onClick={() => {
                   setSwapData({ ...swapData, amount: null, toCurrency: null });
                   setSwapStep("amount");
@@ -488,14 +526,14 @@ const SkillsInput = React.forwardRef<HTMLInputElement, SkillsInputProps>(
           {swapData.toCurrency && (
             <span
               className={cn(
-                "inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm font-medium",
-                "backdrop-blur-[18px] shadow-lg",
-                "bg-white/10 border-white/25 text-white"
+                "inline-flex items-center gap-1 rounded-full border px-3 py-1.5 font-medium text-sm",
+                "shadow-lg backdrop-blur-[18px]",
+                "border-white/25 bg-white/10 text-white"
               )}
             >
               {swapData.toCurrency}
               <button
-                className="h-3 w-3 p-0 ml-1 bg-transparent border-0 cursor-pointer hover:scale-125 transition-transform duration-200"
+                className="ml-1 h-3 w-3 cursor-pointer border-0 bg-transparent p-0 transition-transform duration-200 hover:scale-125"
                 onClick={() => {
                   setSwapData({ ...swapData, toCurrency: null });
                   setSwapStep("to_currency");
@@ -515,17 +553,19 @@ const SkillsInput = React.forwardRef<HTMLInputElement, SkillsInputProps>(
               </button>
             </span>
           )}
-          <input
+          <textarea
             {...props}
             className={cn(
-              "flex-1 outline-none bg-transparent text-white placeholder:text-white/50",
-              "min-w-[100px]"
+              "resize-none overflow-hidden bg-transparent text-white outline-none placeholder:text-white/50",
+              getPlaceholder()
+                ? "w-full md:w-auto md:min-w-[100px] md:flex-1"
+                : "min-w-[100px] flex-1"
             )}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder={getPlaceholder()}
             ref={inputRef}
-            type={swapStep === "amount" ? "text" : "text"}
+            rows={1}
             value={pendingInput}
           />
         </div>

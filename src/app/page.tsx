@@ -15,7 +15,6 @@ import { LoyalTokenTicker } from "@/components/loyal-token-ticker";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { RoadmapSection } from "@/components/roadmap-section";
 import { SkillsInput } from "@/components/skills-input";
-import type { LoyalSkill } from "@/types/skills";
 import { SwapTransactionWidget } from "@/components/swap-transaction-widget";
 import AnimatedBadge from "@/components/ui/animated-badge";
 import { ChevronRightIcon } from "@/components/ui/chevron-right";
@@ -23,6 +22,8 @@ import { CopyIcon, type CopyIconHandle } from "@/components/ui/copy";
 import { MenuIcon, type MenuIconHandle } from "@/components/ui/menu";
 import { PlusIcon, type PlusIconHandle } from "@/components/ui/plus";
 import { useSwap } from "@/hooks/use-swap";
+import type { LoyalSkill } from "@/types/skills";
+
 // import { detectSwapSkill, stripSkillMarkers } from "@/lib/skills-text";
 
 const instrumentSerif = localFont({
@@ -84,7 +85,7 @@ export default function LandingPage() {
   const [hoveredNavIndex, setHoveredNavIndex] = useState<number | null>(null);
   const menuIconRef = useRef<MenuIconHandle>(null);
   const plusIconRef = useRef<PlusIconHandle>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const copyIconRefs = useRef<Map<string, CopyIconHandle>>(new Map());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -476,7 +477,7 @@ export default function LandingPage() {
               parts: [
                 {
                   type: "text",
-                  text: `Failed to get swap quote. Please check the console for details.`,
+                  text: "Failed to get swap quote. Please check the console for details.",
                 },
               ],
             },
@@ -522,8 +523,8 @@ export default function LandingPage() {
     }
 
     // Clear the input component's internal state
-    if (inputRef.current && 'clear' in inputRef.current) {
-      (inputRef.current as HTMLInputElement & { clear: () => void }).clear();
+    if (inputRef.current && "clear" in inputRef.current) {
+      (inputRef.current as HTMLTextAreaElement & { clear: () => void }).clear();
     }
 
     // Ensure focus
