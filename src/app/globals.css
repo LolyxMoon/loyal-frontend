@@ -512,4 +512,24 @@
     display: flex !important;
     align-items: center !important;
   }
+
+  /* Mobile-specific adjustments */
+  @media (max-width: 768px) {
+    .wallet-adapter-modal {
+      padding: 1.5rem 1.25rem !important;
+      margin-top: -10vh !important;
+    }
+
+    .wallet-adapter-modal-title {
+      max-width: 100% !important;
+      width: 100% !important;
+      padding: 0 0.5rem !important;
+      font-size: 1.375rem !important;
+      line-height: 1.4 !important;
+    }
+
+    .wallet-adapter-modal-content {
+      margin-top: 0 !important;
+    }
+  }
 }
