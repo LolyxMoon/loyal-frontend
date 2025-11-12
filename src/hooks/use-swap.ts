@@ -204,14 +204,9 @@ export function useSwap() {
       try {
         console.log("Executing swap with quote:", quoteResponse);
 
-        // Convert amount to smallest unit
-        const decimals = fromToken.toUpperCase() === "SOL" ? 9 : 6;
-        const amountInSmallestUnit = Math.floor(
-          Number.parseFloat(amount) * 10 ** decimals
-        );
-
         // Step 1: Call Jupiter Dial Blinks API to get transaction
         // Format: POST /api/v0/swap/{tokenPair}/{amount}
+        // Amount should be passed as decimal string (e.g., "0.01" for 0.01 SOL)
         // For BONK use "Bonk" symbol, for LOYAL use full mint address
         let toTokenIdentifier: string;
         if (toToken.toUpperCase() === "LOYAL") {
@@ -223,7 +218,8 @@ export function useSwap() {
         }
 
         const tokenPair = `${fromToken}-${toTokenIdentifier}`;
-        const dialUrl = `${JUPITER_DIAL_BASE_URL}/api/v0/swap/${tokenPair}/${amountInSmallestUnit}`;
+        // Pass amount as decimal string, not in smallest units
+        const dialUrl = `${JUPITER_DIAL_BASE_URL}/api/v0/swap/${tokenPair}/${amount}`;
         console.log("Calling Dial API:", dialUrl);
 
         const dialResponse = await fetch(dialUrl, {
