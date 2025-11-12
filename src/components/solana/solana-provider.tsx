@@ -13,7 +13,6 @@ import {
   PhantomWalletAdapter,
   SolflareWalletAdapter,
 } from "@solana/wallet-adapter-wallets";
-import { clusterApiUrl } from "@solana/web3.js";
 import { type FC, type ReactNode, useMemo } from "react";
 
 interface SolanaProviderProps {
@@ -22,7 +21,12 @@ interface SolanaProviderProps {
 
 export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
   const network = WalletAdapterNetwork.Mainnet;
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+  // Using QuickNode endpoint to avoid 403 errors from public RPC
+  const endpoint = useMemo(
+    () =>
+      "https://billowing-blissful-violet.solana-mainnet.quiknode.pro/1811e07f0fcdfbdecc852b62a6ab61002d9f582f/",
+    []
+  );
 
   const wallets = useMemo(
     () => [
