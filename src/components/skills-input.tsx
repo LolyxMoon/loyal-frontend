@@ -650,7 +650,7 @@ const SkillsInput = React.forwardRef<HTMLTextAreaElement, SkillsInputProps>(
       <div style={{ position: "relative", width: "100%", flex: 1 }}>
         <div
           className={cn(
-            "flex min-h-[60px] w-full flex-wrap items-center gap-2 rounded-[20px] px-7 py-5 text-base ring-offset-white transition-all",
+            "flex min-h-[60px] w-full flex-wrap items-center gap-2 rounded-[20px] pl-7 pr-16 py-5 text-base ring-offset-white transition-all",
             "bg-white/5 backdrop-blur-[40px]",
             (hasSwapSkill && !isSwapComplete) ||
               (hasSendSkill && !isSendComplete)
