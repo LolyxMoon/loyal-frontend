@@ -4,6 +4,7 @@ import { Repeat2, Send, XIcon } from "lucide-react";
 import * as React from "react";
 
 import { SkillDropdown } from "@/components/ai-elements/skill-dropdown";
+import { useWalletBalances } from "@/hooks/use-wallet-balances";
 import { cn } from "@/lib/utils";
 import { AVAILABLE_SKILLS, type LoyalSkill } from "@/types/skills";
 
@@ -45,9 +46,6 @@ type SkillsInputProps = Omit<
 };
 
 const ACTION_SKILLS = AVAILABLE_SKILLS.filter((s) => s.category === "action");
-const CURRENCY_SKILLS = AVAILABLE_SKILLS.filter(
-  (s) => s.category === "currency"
-);
 const RECIPIENT_SKILLS = AVAILABLE_SKILLS.filter(
   (s) => s.category === "recipient"
 );
@@ -78,6 +76,18 @@ const SkillsInput = React.forwardRef<HTMLTextAreaElement, SkillsInputProps>(
       top: 0,
       left: 0,
     });
+
+    // Fetch wallet balances to show only available currencies
+    const { balances } = useWalletBalances();
+
+    // Create currency skills from actual wallet balances
+    const CURRENCY_SKILLS = React.useMemo(() => {
+      return balances.map((balance) => ({
+        id: `currency-${balance.symbol.toLowerCase()}`,
+        label: balance.symbol,
+        category: "currency" as const,
+      }));
+    }, [balances]);
 
     // Swap flow state
     const [swapStep, setSwapStep] = React.useState<
