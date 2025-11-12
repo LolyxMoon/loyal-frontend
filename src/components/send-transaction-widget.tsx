@@ -4,6 +4,7 @@ import {
   ArrowRight,
   Check,
   CheckCircle2,
+  Copy,
   Loader2,
   Send,
   XCircle,
@@ -40,6 +41,7 @@ export function SendTransactionWidget({
   result = null,
 }: SendTransactionWidgetProps) {
   const [isExecuting, setIsExecuting] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   const handleApprove = async () => {
     setIsExecuting(true);
@@ -47,6 +49,16 @@ export function SendTransactionWidget({
       await onApprove();
     } finally {
       setIsExecuting(false);
+    }
+  };
+
+  const handleCopyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(sendData.walletAddress);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy address:", err);
     }
   };
 
@@ -268,16 +280,64 @@ export function SendTransactionWidget({
           </span>
           <div
             style={{
-              fontSize: "0.9375rem",
-              fontWeight: 600,
-              color: "rgba(134, 239, 172, 1)",
-              letterSpacing: "-0.01em",
-              fontFamily: "monospace",
-              wordBreak: "break-all",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
             }}
-            title={sendData.walletAddress}
           >
-            {truncatedAddress}
+            <div
+              style={{
+                fontSize: "0.9375rem",
+                fontWeight: 600,
+                color: "rgba(134, 239, 172, 1)",
+                letterSpacing: "-0.01em",
+                fontFamily: "monospace",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                flex: 1,
+              }}
+              title={sendData.walletAddress}
+            >
+              {truncatedAddress}
+            </div>
+            <button
+              onClick={handleCopyAddress}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(134, 239, 172, 0.15)";
+                e.currentTarget.style.transform = "scale(1.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(134, 239, 172, 0.08)";
+                e.currentTarget.style.transform = "scale(1)";
+              }}
+              style={{
+                padding: "0.375rem",
+                background: "rgba(134, 239, 172, 0.08)",
+                border: "1px solid rgba(134, 239, 172, 0.2)",
+                borderRadius: "8px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "all 0.2s ease",
+                flexShrink: 0,
+              }}
+              title="Copy full address"
+              type="button"
+            >
+              {isCopied ? (
+                <Check
+                  size={16}
+                  style={{ color: "rgba(134, 239, 172, 1)" }}
+                />
+              ) : (
+                <Copy
+                  size={16}
+                  style={{ color: "rgba(134, 239, 172, 0.9)" }}
+                />
+              )}
+            </button>
           </div>
         </div>
       </div>
