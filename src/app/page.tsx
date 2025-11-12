@@ -14,6 +14,7 @@ import { Footer } from "@/components/footer";
 import { LoyalTokenTicker } from "@/components/loyal-token-ticker";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { RoadmapSection } from "@/components/roadmap-section";
+import { SendTransactionWidget } from "@/components/send-transaction-widget";
 import { SkillsInput } from "@/components/skills-input";
 import { SwapTransactionWidget } from "@/components/swap-transaction-widget";
 import AnimatedBadge from "@/components/ui/animated-badge";
@@ -22,6 +23,7 @@ import { CopyIcon, type CopyIconHandle } from "@/components/ui/copy";
 import { MenuIcon, type MenuIconHandle } from "@/components/ui/menu";
 import { PlusIcon, type PlusIconHandle } from "@/components/ui/plus";
 import { useChatMode } from "@/contexts/chat-mode-context";
+import { useSend } from "@/hooks/use-send";
 import { useSwap } from "@/hooks/use-swap";
 import type { LoyalSkill } from "@/types/skills";
 
@@ -139,6 +141,20 @@ export default function LandingPage() {
     amount: string;
     fromCurrency: string;
     toCurrency: string;
+  } | null>(null);
+
+  // Send functionality
+  const { executeSend, loading: sendLoading, error: sendError } = useSend();
+  const [showSendWidget, setShowSendWidget] = useState(false);
+  const [pendingSendData, setPendingSendData] = useState<{
+    currency: string;
+    amount: string;
+    walletAddress: string;
+  } | null>(null);
+  const pendingSendDataRef = useRef<{
+    currency: string;
+    amount: string;
+    walletAddress: string;
   } | null>(null);
 
   // Network status monitoring and recovery
@@ -427,6 +443,17 @@ export default function LandingPage() {
     setPendingSwapData(swapData);
   };
 
+  const handleSendComplete = (sendData: {
+    currency: string;
+    amount: string;
+    walletAddress: string;
+  }) => {
+    // Store in ref immediately (synchronous) for Enter key handling
+    pendingSendDataRef.current = sendData;
+    // Also store in state for UI updates
+    setPendingSendData(sendData);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -518,17 +545,48 @@ export default function LandingPage() {
       // Note: Don't clear pendingSwapData here - it's needed for approval
       // It will be cleared in handleSwapApprove or handleSwapCancel
     } else {
-      // Regular message - send to LLM
-      if (status === "ready") {
-        const messageText = [
-          ...input.map((skill) => skill.label),
-          pendingText.trim(),
-        ]
-          .filter(Boolean)
-          .join(" ");
-        sendMessage({ text: messageText });
+      // Check if this is a completed send
+      const hasSendSkill = input.some((skill) => skill.id === "send");
+      const sendData = pendingSendDataRef.current;
+      if (hasSendSkill && sendData) {
+        const sendMessage = `Send ${sendData.amount} ${sendData.currency} to ${sendData.walletAddress}`;
+
+        // Add user's send message to chat
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `user-send-${Date.now()}`,
+            role: "user",
+            parts: [
+              {
+                type: "text",
+                text: sendMessage,
+              },
+            ],
+          },
+        ]);
+
+        // Show send widget for approval
+        setShowSendWidget(true);
+
+        // Clear input (but keep send data for approval)
         setInput([]);
         setPendingText("");
+        // Note: Don't clear pendingSendData here - it's needed for approval
+        // It will be cleared in handleSendApprove or handleSendCancel
+      } else {
+        // Regular message - send to LLM
+        if (status === "ready") {
+          const messageText = [
+            ...input.map((skill) => skill.label),
+            pendingText.trim(),
+          ]
+            .filter(Boolean)
+            .join(" ");
+          sendMessage({ text: messageText });
+          setInput([]);
+          setPendingText("");
+        }
       }
     }
 
@@ -676,6 +734,63 @@ export default function LandingPage() {
     setShowSwapWidget(false);
     setPendingSwapData(null);
     pendingSwapDataRef.current = null;
+  };
+
+  const handleSendApprove = async () => {
+    if (!pendingSendData) return;
+
+    try {
+      const result = await executeSend(
+        pendingSendData.currency,
+        pendingSendData.amount,
+        pendingSendData.walletAddress
+      );
+
+      if (result?.success) {
+        // Add success message to chat
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `send-success-${Date.now()}`,
+            role: "assistant",
+            parts: [
+              {
+                type: "text",
+                text: `✅ Send successful! Transaction signature: ${result.signature}`,
+              },
+            ],
+          },
+        ]);
+      }
+    } catch (err) {
+      console.error("Send execution failed:", err);
+      // Add error message to chat
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `send-error-${Date.now()}`,
+          role: "assistant",
+          parts: [
+            {
+              type: "text",
+              text: `❌ Send failed: ${
+                err instanceof Error ? err.message : "Unknown error"
+              }`,
+            },
+          ],
+        },
+      ]);
+    } finally {
+      setShowSendWidget(false);
+      setPendingSendData(null);
+      pendingSendDataRef.current = null;
+    }
+  };
+
+  const handleSendCancel = () => {
+    setShowSendWidget(false);
+    setPendingSendData(null);
+    pendingSendDataRef.current = null;
   };
 
   // Mock data for previous chats - replace with real data later
@@ -1811,6 +1926,27 @@ export default function LandingPage() {
                   </div>
                 )}
 
+                {/* Send Transaction Widget */}
+                {showSendWidget && pendingSendData && (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
+                      gap: "0.5rem",
+                      animation: "slideInUp 0.3s ease-out",
+                      animationFillMode: "both",
+                    }}
+                  >
+                    <SendTransactionWidget
+                      loading={sendLoading}
+                      onApprove={handleSendApprove}
+                      onCancel={handleSendCancel}
+                      sendData={pendingSendData}
+                    />
+                  </div>
+                )}
+
                 {/* Thinking indicator */}
                 {status === "submitted" && (
                   <div
@@ -1990,6 +2126,7 @@ export default function LandingPage() {
                     }
                   }}
                   onPendingTextChange={setPendingText}
+                  onSendComplete={handleSendComplete}
                   onSwapComplete={handleSwapComplete}
                   onSwapFlowChange={setSwapFlowState}
                   placeholder={

@@ -28,6 +28,11 @@ type SkillsInputProps = Omit<
     fromCurrency: string;
     toCurrency: string;
   }) => void;
+  onSendComplete?: (data: {
+    currency: string;
+    amount: string;
+    walletAddress: string;
+  }) => void;
 };
 
 const ACTION_SKILLS = AVAILABLE_SKILLS.filter((s) => s.category === "action");
@@ -47,6 +52,7 @@ const SkillsInput = React.forwardRef<HTMLTextAreaElement, SkillsInputProps>(
       onPendingTextChange,
       onSwapFlowChange,
       onSwapComplete,
+      onSendComplete,
       ...props
     },
     ref
@@ -344,12 +350,19 @@ const SkillsInput = React.forwardRef<HTMLTextAreaElement, SkillsInputProps>(
           // Basic validation: wallet address should be non-empty
           const walletAddress = pendingInput.trim();
           if (walletAddress.length > 0) {
+            const completedSend = {
+              currency: sendData.currency!,
+              amount: sendData.amount!,
+              walletAddress,
+            };
             setSendData({
               ...sendData,
               walletAddress,
             });
             setSendStep(null);
             setPendingInput("");
+            // Notify parent that Send is complete
+            onSendComplete?.(completedSend);
           }
         } else if (e.key === "Backspace" && pendingInput.length === 0) {
           // If input is empty and user presses backspace, go back to amount
