@@ -19,7 +19,7 @@ const findSkillByLabel = (label: string): LoyalSkill | undefined =>
 
 // Pattern to match amount+currency for Send flow (e.g., "10 SOL", "5.5 USDC")
 // NOTE: For Swap flow, amount and currencies are kept separate
-const AMOUNT_PATTERN = /^(\d+(?:\.\d+)?)\s+(SOL|USDC|USDT|BONK)$/;
+const AMOUNT_PATTERN = /^(\d+(?:\.\d+)?)\s+(SOL|USDC|USDT|BONK|LOYAL)$/i;
 
 // Pattern to match swap amount+currency (e.g., "10 SOL", "5.5 USDC")
 const SWAP_AMOUNT_PATTERN = /^(\d+(?:\.\d+)?)\s+(\w+)$/;

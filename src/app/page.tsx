@@ -3,7 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport, type UIMessage } from "ai";
 import { ArrowDownIcon, ArrowUpToLine } from "lucide-react";
 import { IBM_Plex_Sans, Plus_Jakarta_Sans } from "next/font/google";
 import localFont from "next/font/local";
@@ -62,12 +62,17 @@ const dirtyline = localFont({
   display: "swap",
 });
 
+type TimestampedMessage = UIMessage & { createdAt?: number };
+
 export default function LandingPage() {
-  const { messages, sendMessage, status, setMessages } = useChat({
+  const { messages, sendMessage, status, setMessages } = useChat<
+    TimestampedMessage
+  >({
     transport: new DefaultChatTransport({
       api: "/api/chat",
     }),
   });
+  const [messageTimestamps, setMessageTimestamps] = useState<Record<string, number>>({});
   const [input, setInput] = useState<LoyalSkill[]>([]);
   const [pendingText, setPendingText] = useState("");
   const [swapFlowState, setSwapFlowState] = useState<{
@@ -132,6 +137,26 @@ export default function LandingPage() {
     (pendingText.trim().length > 0 || input.length > 0) &&
     (!swapFlowState?.isActive || swapFlowState?.isComplete) &&
     (!sendFlowState?.isActive || sendFlowState?.isComplete);
+
+  // Track timestamps for messages that arrive without metadata
+  useEffect(() => {
+    setMessageTimestamps((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const message of messages) {
+        if (message.createdAt && next[message.id] !== message.createdAt) {
+          next[message.id] = message.createdAt;
+          changed = true;
+          continue;
+        }
+        if (!message.createdAt && next[message.id] === undefined) {
+          next[message.id] = Date.now();
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [messages]);
 
   // Swap functionality
   const {
@@ -530,19 +555,21 @@ export default function LandingPage() {
     const hasSwapSkill = input.some((skill) => skill.id === "swap");
     const swapData = pendingSwapDataRef.current;
     if (hasSwapSkill && swapData) {
-      const swapMessage = `Swap ${swapData.amount} ${swapData.fromCurrency} to ${swapData.toCurrency}`;
+        const swapMessage = `Swap ${swapData.amount} ${swapData.fromCurrency} to ${swapData.toCurrency}`;
+        const timestamp = Date.now();
 
-      // Add user's swap message to chat
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `user-swap-${Date.now()}`,
-          role: "user",
-          parts: [
-            {
-              type: "text",
-              text: swapMessage,
-            },
+        // Add user's swap message to chat
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `user-swap-${timestamp}`,
+            role: "user",
+            createdAt: timestamp,
+            parts: [
+              {
+                type: "text",
+                text: swapMessage,
+              },
           ],
         },
       ]);
@@ -560,11 +587,13 @@ export default function LandingPage() {
         if (quoteResult) {
           setShowSwapWidget(true);
         } else {
+          const errorTimestamp = Date.now();
           setMessages((prev) => [
             ...prev,
             {
-              id: `swap-quote-error-${Date.now()}`,
+              id: `swap-quote-error-${errorTimestamp}`,
               role: "assistant",
+              createdAt: errorTimestamp,
               parts: [
                 {
                   type: "text",
@@ -576,11 +605,13 @@ export default function LandingPage() {
         }
       } catch (err) {
         console.error("Failed to get swap quote:", err);
+        const errorTimestamp = Date.now();
         setMessages((prev) => [
           ...prev,
           {
-            id: `swap-quote-error-${Date.now()}`,
+            id: `swap-quote-error-${errorTimestamp}`,
             role: "assistant",
+            createdAt: errorTimestamp,
             parts: [
               {
                 type: "text",
@@ -609,13 +640,15 @@ export default function LandingPage() {
             ? `${sendData.walletAddress.slice(0, 6)}...${sendData.walletAddress.slice(-4)}`
             : sendData.walletAddress;
         const sendMessage = `Send ${sendData.amount} ${sendData.currency} to ${truncatedAddress}`;
+        const timestamp = Date.now();
 
         // Add user's send message to chat
         setMessages((prev) => [
           ...prev,
           {
-            id: `user-send-${Date.now()}`,
+            id: `user-send-${timestamp}`,
             role: "user",
+            createdAt: timestamp,
             parts: [
               {
                 type: "text",
@@ -1766,13 +1799,14 @@ export default function LandingPage() {
                     .map((part) => part.text)
                     .join("");
 
-                  // Generate a timestamp for the message
-                  const messageTime = new Date(
-                    Date.now() - (messages.length - messageIndex - 1) * 60_000
-                  ).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  });
+                  const resolvedTimestamp =
+                    message.createdAt ?? messageTimestamps[message.id];
+                  const messageTime = resolvedTimestamp
+                    ? new Date(resolvedTimestamp).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : null;
 
                   return (
                     <div
@@ -1828,15 +1862,17 @@ export default function LandingPage() {
                         }}
                       >
                         {/* Timestamp */}
-                        <span
-                          style={{
-                            fontSize: "0.75rem",
-                            color: "rgba(255, 255, 255, 0.3)",
-                            letterSpacing: "0.025em",
-                          }}
-                        >
-                          {messageTime}
-                        </span>
+                        {messageTime && (
+                          <span
+                            style={{
+                              fontSize: "0.75rem",
+                              color: "rgba(255, 255, 255, 0.3)",
+                              letterSpacing: "0.025em",
+                            }}
+                          >
+                            {messageTime}
+                          </span>
+                        )}
 
                         {/* Copy button */}
                         <button
