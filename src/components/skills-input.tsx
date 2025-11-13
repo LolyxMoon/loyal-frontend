@@ -71,7 +71,7 @@ const SkillsInput = React.forwardRef<HTMLTextAreaElement, SkillsInputProps>(
     },
     ref
   ) => {
-    const inputRef = React.useRef<HTMLTextAreaElement>(null);
+    const textareaRef = React.useRef<HTMLTextAreaElement>(null);
     const containerRef = React.useRef<HTMLDivElement>(null);
     const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
     const [selectedSkillIndex, setSelectedSkillIndex] = React.useState(0);
@@ -138,15 +138,15 @@ const SkillsInput = React.forwardRef<HTMLTextAreaElement, SkillsInputProps>(
 
     // Auto-resize textarea on mount and when pendingInput changes
     React.useEffect(() => {
-      if (inputRef.current) {
-        inputRef.current.style.height = "auto";
-        inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
       }
     }, [pendingInput]);
 
     // Expose clear method to parent while maintaining textarea element methods
     React.useImperativeHandle(ref, () => {
-      const textarea = inputRef.current!;
+      const textarea = textareaRef.current!;
       return new Proxy(textarea, {
         get(target, prop) {
           if (prop === "clear") {
@@ -184,7 +184,7 @@ const SkillsInput = React.forwardRef<HTMLTextAreaElement, SkillsInputProps>(
     });
 
     const calculateDropdownPosition = () => {
-      if (containerRef.current && inputRef.current) {
+      if (containerRef.current && textareaRef.current) {
         const containerRect = containerRef.current.getBoundingClientRect();
         // Position is RELATIVE to the input element
         // We want dropdown below the container, so use container height as top
@@ -498,7 +498,7 @@ const SkillsInput = React.forwardRef<HTMLTextAreaElement, SkillsInputProps>(
             addSkill(filteredSkills[selectedSkillIndex]);
             // Refocus input after selection
             setTimeout(() => {
-              inputRef.current?.focus();
+              textareaRef.current?.focus();
             }, 0);
           }
           return;
@@ -634,9 +634,9 @@ const SkillsInput = React.forwardRef<HTMLTextAreaElement, SkillsInputProps>(
       setPendingInput(newValue);
 
       // Auto-resize textarea based on content
-      if (inputRef.current) {
-        inputRef.current.style.height = "auto";
-        inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "auto";
+        textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
       }
 
       // Don't open dropdown during amount input for swap or send, or during wallet address input
@@ -810,6 +810,8 @@ const SkillsInput = React.forwardRef<HTMLTextAreaElement, SkillsInputProps>(
                     fromCurrencyDecimals: null,
                     amount: null,
                     toCurrency: null,
+                    toCurrencyMint: null,
+                    toCurrencyDecimals: null,
                   });
                   setSwapStep("from_currency");
                   setFilteredSkills(CURRENCY_SKILLS);
@@ -993,7 +995,7 @@ const SkillsInput = React.forwardRef<HTMLTextAreaElement, SkillsInputProps>(
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder={getPlaceholder()}
-            ref={inputRef}
+            ref={textareaRef}
             rows={1}
             value={pendingInput}
           />
@@ -1004,9 +1006,7 @@ const SkillsInput = React.forwardRef<HTMLTextAreaElement, SkillsInputProps>(
             position={dropdownPosition}
             selectedIndex={selectedSkillIndex}
             skills={filteredSkills}
-            textareaRef={
-              containerRef as unknown as React.RefObject<HTMLTextAreaElement>
-            }
+            textareaRef={textareaRef}
           />
         )}
       </div>
