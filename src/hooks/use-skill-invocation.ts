@@ -239,19 +239,33 @@ export const useSkillInvocation = ({
         if (filtered.length > 0) {
           const position = calculateDropdownPosition(textBeforeCursor);
 
-          setSlashIndex(lastSlashIndex);
-          setFilteredSkills(filtered);
-          setDropdownPosition(position);
-          setIsDropdownOpen(true);
-          setSelectedSkillIndex(0);
+          setSlashIndex((prev) =>
+            prev !== lastSlashIndex ? lastSlashIndex : prev
+          );
+          setFilteredSkills((prev) => {
+            if (
+              prev.length !== filtered.length ||
+              prev.some((s, i) => s.id !== filtered[i]?.id)
+            ) {
+              return filtered;
+            }
+            return prev;
+          });
+          setDropdownPosition((prev) =>
+            prev.top !== position.top || prev.left !== position.left
+              ? position
+              : prev
+          );
+          setIsDropdownOpen((prev) => (prev !== true ? true : prev));
+          setSelectedSkillIndex((prev) => (prev !== 0 ? 0 : prev));
         } else {
-          setIsDropdownOpen(false);
+          setIsDropdownOpen((prev) => (prev !== false ? false : prev));
         }
         return;
       }
     }
 
-    setIsDropdownOpen(false);
+    setIsDropdownOpen((prev) => (prev !== false ? false : prev));
   }, [textareaRef, calculateDropdownPosition, pendingRecipientSelection]);
 
   const updateRecipientSuggestions = useCallback(() => {
@@ -272,10 +286,15 @@ export const useSkillInvocation = ({
 
       const rawQuery = text.slice(triggerIndex, cursorPos);
       if (rawQuery.includes(" ") || rawQuery.includes("\n")) {
-        setPendingRecipientSelection(false);
-        setRecipientTriggerIndex(null);
-        setFilteredSkills(ACTION_SKILLS);
-        setIsDropdownOpen(false);
+        setPendingRecipientSelection((prev) => (prev !== false ? false : prev));
+        setRecipientTriggerIndex((prev) => (prev !== null ? null : prev));
+        setFilteredSkills((prev) =>
+          prev.length !== ACTION_SKILLS.length ||
+          prev.some((s, i) => s.id !== ACTION_SKILLS[i]?.id)
+            ? ACTION_SKILLS
+            : prev
+        );
+        setIsDropdownOpen((prev) => (prev !== false ? false : prev));
         return;
       }
 
@@ -289,11 +308,23 @@ export const useSkillInvocation = ({
           )
         : RECIPIENT_SKILLS;
 
-      setFilteredSkills(filtered.length ? filtered : RECIPIENT_SKILLS);
-      setSelectedSkillIndex(0);
-      setIsDropdownOpen(true);
-      setDropdownPosition(
-        calculateDropdownPosition(text.slice(0, triggerIndex))
+      const finalFiltered = filtered.length ? filtered : RECIPIENT_SKILLS;
+      setFilteredSkills((prev) => {
+        if (
+          prev.length !== finalFiltered.length ||
+          prev.some((s, i) => s.id !== finalFiltered[i]?.id)
+        ) {
+          return finalFiltered;
+        }
+        return prev;
+      });
+      setSelectedSkillIndex((prev) => (prev !== 0 ? 0 : prev));
+      setIsDropdownOpen((prev) => (prev !== true ? true : prev));
+      const position = calculateDropdownPosition(text.slice(0, triggerIndex));
+      setDropdownPosition((prev) =>
+        prev.top !== position.top || prev.left !== position.left
+          ? position
+          : prev
       );
       return;
     }
@@ -312,18 +343,32 @@ export const useSkillInvocation = ({
             )
           : RECIPIENT_SKILLS;
 
-        setPendingRecipientSelection(true);
-        setRecipientTriggerIndex(lastAt);
-        setFilteredSkills(filtered.length ? filtered : RECIPIENT_SKILLS);
-        setSelectedSkillIndex(0);
-        setDropdownPosition(calculateDropdownPosition(text.slice(0, lastAt)));
-        setIsDropdownOpen(true);
+        const finalFiltered = filtered.length ? filtered : RECIPIENT_SKILLS;
+        setPendingRecipientSelection((prev) => (prev !== true ? true : prev));
+        setRecipientTriggerIndex((prev) => (prev !== lastAt ? lastAt : prev));
+        setFilteredSkills((prev) => {
+          if (
+            prev.length !== finalFiltered.length ||
+            prev.some((s, i) => s.id !== finalFiltered[i]?.id)
+          ) {
+            return finalFiltered;
+          }
+          return prev;
+        });
+        setSelectedSkillIndex((prev) => (prev !== 0 ? 0 : prev));
+        const position = calculateDropdownPosition(text.slice(0, lastAt));
+        setDropdownPosition((prev) =>
+          prev.top !== position.top || prev.left !== position.left
+            ? position
+            : prev
+        );
+        setIsDropdownOpen((prev) => (prev !== true ? true : prev));
         return;
       }
     }
 
-    setPendingRecipientSelection(false);
-    setRecipientTriggerIndex(null);
+    setPendingRecipientSelection((prev) => (prev !== false ? false : prev));
+    setRecipientTriggerIndex((prev) => (prev !== null ? null : prev));
   }, [
     calculateDropdownPosition,
     pendingRecipientSelection,
@@ -757,10 +802,20 @@ export const useSkillInvocation = ({
     ]
   );
 
+  // Store callbacks in refs to avoid effect dependency issues
+  const detectSlashRef = useRef(detectSlash);
+  const updateRecipientSuggestionsRef = useRef(updateRecipientSuggestions);
+
   useEffect(() => {
-    detectSlash();
-    updateRecipientSuggestions();
-  }, [detectSlash, updateRecipientSuggestions]);
+    detectSlashRef.current = detectSlash;
+    updateRecipientSuggestionsRef.current = updateRecipientSuggestions;
+  });
+
+  // Run detection only when currentValue changes externally (not on every callback change)
+  useEffect(() => {
+    detectSlashRef.current();
+    updateRecipientSuggestionsRef.current();
+  }, [currentValue]);
 
   // Auto-hide deactivation hint after 2 seconds
   useEffect(() => {
