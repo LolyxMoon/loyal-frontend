@@ -15,12 +15,21 @@ import { roadmapEvents as events } from "@/data/roadmap";
 
 const height = "30rem";
 
+const SWIPE_DEBOUNCE_MS = 200;
+
 export default function HorizontalEventTimelineCarousel() {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [expandedHeight, setExpandedHeight] = useState<number>(100);
   const carouselRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null); // Ref for the header content
+  const currentIndexRef = useRef(0); // Stable ref to avoid race conditions
+  const isTransitioningRef = useRef(false); // Lock to prevent rapid successive triggers
+
+  // Keep currentIndexRef in sync with currentIndex state
+  useEffect(() => {
+    currentIndexRef.current = currentIndex;
+  }, [currentIndex]);
 
   // Calculate expanded height based on total height minus header height
   useEffect(() => {
@@ -51,18 +60,48 @@ export default function HorizontalEventTimelineCarousel() {
   };
 
   const nextSlide = () => {
-    setCurrentIndex((prev) => (prev === events.length - 1 ? 0 : prev + 1));
+    if (isTransitioningRef.current) {
+      return;
+    }
+    isTransitioningRef.current = true;
+    setCurrentIndex((prev) => {
+      const newIndex = prev === events.length - 1 ? 0 : prev + 1;
+      currentIndexRef.current = newIndex;
+      return newIndex;
+    });
     setExpandedIndex(null);
+    setTimeout(() => {
+      isTransitioningRef.current = false;
+    }, SWIPE_DEBOUNCE_MS);
   };
 
   const prevSlide = () => {
-    setCurrentIndex((prev) => (prev === 0 ? events.length - 1 : prev - 1));
+    if (isTransitioningRef.current) {
+      return;
+    }
+    isTransitioningRef.current = true;
+    setCurrentIndex((prev) => {
+      const newIndex = prev === 0 ? events.length - 1 : prev - 1;
+      currentIndexRef.current = newIndex;
+      return newIndex;
+    });
     setExpandedIndex(null);
+    setTimeout(() => {
+      isTransitioningRef.current = false;
+    }, SWIPE_DEBOUNCE_MS);
   };
 
   const goToSlide = (index: number) => {
+    if (isTransitioningRef.current) {
+      return;
+    }
+    isTransitioningRef.current = true;
     setCurrentIndex(index);
+    currentIndexRef.current = index;
     setExpandedIndex(null);
+    setTimeout(() => {
+      isTransitioningRef.current = false;
+    }, SWIPE_DEBOUNCE_MS);
   };
 
   const handleDragEnd = (
@@ -70,10 +109,19 @@ export default function HorizontalEventTimelineCarousel() {
     info: PanInfo,
     index: number
   ) => {
+    // Check if already transitioning to prevent rapid successive triggers
+    if (isTransitioningRef.current) {
+      return;
+    }
+
     const SWIPE_THRESHOLD = 50;
-    if (info.offset.x > SWIPE_THRESHOLD && index === currentIndex) {
+    // Use ref instead of state to avoid race conditions on rapid swipes
+    if (info.offset.x > SWIPE_THRESHOLD && index === currentIndexRef.current) {
       prevSlide();
-    } else if (info.offset.x < -SWIPE_THRESHOLD && index === currentIndex) {
+    } else if (
+      info.offset.x < -SWIPE_THRESHOLD &&
+      index === currentIndexRef.current
+    ) {
       nextSlide();
     }
   };
