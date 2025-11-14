@@ -161,13 +161,13 @@ const SkillsInput = React.forwardRef<HTMLTextAreaElement, SkillsInputProps>(
     const hasSwapSkill = value.some((skill) => skill.id === "swap");
     const hasSendSkill = value.some((skill) => skill.id === "send");
 
-    // Auto-resize textarea on mount and when pendingInput changes
+    // Auto-resize textarea on mount and when pendingInput or placeholder changes
     React.useEffect(() => {
       if (textareaRef.current) {
         textareaRef.current.style.height = "auto";
         textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
       }
-    }, [pendingInput]);
+    }, [pendingInput, sendStep, swapStep]);
 
     // Submit surrounding form once send flow completes
     React.useEffect(() => {
