@@ -4,7 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { ArrowDownIcon, ArrowUpToLine } from "lucide-react";
+import { ArrowDownIcon, ArrowUpToLine, Loader2 } from "lucide-react";
 import { IBM_Plex_Sans, Plus_Jakarta_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import Image from "next/image";
@@ -217,6 +217,13 @@ export default function LandingPage() {
     amount: string;
     walletAddress: string;
   } | null>(null);
+
+  // Check if any transaction or chat operation is in progress
+  const isLoading =
+    swapLoading ||
+    sendLoading ||
+    status === "streaming" ||
+    status === "submitted";
 
   // Network status monitoring and recovery
   useEffect(() => {
@@ -571,6 +578,11 @@ export default function LandingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Prevent submission if a transaction or chat operation is in progress
+    if (isLoading) {
+      return;
+    }
 
     // Always check if wallet is connected before sending any message
     if (!connected) {
@@ -2283,9 +2295,9 @@ export default function LandingPage() {
                   value={input}
                 />
                 <button
-                  disabled={!hasUsableInput}
+                  disabled={!hasUsableInput || isLoading}
                   onMouseEnter={(e) => {
-                    if (hasUsableInput) {
+                    if (hasUsableInput && !isLoading) {
                       e.currentTarget.style.opacity = "1";
                       e.currentTarget.style.background =
                         "rgba(255, 255, 255, 0.15)";
@@ -2294,7 +2306,7 @@ export default function LandingPage() {
                     }
                   }}
                   onMouseLeave={(e) => {
-                    if (hasUsableInput) {
+                    if (hasUsableInput && !isLoading) {
                       e.currentTarget.style.opacity = "0.8";
                       e.currentTarget.style.background = "transparent";
                       e.currentTarget.style.transform =
@@ -2314,23 +2326,24 @@ export default function LandingPage() {
                     background: "transparent",
                     border: "none",
                     borderRadius: "12px",
-                    cursor: hasUsableInput ? "pointer" : "not-allowed",
+                    cursor: hasUsableInput && !isLoading ? "pointer" : "not-allowed",
                     outline: "none",
                     transition: "all 0.3s ease",
-                    opacity: hasUsableInput ? 0.8 : 0.3,
+                    opacity: hasUsableInput && !isLoading ? 0.8 : 0.3,
                     zIndex: 2,
                   }}
                   type="submit"
                 >
-                  <ChevronRightIcon
-                    size={24}
-                    style={{
-                      animation:
-                        status === "streaming" || status === "submitted"
-                          ? "pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite"
-                          : "none",
-                    }}
-                  />
+                  {isLoading ? (
+                    <Loader2
+                      size={24}
+                      style={{
+                        animation: "spin 1s linear infinite",
+                      }}
+                    />
+                  ) : (
+                    <ChevronRightIcon size={24} />
+                  )}
                 </button>
               </div>
             </form>
