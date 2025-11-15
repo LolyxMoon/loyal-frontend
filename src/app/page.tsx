@@ -603,7 +603,9 @@ export default function LandingPage() {
     if (!connected) {
       // Save the message to send after connection
       if (hasUsableInput) {
-        setPendingMessage(input.map((s) => s.label).join(" "));
+        setPendingMessage(
+          `${pendingText.trim()} ${input.map((s) => s.label).join(" ")}`.trim()
+        );
       }
       // Open wallet connection modal
       setVisible(true);
