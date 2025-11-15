@@ -218,7 +218,7 @@ export const SkillsTextarea = forwardRef<
         onKeyDown={handleKeyDownCombined}
         placeholder={
           pendingCurrencySelection && !swapData.fromCurrency
-            ? "Select FROM currency (SOL, USDC, etc.)..."
+            ? "Select FROM currency (SOL, Loyal, etc.)..."
             : pendingAmountInput
               ? "Type amount (e.g., 10) then press Enter..."
               : pendingSwapToCurrency
@@ -238,7 +238,9 @@ export const SkillsTextarea = forwardRef<
           caretColor: props.style?.color || "#fff",
         }}
       />
-      {(pendingAmountInput || pendingCurrencySelection || pendingSwapToCurrency) && (
+      {(pendingAmountInput ||
+        pendingCurrencySelection ||
+        pendingSwapToCurrency) && (
         <div
           style={{
             position: "absolute",
