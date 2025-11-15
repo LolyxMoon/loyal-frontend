@@ -708,7 +708,10 @@ export default function LandingPage() {
         // Truncate wallet address for display (keep first 6 and last 4 chars)
         const truncatedAddress =
           sendData.walletAddress.length > 12
-            ? `${sendData.walletAddress.slice(0, 6)}...${sendData.walletAddress.slice(-4)}`
+            ? `${sendData.walletAddress.slice(
+                0,
+                6
+              )}...${sendData.walletAddress.slice(-4)}`
             : sendData.walletAddress;
         const sendMessage = `Send ${sendData.amount} ${sendData.currency} to ${truncatedAddress}`;
         const timestamp = Date.now();
@@ -1197,7 +1200,9 @@ export default function LandingPage() {
 
           {/* Token Ticker */}
           <div
-            className={`loyal-token-ticker-container ${connected ? "" : "no-wallet"}`}
+            className={`loyal-token-ticker-container ${
+              connected ? "" : "no-wallet"
+            }`}
             style={{
               position: "fixed",
               top: "4.5rem",
@@ -1780,7 +1785,7 @@ export default function LandingPage() {
                 lineHeight: 1.45,
               }}
             >
-              Private onchain intelligence with web2 performance
+              Private onchain intelligence with real-time performance
             </p>
           </div>
 
@@ -2314,8 +2319,8 @@ export default function LandingPage() {
                         ? isChatMode && !connected
                           ? "Please reconnect wallet to continue..."
                           : isChatMode
-                            ? ""
-                            : "Ask me anything (type / for skills)..."
+                          ? ""
+                          : "Ask me anything (type / for skills)..."
                         : "No internet connection..."
                     }
                     ref={inputRef}
@@ -2368,8 +2373,8 @@ export default function LandingPage() {
                         ? isChatMode && !connected
                           ? "Please reconnect wallet to continue..."
                           : isChatMode
-                            ? ""
-                            : "Ask me anything..."
+                          ? ""
+                          : "Ask me anything..."
                         : "No internet connection..."
                     }
                     ref={inputRef as React.RefObject<HTMLTextAreaElement>}
