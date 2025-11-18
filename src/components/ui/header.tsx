@@ -1,7 +1,10 @@
 "use client";
 
 import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import {
+  useWalletModal,
+  WalletMultiButton,
+} from "@solana/wallet-adapter-react-ui";
 import { useEffect, useState } from "react";
 
 import { useChatMode } from "@/contexts/chat-mode-context";
@@ -9,11 +12,28 @@ import { useChatMode } from "@/contexts/chat-mode-context";
 export function Header() {
   const [mounted, setMounted] = useState(false);
   const { isChatMode } = useChatMode();
-  const { connected } = useWallet();
+  const { connected, disconnect } = useWallet();
+  const { setVisible } = useWalletModal();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Allow users to change wallet selection at any time when not connected
+  const handleWalletClick = (e: React.MouseEvent) => {
+    if (!connected) {
+      // Prevent default wallet button behavior
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Disconnect any pending connection and show modal
+      disconnect();
+      // Small delay to ensure disconnect completes
+      setTimeout(() => {
+        setVisible(true);
+      }, 100);
+    }
+  };
 
   if (!mounted) {
     return (
@@ -29,9 +49,14 @@ export function Header() {
 
   return (
     <header
-      className={`fixed top-6 right-6 z-[100] ${isChatMode ? "chat-mode-active" : ""} ${connected ? "" : "max-md:hidden"}`}
+      className={`fixed top-6 right-6 z-[100] ${isChatMode ? "chat-mode-active" : ""}`}
     >
-      <WalletMultiButton />
+      <div
+        className={connected ? "wallet-connected" : "wallet-disconnected"}
+        onClickCapture={handleWalletClick}
+      >
+        <WalletMultiButton />
+      </div>
     </header>
   );
 }
