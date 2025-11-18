@@ -245,7 +245,7 @@ const SkillsInput = React.forwardRef<HTMLTextAreaElement, SkillsInputProps>(
       setShouldSubmitForm(false);
     }, [shouldSubmitForm]);
 
-    // Expose clear method to parent while maintaining textarea element methods
+    // Expose clear and addSkill methods to parent while maintaining textarea element methods
     React.useImperativeHandle(ref, () => {
       const textarea = textareaRef.current!;
       return new Proxy(textarea, {
@@ -274,11 +274,62 @@ const SkillsInput = React.forwardRef<HTMLTextAreaElement, SkillsInputProps>(
               setIsDropdownOpen(false);
             };
           }
+          if (prop === "addSkill") {
+            return (skill: LoyalSkill) => {
+              addSkill(skill);
+            };
+          }
+          if (prop === "resetAndAddSkill") {
+            return (skill: LoyalSkill) => {
+              // Clear all state
+              setPendingInput("");
+              setSwapStep(null);
+              setSwapData({
+                fromCurrency: null,
+                fromCurrencyMint: null,
+                fromCurrencyDecimals: null,
+                amount: null,
+                toCurrency: null,
+                toCurrencyMint: null,
+                toCurrencyDecimals: null,
+              });
+              setSendStep(null);
+              setSendData({
+                currency: null,
+                currencyMint: null,
+                currencyDecimals: null,
+                amount: null,
+                walletAddress: null,
+              });
+              setIsDropdownOpen(false);
+              setAmountError(null);
+              setWalletAddressError(null);
+
+              // Add the new skill and set flow state
+              if (skill.id === "swap") {
+                onChange([skill]);
+                setSwapStep("from_currency");
+                setFilteredSkills(CURRENCY_SKILLS);
+                setIsDropdownOpen(CURRENCY_SKILLS.length > 0);
+                setSelectedSkillIndex(0);
+                calculateDropdownPosition();
+              } else if (skill.id === "send") {
+                onChange([skill]);
+                setSendStep("currency");
+                setFilteredSkills(CURRENCY_SKILLS);
+                setIsDropdownOpen(CURRENCY_SKILLS.length > 0);
+                setSelectedSkillIndex(0);
+                calculateDropdownPosition();
+              } else {
+                onChange([skill]);
+              }
+            };
+          }
           const value = target[prop as keyof HTMLTextAreaElement];
           return typeof value === "function" ? value.bind(target) : value;
         },
         has(target, prop) {
-          if (prop === "clear") {
+          if (prop === "clear" || prop === "addSkill" || prop === "resetAndAddSkill") {
             return true;
           }
           return prop in target;
