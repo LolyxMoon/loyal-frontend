@@ -16,6 +16,7 @@ import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { RoadmapSection } from "@/components/roadmap-section";
 import { SendTransactionWidget } from "@/components/send-transaction-widget";
 import { SkillsInput } from "@/components/skills-input";
+import { SkillsSelector } from "@/components/skills-selector";
 import { SwapTransactionWidget } from "@/components/swap-transaction-widget";
 import AnimatedBadge from "@/components/ui/animated-badge";
 import { ChevronRightIcon } from "@/components/ui/chevron-right";
@@ -1738,7 +1739,7 @@ export default function LandingPage() {
               alignItems: "center",
               justifyContent: "flex-start",
               textAlign: "center",
-              padding: "calc(22vh + 40px) 1.5rem 0",
+              padding: "min(calc(22vh + 40px), 8rem) 1.5rem 0",
               gap: "0.75rem",
               color: "#fff",
               transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -1846,7 +1847,7 @@ export default function LandingPage() {
             }}
             style={{
               position: "absolute",
-              bottom: isChatMode ? "0" : "calc(48vh - 40px)",
+              bottom: isChatMode ? "0" : "clamp(5vh, calc(48vh - 40px), 38vh)",
               left: "50%",
               transform: "translateX(-50%)",
               width: isChatMode ? "min(920px, 90%)" : "min(600px, 90%)",
@@ -2262,7 +2263,7 @@ export default function LandingPage() {
                 style={{
                   position: "relative",
                   display: "flex",
-                  alignItems: "flex-end",
+                  flexDirection: "column",
                   background: "rgba(255, 255, 255, 0.08)",
                   backdropFilter: "blur(20px)",
                   border: "1px solid rgba(255, 255, 255, 0.15)",
@@ -2272,6 +2273,13 @@ export default function LandingPage() {
                   transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
               >
+                <div
+                  style={{
+                    position: "relative",
+                    display: "flex",
+                    alignItems: "flex-end",
+                  }}
+                >
                 {skillsEnabled ? (
                   <SkillsInput
                     onChange={(skills) => {
@@ -2442,6 +2450,31 @@ export default function LandingPage() {
                     <ChevronRightIcon size={24} />
                   )}
                 </button>
+                </div>
+                {skillsEnabled && (
+                  <SkillsSelector
+                    selectedSkillId={
+                      input.find((skill) => skill.category === "action")?.id
+                    }
+                    onSkillSelect={(skill) => {
+                      const currentActiveSkill = input.find((s) => s.category === "action");
+
+                      // If null or deselecting the same skill - clear everything
+                      if (!skill || (currentActiveSkill && currentActiveSkill.id === skill.id)) {
+                        if (inputRef.current && "clear" in inputRef.current) {
+                          (inputRef.current as HTMLTextAreaElement & { clear: () => void }).clear();
+                          setInput([]);
+                        }
+                      } else {
+                        // Reset all state and add the selected skill
+                        if (inputRef.current && "resetAndAddSkill" in inputRef.current) {
+                          (inputRef.current as HTMLTextAreaElement & { resetAndAddSkill: (skill: LoyalSkill) => void }).resetAndAddSkill(skill);
+                        }
+                      }
+                    }}
+                    className="px-5 py-2"
+                  />
+                )}
               </div>
             </form>
           </div>
