@@ -69,7 +69,7 @@ export const PhantomWalletProvider: FC<PhantomWalletProviderProps> = ({
       appIcon="https://askloyal.com/favicon.png"
       appName="Loyal"
       config={{
-        providers: ["google", "apple", "injected", "deeplink"],
+        providers: ["google", "apple", "phantom", "injected", "deeplink"],
         appId: PHANTOM_APP_ID,
         addressTypes: [AddressType.solana],
         authOptions: {
