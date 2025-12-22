@@ -1123,29 +1123,27 @@ export default function LandingPage() {
           />
 
           {/* Navigation Bar - Desktop only - Fixed to viewport */}
-          <nav
-            className="hidden md:flex"
-            onMouseLeave={() => setHoveredNavIndex(null)}
-            style={{
-              position: "fixed",
-              top: "1.4375rem",
-              left: "50%",
-              transform: "translateX(-50%)",
-              alignItems: "center",
-              gap: "1.5rem",
-              background: "rgba(38, 38, 38, 0.7)",
-              backdropFilter: "blur(48px)",
-              borderRadius: "60px",
-              padding: "4px",
-              boxShadow:
-                "0px 0px 8px 0px rgba(0, 0, 0, 0.1), 0px 16px 16px 0px rgba(0, 0, 0, 0.2)",
-              mixBlendMode: "luminosity",
-              zIndex: 60,
-              opacity: isChatMode ? 0 : 1,
-              pointerEvents: isChatMode ? "none" : "auto",
-              transition: "opacity 0.3s ease",
-            }}
-          >
+          {!isChatMode && (
+            <nav
+              className="hidden md:flex"
+              onMouseLeave={() => setHoveredNavIndex(null)}
+              style={{
+                position: "fixed",
+                top: "1.4375rem",
+                left: "50%",
+                transform: "translateX(-50%)",
+                alignItems: "center",
+                gap: "1.5rem",
+                background: "rgba(38, 38, 38, 0.7)",
+                backdropFilter: "blur(48px)",
+                borderRadius: "60px",
+                padding: "4px",
+                boxShadow:
+                  "0px 0px 8px 0px rgba(0, 0, 0, 0.1), 0px 16px 16px 0px rgba(0, 0, 0, 0.2)",
+                mixBlendMode: "luminosity",
+                zIndex: 60,
+              }}
+            >
             {/* Logo */}
             <div
               style={{
@@ -1343,7 +1341,8 @@ export default function LandingPage() {
                 </button>
               ))}
             </div>
-          </nav>
+            </nav>
+          )}
 
           {/* Sidebar Container - Fixed position on left */}
           <div
