@@ -3,7 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import { useModal, usePhantom } from "@phantom/react-sdk";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { ArrowDownIcon, ArrowUpToLine } from "lucide-react";
+import { ArrowDownIcon, ArrowUpToLine, MoreHorizontal } from "lucide-react";
 import { IBM_Plex_Sans, Plus_Jakarta_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import Image from "next/image";
@@ -2100,20 +2100,31 @@ export default function LandingPage() {
                       <div
                         style={{
                           position: "relative",
-                          padding: "1rem 1.5rem",
-                          borderRadius: "16px",
+                          padding:
+                            message.role === "user"
+                              ? "8px 16px"
+                              : "1rem 1.5rem",
+                          borderRadius:
+                            message.role === "user"
+                              ? "20px 20px 4px 20px"
+                              : "16px",
                           background:
                             message.role === "user"
-                              ? "rgba(255, 255, 255, 0.1)"
+                              ? "rgba(255, 255, 255, 0.12)"
                               : "rgba(255, 255, 255, 0.05)",
-                          backdropFilter: "blur(10px)",
-                          border: "1px solid rgba(255, 255, 255, 0.1)",
+                          backdropFilter:
+                            message.role === "user" ? "none" : "blur(10px)",
+                          border:
+                            message.role === "user"
+                              ? "none"
+                              : "1px solid rgba(255, 255, 255, 0.1)",
                           color: "#fff",
-                          fontSize: "1rem",
-                          lineHeight: 1.5,
-                          maxWidth: "80%",
+                          fontSize: "16px",
+                          lineHeight: "24px",
+                          maxWidth: message.role === "user" ? "464px" : "80%",
                           transition: "all 0.2s ease",
                           overflow: "visible",
+                          fontFamily: "var(--font-geist-sans), sans-serif",
                         }}
                       >
                         {message.role === "assistant" ? (
@@ -2127,108 +2138,81 @@ export default function LandingPage() {
                         )}
                       </div>
 
-                      {/* Controls below message */}
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.75rem",
-                          padding: "0 0.5rem",
-                        }}
-                      >
-                        {/* Timestamp */}
-                        {messageTime && (
-                          <span
-                            style={{
-                              fontSize: "0.75rem",
-                              color: "rgba(255, 255, 255, 0.3)",
-                              letterSpacing: "0.025em",
-                            }}
-                          >
-                            {messageTime}
-                          </span>
-                        )}
-
-                        {/* Copy button */}
-                        <button
-                          onClick={() =>
-                            handleCopyMessage(message.id, messageText)
-                          }
-                          onMouseEnter={(e) => {
-                            if (copiedMessageId !== message.id) {
-                              e.currentTarget.style.color =
-                                "rgba(255, 255, 255, 0.5)";
-                              e.currentTarget.style.background =
-                                "rgba(255, 255, 255, 0.05)";
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (copiedMessageId !== message.id) {
-                              e.currentTarget.style.color =
-                                "rgba(255, 255, 255, 0.3)";
-                              e.currentTarget.style.background = "transparent";
-                            }
-                          }}
+                      {/* Message Footer Actions */}
+                      {message.role === "user" && (
+                        <div
                           style={{
-                            padding: "0.25rem",
-                            background:
-                              copiedMessageId === message.id
-                                ? "rgba(34, 197, 94, 0.15)"
-                                : "transparent",
-                            border: "none",
-                            borderRadius: "8px",
-                            cursor: "pointer",
-                            color:
-                              copiedMessageId === message.id
-                                ? "#22c55e"
-                                : "rgba(255, 255, 255, 0.3)",
-                            transition: "all 0.2s ease",
                             display: "flex",
                             alignItems: "center",
-                            justifyContent: "center",
-                            position: "relative",
+                            justifyContent: "flex-end",
+                            height: "40px",
+                            width: "100%",
                           }}
-                          title={
-                            copiedMessageId === message.id
-                              ? "Copied!"
-                              : "Copy message"
-                          }
                         >
-                          <CopyIcon
-                            ref={(el) => {
-                              if (el) {
-                                copyIconRefs.current.set(message.id, el);
-                              }
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
                             }}
-                            size={14}
-                          />
-
-                          {/* Copied feedback text */}
-                          {copiedMessageId === message.id && (
-                            <span
+                          >
+                            {/* Copy button */}
+                            <button
+                              onClick={() =>
+                                handleCopyMessage(message.id, messageText)
+                              }
                               style={{
-                                position: "absolute",
-                                top: "-1.25rem",
-                                left: "50%",
-                                transform: "translateX(-50%)",
-                                fontSize: "0.65rem",
-                                color: "#fff",
-                                background: "rgba(34, 197, 94, 0.9)",
-                                padding: "0.125rem 0.375rem",
-                                borderRadius: "4px",
-                                animation: "fadeInDownSimple 0.2s ease-in",
-                                fontWeight: 500,
-                                letterSpacing: "0.025em",
-                                whiteSpace: "nowrap",
-                                pointerEvents: "none",
-                                zIndex: 10,
+                                padding: "6px",
+                                background: "transparent",
+                                border: "none",
+                                borderRadius: "9999px",
+                                cursor: "pointer",
+                                color:
+                                  copiedMessageId === message.id
+                                    ? "#22c55e"
+                                    : "rgba(255, 255, 255, 1)",
+                                transition: "all 0.2s ease",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                position: "relative",
                               }}
+                              title={
+                                copiedMessageId === message.id
+                                  ? "Copied!"
+                                  : "Copy message"
+                              }
                             >
-                              Copied
-                            </span>
-                          )}
-                        </button>
-                      </div>
+                              <CopyIcon
+                                ref={(el) => {
+                                  if (el) {
+                                    copyIconRefs.current.set(message.id, el);
+                                  }
+                                }}
+                                size={20}
+                              />
+                            </button>
+
+                            {/* More button */}
+                            <button
+                              style={{
+                                padding: "6px",
+                                background: "transparent",
+                                border: "none",
+                                borderRadius: "9999px",
+                                cursor: "pointer",
+                                color: "rgba(255, 255, 255, 1)",
+                                transition: "all 0.2s ease",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                              title="More options"
+                            >
+                              <MoreHorizontal size={20} />
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -2284,65 +2268,29 @@ export default function LandingPage() {
                   <div
                     style={{
                       display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-start",
-                      gap: "0.5rem",
+                      alignItems: "center",
+                      paddingBottom: "8px",
                       animation: "slideInUp 0.3s ease-out",
                       animationFillMode: "both",
                     }}
                   >
-                    <div
+                    <span
                       style={{
-                        position: "relative",
-                        padding: "1rem 1.5rem",
-                        borderRadius: "16px",
-                        background: "rgba(255, 255, 255, 0.05)",
-                        backdropFilter: "blur(10px)",
-                        border: "1px solid rgba(255, 255, 255, 0.1)",
-                        color: "rgba(255, 255, 255, 0.6)",
-                        fontSize: "1rem",
-                        lineHeight: 1.5,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
+                        fontFamily: "var(--font-geist-sans), sans-serif",
+                        fontWeight: 500,
+                        fontSize: "16px",
+                        lineHeight: "28px",
+                        backgroundImage:
+                          "linear-gradient(90deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0.4) 100%)",
+                        backgroundSize: "200% 100%",
+                        backgroundClip: "text",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                        animation: "thinkingShimmer 2s ease-in-out infinite",
                       }}
                     >
-                      <span>Thinking</span>
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          gap: "0.125rem",
-                        }}
-                      >
-                        <span
-                          style={{
-                            animation:
-                              "dotBounce 1.4s infinite ease-in-out both",
-                            animationDelay: "0s",
-                          }}
-                        >
-                          .
-                        </span>
-                        <span
-                          style={{
-                            animation:
-                              "dotBounce 1.4s infinite ease-in-out both",
-                            animationDelay: "0.2s",
-                          }}
-                        >
-                          .
-                        </span>
-                        <span
-                          style={{
-                            animation:
-                              "dotBounce 1.4s infinite ease-in-out both",
-                            animationDelay: "0.4s",
-                          }}
-                        >
-                          .
-                        </span>
-                      </span>
-                    </div>
+                      Thinking
+                    </span>
                   </div>
                 )}
 
@@ -3069,6 +3017,15 @@ export default function LandingPage() {
           }
           50% {
             opacity: 0.5;
+          }
+        }
+
+        @keyframes thinkingShimmer {
+          0% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: -100% 50%;
           }
         }
 
