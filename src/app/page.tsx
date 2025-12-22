@@ -1133,31 +1133,40 @@ export default function LandingPage() {
                 Loyal
               </span>
             </div>
-            {/* Sliding hover indicator */}
-            {hoveredNavIndex !== null &&
-              navItemRefs.current[hoveredNavIndex] && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: navItemRefs.current[hoveredNavIndex]?.offsetLeft || 0,
-                    width:
-                      navItemRefs.current[hoveredNavIndex]?.offsetWidth || 0,
-                    height:
-                      navItemRefs.current[hoveredNavIndex]?.offsetHeight || 0,
-                    transform: "translateY(-50%)",
-                    background: "rgba(255, 255, 255, 0.08)",
-                    backdropFilter: "blur(48px)",
-                    borderRadius: "9999px",
-                    boxShadow:
-                      "0px 4px 8px 0px rgba(0, 0, 0, 0.04), 0px 2px 4px 0px rgba(0, 0, 0, 0.02)",
-                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                    pointerEvents: "none",
-                    zIndex: 0,
-                  }}
-                />
-              )}
-            {[
+            {/* Nav items group */}
+            <div
+              style={{
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
+              {/* Sliding hover indicator */}
+              {hoveredNavIndex !== null &&
+                navItemRefs.current[hoveredNavIndex] && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: navItemRefs.current[hoveredNavIndex]?.offsetLeft || 0,
+                      width:
+                        navItemRefs.current[hoveredNavIndex]?.offsetWidth || 0,
+                      height:
+                        navItemRefs.current[hoveredNavIndex]?.offsetHeight || 0,
+                      transform: "translateY(-50%)",
+                      background: "rgba(255, 255, 255, 0.1)",
+                      mixBlendMode: "lighten",
+                      backdropFilter: "blur(48px)",
+                      borderRadius: "9999px",
+                      boxShadow:
+                        "0px 4px 8px 0px rgba(0, 0, 0, 0.04), 0px 2px 4px 0px rgba(0, 0, 0, 0.02)",
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                      pointerEvents: "none",
+                      zIndex: 0,
+                    }}
+                  />
+                )}
+              {[
               {
                 label: "About",
                 onClick: isScrolledToAbout
@@ -1295,6 +1304,7 @@ export default function LandingPage() {
                 </span>
               </button>
             ))}
+            </div>
           </nav>
 
 
