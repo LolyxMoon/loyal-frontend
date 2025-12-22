@@ -1432,41 +1432,38 @@ export default function LandingPage() {
                 </button>
               </div>
 
-              {/* Wallet Button - Bottom (when connected) or Top (when not connected) */}
-              <button
-                className="sidebar-icon-btn"
-                onClick={() => {
-                  if (!isConnected) {
-                    open();
-                  }
-                  // When connected, could open wallet management modal
-                }}
-                style={{
-                  width: "36px",
-                  height: "36px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  background: "rgba(255, 255, 255, 0.06)",
-                  backdropFilter: "blur(48px)",
-                  border: "none",
-                  borderRadius: "9999px",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                  boxShadow:
-                    "0px 4px 8px 0px rgba(0, 0, 0, 0.04), 0px 2px 4px 0px rgba(0, 0, 0, 0.02)",
-                  mixBlendMode: "lighten",
-                  padding: "4px",
-                }}
-                title={isConnected ? truncatedAddress : "Connect Wallet"}
-              >
-                <img
-                  alt="Wallet"
-                  height={28}
-                  src="/Wallet-Icon.svg"
-                  width={28}
-                />
-              </button>
+              {/* Wallet Button - Bottom (only visible in chat mode when connected) */}
+              {isChatMode && isConnected && (
+                <button
+                  className="sidebar-icon-btn"
+                  onClick={() => open()}
+                  style={{
+                    width: "36px",
+                    height: "36px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    background: "rgba(255, 255, 255, 0.06)",
+                    backdropFilter: "blur(48px)",
+                    border: "none",
+                    borderRadius: "9999px",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    boxShadow:
+                      "0px 4px 8px 0px rgba(0, 0, 0, 0.04), 0px 2px 4px 0px rgba(0, 0, 0, 0.02)",
+                    mixBlendMode: "lighten",
+                    padding: "4px",
+                  }}
+                  title={truncatedAddress || "Wallet"}
+                >
+                  <img
+                    alt="Wallet"
+                    height={28}
+                    src="/Wallet-Icon.svg"
+                    width={28}
+                  />
+                </button>
+              )}
             </div>
 
             {/* Expanded Sidebar Panel */}
@@ -1769,45 +1766,41 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                {/* Wallet Container - Bottom */}
-                <div
-                  style={{
-                    padding: "8px",
-                  }}
-                >
-                  <button
-                    className="sidebar-icon-btn"
-                    onClick={() => {
-                      if (!isConnected) {
-                        open();
-                      }
-                    }}
+                {/* Wallet Container - Bottom (only visible in chat mode when connected) */}
+                {isChatMode && isConnected && (
+                  <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      background: "rgba(255, 255, 255, 0.06)",
-                      backdropFilter: "blur(48px)",
-                      border: "none",
-                      borderRadius: "32px",
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                      boxShadow:
-                        "0px 4px 8px 0px rgba(0, 0, 0, 0.04), 0px 2px 4px 0px rgba(0, 0, 0, 0.02)",
-                      mixBlendMode: "lighten",
-                      padding: "4px",
+                      padding: "8px",
                     }}
                   >
-                    <img
-                      alt="Wallet"
-                      height={28}
-                      src="/Wallet-Icon.svg"
+                    <button
+                      className="sidebar-icon-btn"
+                      onClick={() => open()}
                       style={{
-                        borderRadius: "9999px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        background: "rgba(255, 255, 255, 0.06)",
+                        backdropFilter: "blur(48px)",
+                        border: "none",
+                        borderRadius: "32px",
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                        boxShadow:
+                          "0px 4px 8px 0px rgba(0, 0, 0, 0.04), 0px 2px 4px 0px rgba(0, 0, 0, 0.02)",
+                        mixBlendMode: "lighten",
+                        padding: "4px",
                       }}
-                      width={28}
-                    />
-                    {isConnected && truncatedAddress && (
+                    >
+                      <img
+                        alt="Wallet"
+                        height={28}
+                        src="/Wallet-Icon.svg"
+                        style={{
+                          borderRadius: "9999px",
+                        }}
+                        width={28}
+                      />
                       <span
                         style={{
                           fontSize: "14px",
@@ -1819,22 +1812,9 @@ export default function LandingPage() {
                       >
                         {truncatedAddress}
                       </span>
-                    )}
-                    {!isConnected && (
-                      <span
-                        style={{
-                          fontSize: "14px",
-                          fontWeight: 400,
-                          lineHeight: "20px",
-                          color: "#fff",
-                          paddingRight: "12px",
-                        }}
-                      >
-                        Connect
-                      </span>
-                    )}
-                  </button>
-                </div>
+                    </button>
+                  </div>
+                )}
               </div>
           </div>
 
