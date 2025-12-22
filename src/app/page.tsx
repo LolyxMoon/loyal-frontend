@@ -1085,7 +1085,7 @@ export default function LandingPage() {
               position: "absolute",
               inset: 0,
               backgroundColor: "rgba(22, 22, 26, 0.95)",
-              backdropFilter: isChatMode ? "blur(48px)" : "blur(10px)",
+              backdropFilter: isChatMode ? "blur(40px)" : "blur(10px)",
               opacity: isChatMode ? 1 : 0,
               transition: "all 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
               pointerEvents: isChatMode ? "auto" : "none",
@@ -1904,11 +1904,7 @@ export default function LandingPage() {
               position: isChatMode ? "absolute" : "absolute",
               top: isChatMode ? "0" : "auto",
               bottom: isChatMode ? "0" : "clamp(5vh, calc(48vh - 40px), 38vh)",
-              left: isChatMode
-                ? isSidebarOpen
-                  ? "314px"
-                  : "0"
-                : "50%",
+              left: isChatMode ? (isSidebarOpen ? "314px" : "0") : "50%",
               right: isChatMode ? "0" : "auto",
               transform: isChatMode ? "none" : "translateX(-50%)",
               width: isChatMode ? "auto" : "min(600px, 90%)",
@@ -2286,15 +2282,32 @@ export default function LandingPage() {
               </button>
             )}
 
-            {/* Input form - liquid glass style with integrated send button */}
-            <form
-              onSubmit={handleSubmit}
+            {/* Chat Input Container - fixed at bottom in chat mode */}
+            <div
               style={{
-                position: "relative",
-                width: "100%",
-                marginTop: "0.5rem",
+                position: isChatMode ? "absolute" : "relative",
+                bottom: isChatMode ? "0" : "auto",
+                left: isChatMode ? "0" : "auto",
+                right: isChatMode ? "0" : "auto",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                padding: isChatMode ? "0 16px 16px" : "0",
+                pointerEvents: "none",
               }}
             >
+              {/* Input form - liquid glass style with integrated send button */}
+              <form
+                onSubmit={handleSubmit}
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  maxWidth: "768px",
+                  marginTop: isChatMode ? "0" : "0.5rem",
+                  pointerEvents: "auto",
+                }}
+              >
               <div
                 style={{
                   position: "relative",
@@ -2526,6 +2539,7 @@ export default function LandingPage() {
                 )}
               </div>
             </form>
+            </div>
           </div>
         </div>
         {/* End of first section */}
