@@ -1836,7 +1836,6 @@ export default function LandingPage() {
                   </button>
                 </div>
               </div>
-            )}
           </div>
 
           {/* Mobile backdrop overlay */}
