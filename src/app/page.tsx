@@ -100,6 +100,8 @@ export default function LandingPage() {
   } | null>(null);
   const [isChatModeLocal, setIsChatModeLocal] = useState(false);
   const [parallaxOffset, setParallaxOffset] = useState(0);
+  const [isInputStuckToBottom, setIsInputStuckToBottom] = useState(false);
+  const [stickyInputBottomOffset, setStickyInputBottomOffset] = useState(24);
   const { setIsChatMode } = useChatMode();
 
   // Check Skills feature flag
@@ -556,18 +558,52 @@ export default function LandingPage() {
     };
   }, [isChatMode]);
 
-  // Parallax effect for landing page input
+  // Parallax effect for landing page input + sticky behavior
   useEffect(() => {
     if (isChatMode) {
       setParallaxOffset(0);
+      setIsInputStuckToBottom(false);
+      setStickyInputBottomOffset(24);
       return;
     }
 
     const handleParallaxScroll = () => {
       const scrollY = window.scrollY;
+      const viewportHeight = window.innerHeight;
+
       // Move the input at 0.15 of the scroll speed (subtle parallax)
       const offset = scrollY * 0.15;
       setParallaxOffset(offset);
+
+      // Calculate when the input's natural position goes above viewport
+      // Input is centered at viewportHeight/2, moves up at 0.85x scroll speed
+      // Stick when the input center would be above ~120px from top
+      const inputNaturalCenterFromTop = viewportHeight / 2 - scrollY * 0.85;
+      const stickThreshold = 120; // When input center reaches this point from top
+
+      if (inputNaturalCenterFromTop < stickThreshold) {
+        setIsInputStuckToBottom(true);
+
+        // Check if we're near the copyright - adjust bottom offset to stay above it
+        const copyright = document.getElementById("footer-copyright");
+        const copyrightTop =
+          copyright?.getBoundingClientRect().top ?? viewportHeight;
+        const defaultBottomPadding = 24; // Same as header top padding
+
+        // If copyright is visible, push input up to stay above it
+        if (copyrightTop < viewportHeight) {
+          const requiredBottom =
+            viewportHeight - copyrightTop + defaultBottomPadding;
+          setStickyInputBottomOffset(
+            Math.max(requiredBottom, defaultBottomPadding)
+          );
+        } else {
+          setStickyInputBottomOffset(defaultBottomPadding);
+        }
+      } else {
+        setIsInputStuckToBottom(false);
+        setStickyInputBottomOffset(24);
+      }
     };
 
     window.addEventListener("scroll", handleParallaxScroll, { passive: true });
@@ -2259,21 +2295,34 @@ export default function LandingPage() {
             {/* Chat Input Container - animates between center and bottom */}
             <div
               style={{
-                position: "absolute",
-                bottom: isChatMode ? "16px" : "50%",
-                left: "16px",
-                right: "16px",
+                position: isChatMode
+                  ? "absolute"
+                  : isInputStuckToBottom
+                    ? "fixed"
+                    : "absolute",
+                bottom: isChatMode
+                  ? "16px"
+                  : isInputStuckToBottom
+                    ? `${stickyInputBottomOffset}px`
+                    : "50%",
+                left: isInputStuckToBottom && !isChatMode ? "0" : "16px",
+                right: isInputStuckToBottom && !isChatMode ? "0" : "16px",
                 transform: isChatMode
                   ? "translateY(0)"
-                  : `translateY(calc(50% + ${parallaxOffset}px))`,
+                  : isInputStuckToBottom
+                    ? "translateY(0)"
+                    : `translateY(calc(50% + ${parallaxOffset}px))`,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
                 pointerEvents: "none",
+                zIndex: isInputStuckToBottom && !isChatMode ? 50 : "auto",
                 transition: isChatMode
                   ? "bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)"
-                  : "bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+                  : isInputStuckToBottom
+                    ? "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.3s ease, right 0.3s ease, max-width 0.3s ease"
+                    : "transform 0.3s ease-out",
               }}
             >
               {/* Input form - liquid glass style with integrated send button */}
@@ -2282,8 +2331,10 @@ export default function LandingPage() {
                 style={{
                   position: "relative",
                   width: "100%",
-                  maxWidth: "768px",
+                  maxWidth:
+                    isInputStuckToBottom && !isChatMode ? "500px" : "768px",
                   pointerEvents: "auto",
+                  transition: "max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
               >
                 <div

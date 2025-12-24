@@ -268,8 +268,9 @@ function RoadmapSectionComponent() {
               touchAction: "pan-y",
             }}
           >
-            {/* Fade overlays - inside carousel, won't block buttons */}
+            {/* Fade overlays with mobile navigation */}
             <div
+              onClick={prevSlide}
               style={{
                 position: "absolute",
                 left: 0,
@@ -279,10 +280,37 @@ function RoadmapSectionComponent() {
                 background:
                   "linear-gradient(to right, #000 0%, transparent 100%)",
                 zIndex: 5,
-                pointerEvents: "none",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-start",
+                paddingLeft: "0.75rem",
               }}
-            />
+            >
+              {/* Mobile chevron - hidden on desktop via media query */}
+              <svg
+                className="mobile-nav-chevron"
+                fill="none"
+                height="32"
+                style={{
+                  color: "rgba(255, 255, 255, 0.5)",
+                  transform: "rotate(180deg)",
+                }}
+                viewBox="0 0 24 24"
+                width="32"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10.75 8.75L14.25 12L10.75 15.25"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.5"
+                />
+              </svg>
+            </div>
             <div
+              onClick={nextSlide}
               style={{
                 position: "absolute",
                 right: 0,
@@ -292,9 +320,42 @@ function RoadmapSectionComponent() {
                 background:
                   "linear-gradient(to left, #000 0%, transparent 100%)",
                 zIndex: 5,
-                pointerEvents: "none",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                paddingRight: "0.75rem",
               }}
-            />
+            >
+              {/* Mobile chevron - hidden on desktop via media query */}
+              <svg
+                className="mobile-nav-chevron"
+                fill="none"
+                height="32"
+                style={{
+                  color: "rgba(255, 255, 255, 0.5)",
+                }}
+                viewBox="0 0 24 24"
+                width="32"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M10.75 8.75L14.25 12L10.75 15.25"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.5"
+                />
+              </svg>
+            </div>
+            {/* CSS for hiding mobile chevrons on desktop */}
+            <style jsx>{`
+              @media (min-width: 768px) {
+                .mobile-nav-chevron {
+                  display: none;
+                }
+              }
+            `}</style>
 
             <div
               style={{
@@ -366,7 +427,7 @@ function RoadmapSectionComponent() {
                             height: "16px",
                             borderRadius: "50%",
                             background: "#ef4444",
-                            boxShadow: "0 0 12px rgba(239, 68, 68, 0.6)",
+                            zIndex: 10,
                           }}
                           transition={{
                             scale: {
@@ -380,6 +441,45 @@ function RoadmapSectionComponent() {
                             },
                           }}
                         />
+                        {/* Red glow clipped to card surface */}
+                        <div
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            overflow: "hidden",
+                            borderRadius: "24px",
+                            pointerEvents: "none",
+                          }}
+                        >
+                          <motion.div
+                            animate={{
+                              opacity: index === currentIndex ? 1 : 0,
+                              scale: index === currentIndex ? 1 : 0.5,
+                            }}
+                            initial={false}
+                            style={{
+                              position: "absolute",
+                              top: "-50px",
+                              left: "calc(50% - 80px)",
+                              width: "160px",
+                              height: "100px",
+                              background:
+                                "radial-gradient(ellipse at center top, rgba(239, 68, 68, 0.4) 0%, rgba(239, 68, 68, 0.15) 40%, transparent 70%)",
+                              pointerEvents: "none",
+                            }}
+                            transition={{
+                              opacity: {
+                                duration: 0.4,
+                                delay: index === currentIndex ? 0.2 : 0,
+                              },
+                              scale: {
+                                duration: 0.4,
+                                ease: [0.34, 1.56, 0.64, 1],
+                                delay: index === currentIndex ? 0.2 : 0,
+                              },
+                            }}
+                          />
+                        </div>
                         {/* Card header */}
                         <div
                           onClick={() => toggleExpand(index)}
