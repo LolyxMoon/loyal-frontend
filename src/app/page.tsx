@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { useModal, usePhantom, useAccounts } from "@phantom/react-sdk";
+import { useAccounts, useModal, usePhantom } from "@phantom/react-sdk";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import {
   ArrowDownIcon,
@@ -16,14 +16,12 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { BentoGridSection } from "@/components/bento-grid-section";
 import { Footer } from "@/components/footer";
-import { LoyalTokenTicker } from "@/components/loyal-token-ticker";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { RoadmapSection } from "@/components/roadmap-section";
 import { SendTransactionWidget } from "@/components/send-transaction-widget";
 import { SkillsInput, type SkillsInputRef } from "@/components/skills-input";
 import { SkillsSelector } from "@/components/skills-selector";
 import { SwapTransactionWidget } from "@/components/swap-transaction-widget";
-import AnimatedBadge from "@/components/ui/animated-badge";
 import { CopyIcon, type CopyIconHandle } from "@/components/ui/copy";
 import { MenuIcon, type MenuIconHandle } from "@/components/ui/menu";
 import { PlusIcon, type PlusIconHandle } from "@/components/ui/plus";
@@ -1144,203 +1142,207 @@ export default function LandingPage() {
                 zIndex: 60,
               }}
             >
-            {/* Logo */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-              }}
-            >
-              <Image alt="Loyal" height={36} src="/logo.svg" width={36} />
-              <span
+              {/* Logo */}
+              <div
                 style={{
-                  fontSize: "1.25rem",
-                  fontWeight: 500,
-                  color: "#fff",
-                  letterSpacing: "-0.2px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  paddingLeft: "12px",
+                  marginRight: "-8px",
                 }}
               >
-                Loyal
-              </span>
-            </div>
-            {/* Nav items group */}
-            <div
-              style={{
-                position: "relative",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              {/* Sliding hover indicator */}
-              {hoveredNavIndex !== null &&
-                navItemRefs.current[hoveredNavIndex] && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "50%",
-                      left:
-                        navItemRefs.current[hoveredNavIndex]?.offsetLeft || 0,
-                      width:
-                        navItemRefs.current[hoveredNavIndex]?.offsetWidth || 0,
-                      height:
-                        navItemRefs.current[hoveredNavIndex]?.offsetHeight || 0,
-                      transform: "translateY(-50%)",
-                      background: "rgba(255, 255, 255, 0.1)",
-                      mixBlendMode: "lighten",
-                      backdropFilter: "blur(48px)",
-                      borderRadius: "9999px",
-                      boxShadow:
-                        "0px 4px 8px 0px rgba(0, 0, 0, 0.04), 0px 2px 4px 0px rgba(0, 0, 0, 0.02)",
-                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                      pointerEvents: "none",
-                      zIndex: 0,
-                    }}
-                  />
-                )}
-              {[
-                {
-                  label: "About",
-                  onClick: isScrolledToAbout
-                    ? handleBackToTop
-                    : handleScrollToAbout,
-                  isAbout: true,
-                },
-                {
-                  label: "Roadmap",
-                  onClick: isScrolledToRoadmap
-                    ? handleBackToTop
-                    : handleScrollToRoadmap,
-                  isRoadmap: true,
-                },
-                {
-                  label: "Links",
-                  onClick: isScrolledToLinks
-                    ? handleBackToTop
-                    : handleScrollToLinks,
-                  isLinks: true,
-                },
-                { label: "Docs", href: "https://docs.askloyal.com/" },
-                {
-                  label: "Changelog",
-                  onClick: () => {
-                    if (typeof window !== "undefined" && window.Productlane) {
-                      window.Productlane.open("CHANGELOG");
-                    }
-                  },
-                },
-              ].map((item, index) => (
-                <button
-                  key={item.label}
-                  onClick={
-                    item.href
-                      ? () =>
-                          window.open(
-                            item.href,
-                            "_blank",
-                            "noopener,noreferrer"
-                          )
-                      : item.onClick
-                  }
-                  onMouseEnter={() => setHoveredNavIndex(index)}
-                  ref={(el) => {
-                    navItemRefs.current[index] = el;
-                  }}
+                <Image alt="Loyal" height={22} src="/Loyal.svg" width={27} />
+                <span
                   style={{
-                    position: "relative",
+                    fontSize: "1.25rem",
+                    fontWeight: 500,
                     color: "#fff",
-                    fontSize: "1rem",
-                    fontWeight: 400,
-                    padding: "0.5rem 1rem",
-                    background: "transparent",
-                    border: "none",
-                    borderRadius: "9999px",
-                    cursor: "pointer",
-                    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                    outline: "none",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "0.375rem",
-                    zIndex: 1,
-                    filter:
-                      (item.isAbout && isScrolledToAbout) ||
-                      (item.isRoadmap && isScrolledToRoadmap) ||
-                      (item.isLinks && isScrolledToLinks)
-                        ? "drop-shadow(0 0 8px rgba(255, 255, 255, 0.6))"
-                        : "none",
-                    overflow: "hidden",
+                    letterSpacing: "-0.2px",
                   }}
                 >
-                  <span
+                  Loyal
+                </span>
+              </div>
+              {/* Nav items group */}
+              <div
+                style={{
+                  position: "relative",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                {/* Sliding hover indicator */}
+                {hoveredNavIndex !== null &&
+                  navItemRefs.current[hoveredNavIndex] && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "50%",
+                        left:
+                          navItemRefs.current[hoveredNavIndex]?.offsetLeft || 0,
+                        width:
+                          navItemRefs.current[hoveredNavIndex]?.offsetWidth ||
+                          0,
+                        height:
+                          navItemRefs.current[hoveredNavIndex]?.offsetHeight ||
+                          0,
+                        transform: "translateY(-50%)",
+                        background: "rgba(255, 255, 255, 0.1)",
+                        mixBlendMode: "lighten",
+                        backdropFilter: "blur(48px)",
+                        borderRadius: "9999px",
+                        boxShadow:
+                          "0px 4px 8px 0px rgba(0, 0, 0, 0.04), 0px 2px 4px 0px rgba(0, 0, 0, 0.02)",
+                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                        pointerEvents: "none",
+                        zIndex: 0,
+                      }}
+                    />
+                  )}
+                {[
+                  {
+                    label: "About",
+                    onClick: isScrolledToAbout
+                      ? handleBackToTop
+                      : handleScrollToAbout,
+                    isAbout: true,
+                  },
+                  {
+                    label: "Roadmap",
+                    onClick: isScrolledToRoadmap
+                      ? handleBackToTop
+                      : handleScrollToRoadmap,
+                    isRoadmap: true,
+                  },
+                  {
+                    label: "Links",
+                    onClick: isScrolledToLinks
+                      ? handleBackToTop
+                      : handleScrollToLinks,
+                    isLinks: true,
+                  },
+                  { label: "Docs", href: "https://docs.askloyal.com/" },
+                  {
+                    label: "Changelog",
+                    onClick: () => {
+                      if (typeof window !== "undefined" && window.Productlane) {
+                        window.Productlane.open("CHANGELOG");
+                      }
+                    },
+                  },
+                ].map((item, index) => (
+                  <button
+                    key={item.label}
+                    onClick={
+                      item.href
+                        ? () =>
+                            window.open(
+                              item.href,
+                              "_blank",
+                              "noopener,noreferrer"
+                            )
+                        : item.onClick
+                    }
+                    onMouseEnter={() => setHoveredNavIndex(index)}
+                    ref={(el) => {
+                      navItemRefs.current[index] = el;
+                    }}
                     style={{
-                      display: "inline-flex",
+                      position: "relative",
+                      color: "#fff",
+                      fontSize: "1rem",
+                      fontWeight: 400,
+                      padding: "0.5rem 1rem",
+                      background: "transparent",
+                      border: "none",
+                      borderRadius: "9999px",
+                      cursor: "pointer",
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                      outline: "none",
+                      display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      opacity:
+                      gap: "0.375rem",
+                      zIndex: 1,
+                      filter:
                         (item.isAbout && isScrolledToAbout) ||
                         (item.isRoadmap && isScrolledToRoadmap) ||
                         (item.isLinks && isScrolledToLinks)
-                          ? 1
-                          : 0,
-                      transform:
-                        (item.isAbout && isScrolledToAbout) ||
-                        (item.isRoadmap && isScrolledToRoadmap) ||
-                        (item.isLinks && isScrolledToLinks)
-                          ? "scale(1) translateY(0)"
-                          : "scale(0.8) translateY(4px)",
-                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                      position:
-                        (item.isAbout && isScrolledToAbout) ||
-                        (item.isLinks && isScrolledToLinks)
-                          ? "relative"
-                          : "absolute",
-                      pointerEvents:
-                        (item.isAbout && isScrolledToAbout) ||
-                        (item.isLinks && isScrolledToLinks)
-                          ? "auto"
+                          ? "drop-shadow(0 0 8px rgba(255, 255, 255, 0.6))"
                           : "none",
+                      overflow: "hidden",
                     }}
                   >
-                    {(item.isAbout || item.isRoadmap || item.isLinks) && (
-                      <ArrowUpToLine size={18} />
-                    )}
-                  </span>
-                  <span
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      opacity:
-                        (item.isAbout && isScrolledToAbout) ||
-                        (item.isRoadmap && isScrolledToRoadmap) ||
-                        (item.isLinks && isScrolledToLinks)
-                          ? 0
-                          : 1,
-                      transform:
-                        (item.isAbout && isScrolledToAbout) ||
-                        (item.isRoadmap && isScrolledToRoadmap) ||
-                        (item.isLinks && isScrolledToLinks)
-                          ? "scale(0.8) translateY(-4px)"
-                          : "scale(1) translateY(0)",
-                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                      position:
-                        (item.isAbout && isScrolledToAbout) ||
-                        (item.isLinks && isScrolledToLinks)
-                          ? "absolute"
-                          : "relative",
-                      pointerEvents:
-                        (item.isAbout && isScrolledToAbout) ||
-                        (item.isLinks && isScrolledToLinks)
-                          ? "none"
-                          : "auto",
-                    }}
-                  >
-                    {item.label}
-                  </span>
-                </button>
-              ))}
-            </div>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        opacity:
+                          (item.isAbout && isScrolledToAbout) ||
+                          (item.isRoadmap && isScrolledToRoadmap) ||
+                          (item.isLinks && isScrolledToLinks)
+                            ? 1
+                            : 0,
+                        transform:
+                          (item.isAbout && isScrolledToAbout) ||
+                          (item.isRoadmap && isScrolledToRoadmap) ||
+                          (item.isLinks && isScrolledToLinks)
+                            ? "scale(1) translateY(0)"
+                            : "scale(0.8) translateY(4px)",
+                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                        position:
+                          (item.isAbout && isScrolledToAbout) ||
+                          (item.isLinks && isScrolledToLinks)
+                            ? "relative"
+                            : "absolute",
+                        pointerEvents:
+                          (item.isAbout && isScrolledToAbout) ||
+                          (item.isLinks && isScrolledToLinks)
+                            ? "auto"
+                            : "none",
+                      }}
+                    >
+                      {(item.isAbout || item.isRoadmap || item.isLinks) && (
+                        <ArrowUpToLine size={18} />
+                      )}
+                    </span>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        opacity:
+                          (item.isAbout && isScrolledToAbout) ||
+                          (item.isRoadmap && isScrolledToRoadmap) ||
+                          (item.isLinks && isScrolledToLinks)
+                            ? 0
+                            : 1,
+                        transform:
+                          (item.isAbout && isScrolledToAbout) ||
+                          (item.isRoadmap && isScrolledToRoadmap) ||
+                          (item.isLinks && isScrolledToLinks)
+                            ? "scale(0.8) translateY(-4px)"
+                            : "scale(1) translateY(0)",
+                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                        position:
+                          (item.isAbout && isScrolledToAbout) ||
+                          (item.isLinks && isScrolledToLinks)
+                            ? "absolute"
+                            : "relative",
+                        pointerEvents:
+                          (item.isAbout && isScrolledToAbout) ||
+                          (item.isLinks && isScrolledToLinks)
+                            ? "none"
+                            : "auto",
+                      }}
+                    >
+                      {item.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </nav>
           )}
 
@@ -1761,8 +1763,8 @@ export default function LandingPage() {
                   )}
                   {previousChats.map((chat) => (
                     <div
-                      key={chat.id}
                       className="sidebar-history-item"
+                      key={chat.id}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.background =
                           "rgba(255, 255, 255, 0.06)";
@@ -2400,7 +2402,7 @@ export default function LandingPage() {
                       }}
                     >
                       <button
-                        disabled={!hasUsableInput && !isLoading}
+                        disabled={!(hasUsableInput || isLoading)}
                         onClick={(e) => {
                           e.preventDefault();
                           if (isLoading) {
@@ -2615,7 +2617,6 @@ export default function LandingPage() {
           </div>
         </div>
       )}
-
 
       {/* Modal for testers message */}
       {isModalOpen && (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useModal, usePhantom, useAccounts } from "@phantom/react-sdk";
+import { useAccounts, useModal, usePhantom } from "@phantom/react-sdk";
 import { useEffect, useState } from "react";
 
 import { useChatMode } from "@/contexts/chat-mode-context";
@@ -62,12 +62,7 @@ export function Header() {
             borderRadius: "9999px",
           }}
         >
-          <img
-            alt="Wallet"
-            height={28}
-            src="/Wallet-Icon.svg"
-            width={28}
-          />
+          <img alt="Wallet" height={28} src="/Wallet-Icon.svg" width={28} />
         </div>
         <span
           style={{
@@ -78,7 +73,9 @@ export function Header() {
             paddingRight: "12px",
           }}
         >
-          {isConnected && truncatedAddress ? truncatedAddress : "Connect Wallet"}
+          {isConnected && truncatedAddress
+            ? truncatedAddress
+            : "Connect Wallet"}
         </span>
       </button>
     </header>
