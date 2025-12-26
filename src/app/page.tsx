@@ -1133,16 +1133,8 @@ export default function LandingPage() {
           flexDirection: "column",
         }}
       >
-        {/* First section with background image */}
+        {/* First section */}
         <div style={{ position: "relative", width: "100%", height: "100vh" }}>
-          <Image
-            alt="Landing"
-            fill
-            priority
-            sizes="100vw"
-            src="/landing.png"
-            style={{ objectFit: "cover", objectPosition: "center" }}
-          />
           {/* Dark overlay for chat mode */}
           <div
             style={{
@@ -1178,28 +1170,6 @@ export default function LandingPage() {
                 zIndex: 60,
               }}
             >
-              {/* Logo */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  paddingLeft: "12px",
-                  marginRight: "-8px",
-                }}
-              >
-                <Image alt="Loyal" height={22} src="/Loyal.svg" width={27} />
-                <span
-                  style={{
-                    fontSize: "1.25rem",
-                    fontWeight: 500,
-                    color: "#fff",
-                    letterSpacing: "-0.2px",
-                  }}
-                >
-                  Loyal
-                </span>
-              </div>
               {/* Nav items group */}
               <div
                 style={{
@@ -2298,20 +2268,20 @@ export default function LandingPage() {
                 position: isChatMode
                   ? "absolute"
                   : isInputStuckToBottom
-                    ? "fixed"
-                    : "absolute",
+                  ? "fixed"
+                  : "absolute",
                 bottom: isChatMode
                   ? "16px"
                   : isInputStuckToBottom
-                    ? `${stickyInputBottomOffset}px`
-                    : "50%",
+                  ? `${stickyInputBottomOffset}px`
+                  : "50%",
                 left: isInputStuckToBottom && !isChatMode ? "0" : "16px",
                 right: isInputStuckToBottom && !isChatMode ? "0" : "16px",
                 transform: isChatMode
                   ? "translateY(0)"
                   : isInputStuckToBottom
-                    ? "translateY(0)"
-                    : `translateY(calc(50% + ${parallaxOffset}px))`,
+                  ? "translateY(0)"
+                  : `translateY(calc(50% + ${parallaxOffset}px))`,
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -2321,8 +2291,8 @@ export default function LandingPage() {
                 transition: isChatMode
                   ? "bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)"
                   : isInputStuckToBottom
-                    ? "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.3s ease, right 0.3s ease, max-width 0.3s ease"
-                    : "transform 0.3s ease-out",
+                  ? "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.3s ease, right 0.3s ease, max-width 0.3s ease"
+                  : "transform 0.3s ease-out",
               }}
             >
               {/* Input form - liquid glass style with integrated send button */}
