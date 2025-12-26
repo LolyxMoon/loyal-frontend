@@ -2295,6 +2295,20 @@ export default function LandingPage() {
                   : "transform 0.3s ease-out",
               }}
             >
+              {/* Ask Loyal logo - only visible when not in chat mode */}
+              {!isChatMode && !isInputStuckToBottom && (
+                <Image
+                  alt="Ask Loyal"
+                  height={64}
+                  src="/Askloyal.svg"
+                  style={{
+                    marginBottom: "32px",
+                    pointerEvents: "none",
+                  }}
+                  width={307}
+                />
+              )}
+
               {/* Input form - liquid glass style with integrated send button */}
               <form
                 onSubmit={handleSubmit}
