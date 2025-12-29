@@ -2495,6 +2495,39 @@ export default function LandingPage() {
                           if (isLoading) {
                             // TODO: Implement stop functionality
                           } else if (hasUsableInput) {
+                            // For NLP mode, ensure completion data is set before submitting
+                            // (same as what Enter key does in SkillsInput)
+                            if (nlpState?.isActive && nlpState?.intent === "send") {
+                              if (
+                                nlpState.parsedData.amount &&
+                                nlpState.parsedData.currency &&
+                                nlpState.parsedData.walletAddress
+                              ) {
+                                handleSendComplete({
+                                  currency: nlpState.parsedData.currency,
+                                  currencyMint: nlpState.parsedData.currencyMint,
+                                  currencyDecimals: nlpState.parsedData.currencyDecimals,
+                                  amount: nlpState.parsedData.amount,
+                                  walletAddress: nlpState.parsedData.walletAddress,
+                                });
+                              }
+                            } else if (nlpState?.isActive && nlpState?.intent === "swap") {
+                              if (
+                                nlpState.parsedData.amount &&
+                                nlpState.parsedData.currency &&
+                                nlpState.parsedData.toCurrency
+                              ) {
+                                handleSwapComplete({
+                                  fromCurrency: nlpState.parsedData.currency,
+                                  fromCurrencyMint: nlpState.parsedData.currencyMint,
+                                  fromCurrencyDecimals: nlpState.parsedData.currencyDecimals,
+                                  amount: nlpState.parsedData.amount,
+                                  toCurrency: nlpState.parsedData.toCurrency,
+                                  toCurrencyMint: nlpState.parsedData.toCurrencyMint,
+                                  toCurrencyDecimals: nlpState.parsedData.toCurrencyDecimals,
+                                });
+                              }
+                            }
                             handleSubmit(e as unknown as React.FormEvent);
                           }
                         }}
