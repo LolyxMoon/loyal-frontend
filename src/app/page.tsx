@@ -1359,7 +1359,7 @@ export default function LandingPage() {
               top: "8px",
               left: "8px",
               bottom: "8px",
-              zIndex: 50,
+              zIndex: 60,
               display: "flex",
               flexDirection: "column",
               justifyContent: "space-between",
