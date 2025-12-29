@@ -1348,22 +1348,11 @@ const SkillsInput = React.forwardRef<HTMLTextAreaElement, SkillsInputProps>(
       sendData.walletAddress;
 
     return (
-      <div style={{ position: "relative", width: "100%", flex: 1 }}>
-        <div
-          className={cn(
-            "flex min-h-[60px] w-full flex-wrap items-center gap-2 rounded-[20px] py-5 pr-16 pl-7 text-base ring-offset-white transition-all",
-            "bg-white/5 backdrop-blur-[40px]",
-            (hasSwapSkill && !isSwapComplete) ||
-              (hasSendSkill && !isSendComplete)
-              ? "shadow-[0_0_0_2px_rgba(255,255,255,0.6),0_0_20px_rgba(255,255,255,0.4),0_0_40px_rgba(255,255,255,0.2)]"
-              : "",
-            isSwapComplete || isSendComplete
-              ? "shadow-[0_0_0_2px_rgba(34,197,94,0.6),0_0_20px_rgba(34,197,94,0.4),0_0_40px_rgba(34,197,94,0.2)]"
-              : "",
-            className
-          )}
-          ref={containerRef}
-        >
+      <div
+        className={cn("flex w-full flex-wrap items-center gap-2", className)}
+        ref={containerRef}
+        style={{ position: "relative" }}
+      >
           {value.map((skill) => (
             <span
               className={cn(
@@ -1598,7 +1587,6 @@ const SkillsInput = React.forwardRef<HTMLTextAreaElement, SkillsInputProps>(
               {walletAddressError || amountError}
             </div>
           )}
-        </div>
         {isDropdownOpen && (
           <SkillDropdown
             onSelect={addSkill}

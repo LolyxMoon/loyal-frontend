@@ -2498,61 +2498,65 @@ export default function LandingPage() {
                       </button>
                     </div>
                   </div>
-                  {skillsEnabled && (
-                    <SkillsSelector
-                      className="px-5 py-2"
-                      nlpState={nlpState}
-                      onSkillSelect={(skill) => {
-                        const currentActiveSkill = input.find(
-                          (s) => s.category === "action"
-                        );
-
-                        // If null or deselecting the same skill - clear everything
-                        if (
-                          !skill ||
-                          (currentActiveSkill &&
-                            currentActiveSkill.id === skill.id)
-                        ) {
-                          if (inputRef.current && "clear" in inputRef.current) {
-                            (
-                              inputRef.current as HTMLTextAreaElement & {
-                                clear: () => void;
-                              }
-                            ).clear();
-                            setInput([]);
-                          }
-                        } else if (skill.id === "send" || skill.id === "swap") {
-                          // For "send" and "swap" skills, activate NLP mode instead of adding the skill object
-                          if (
-                            inputRef.current &&
-                            "activateNlpMode" in inputRef.current
-                          ) {
-                            (inputRef.current as any).activateNlpMode(
-                              `${skill.id} `
-                            );
-                          }
-                        } else {
-                          // For other skills, use the old flow
-                          // Reset all state and add the selected skill
-                          if (
-                            inputRef.current &&
-                            "resetAndAddSkill" in inputRef.current
-                          ) {
-                            (
-                              inputRef.current as HTMLTextAreaElement & {
-                                resetAndAddSkill: (skill: LoyalSkill) => void;
-                              }
-                            ).resetAndAddSkill(skill);
-                          }
-                        }
-                      }}
-                      selectedSkillId={
-                        input.find((skill) => skill.category === "action")?.id
-                      }
-                    />
-                  )}
                 </div>
               </form>
+
+              {/* Skills selector buttons - below input */}
+              {skillsEnabled && !isChatMode && (
+                <div style={{ pointerEvents: "auto" }}>
+                  <SkillsSelector
+                    className="mt-4"
+                    nlpState={nlpState}
+                    onSkillSelect={(skill) => {
+                      const currentActiveSkill = input.find(
+                        (s) => s.category === "action"
+                      );
+
+                      // If null or deselecting the same skill - clear everything
+                      if (
+                        !skill ||
+                        (currentActiveSkill &&
+                          currentActiveSkill.id === skill.id)
+                      ) {
+                        if (inputRef.current && "clear" in inputRef.current) {
+                          (
+                            inputRef.current as HTMLTextAreaElement & {
+                              clear: () => void;
+                            }
+                          ).clear();
+                          setInput([]);
+                        }
+                      } else if (skill.id === "send" || skill.id === "swap") {
+                        // For "send" and "swap" skills, activate NLP mode instead of adding the skill object
+                        if (
+                          inputRef.current &&
+                          "activateNlpMode" in inputRef.current
+                        ) {
+                          (inputRef.current as any).activateNlpMode(
+                            `${skill.id} `
+                          );
+                        }
+                      } else {
+                        // For other skills, use the old flow
+                        // Reset all state and add the selected skill
+                        if (
+                          inputRef.current &&
+                          "resetAndAddSkill" in inputRef.current
+                        ) {
+                          (
+                            inputRef.current as HTMLTextAreaElement & {
+                              resetAndAddSkill: (skill: LoyalSkill) => void;
+                            }
+                          ).resetAndAddSkill(skill);
+                        }
+                      }
+                    }}
+                    selectedSkillId={
+                      input.find((skill) => skill.category === "action")?.id
+                    }
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Repeat2, Send, X } from "lucide-react";
+import { Repeat2, Send } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { AVAILABLE_SKILLS, type LoyalSkill } from "@/types/skills";
@@ -30,10 +30,10 @@ type SkillsSelectorProps = {
 const getSkillIcon = (skillId: string) => {
   switch (skillId) {
     case "send": {
-      return <Send className="h-3 w-3" />;
+      return <Send className="h-4 w-4 opacity-60" />;
     }
     case "swap": {
-      return <Repeat2 className="h-3 w-3" />;
+      return <Repeat2 className="h-4 w-4 opacity-60" />;
     }
     default: {
       return null;
@@ -158,25 +158,14 @@ export function SkillsSelector({
       {ACTION_SKILLS.map((skill) => {
         const isActive = selectedSkillId === skill.id;
 
-        // Determine styles based on skill type
-        let activeStyle = "bg-white/10 border-white/20";
-        if (skill.id === "send") {
-          activeStyle =
-            "bg-gradient-to-br from-red-400/25 to-red-500/50 border-red-400/40";
-        } else if (skill.id === "swap") {
-          activeStyle =
-            "bg-gradient-to-br from-purple-400/25 to-purple-500/50 border-purple-400/40";
-        }
-
         return (
           <button
             className={cn(
-              "inline-flex cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 font-medium text-sm transition-all",
-              "shadow-lg backdrop-blur-[18px]",
+              "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-[32px] px-4 py-1.5 text-sm transition-all",
               "text-white",
               isActive
-                ? activeStyle
-                : "border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10",
+                ? "bg-white/15 shadow-[0px_4px_8px_0px_rgba(0,0,0,0.08),0px_4px_24px_0px_rgba(0,0,0,0.12)]"
+                : "bg-white/10 shadow-[0px_4px_8px_0px_rgba(0,0,0,0.04),0px_4px_24px_0px_rgba(0,0,0,0.08)] hover:bg-white/15",
               "focus:outline-none"
             )}
             key={skill.id}
@@ -187,7 +176,6 @@ export function SkillsSelector({
           >
             {getSkillIcon(skill.id)}
             {skill.label}
-            {isActive && <X className="ml-1 h-3 w-3" />}
           </button>
         );
       })}
