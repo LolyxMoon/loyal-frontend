@@ -162,10 +162,10 @@ export function SkillsSelector({
           <button
             className={cn(
               "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-[32px] px-4 py-1.5 text-sm transition-all",
-              "text-white",
+              "text-white backdrop-blur-[24px]",
               isActive
-                ? "bg-white/15 shadow-[0px_4px_8px_0px_rgba(0,0,0,0.08),0px_4px_24px_0px_rgba(0,0,0,0.12)]"
-                : "bg-white/10 shadow-[0px_4px_8px_0px_rgba(0,0,0,0.04),0px_4px_24px_0px_rgba(0,0,0,0.08)] hover:bg-white/15",
+                ? "bg-[rgba(58,58,58,0.6)] shadow-[0px_4px_8px_0px_rgba(0,0,0,0.08),0px_4px_24px_0px_rgba(0,0,0,0.12)]"
+                : "bg-[rgba(38,38,38,0.5)] shadow-[0px_4px_8px_0px_rgba(0,0,0,0.04),0px_4px_24px_0px_rgba(0,0,0,0.08)] hover:bg-[rgba(58,58,58,0.6)]",
               "focus:outline-none"
             )}
             key={skill.id}

@@ -2309,6 +2309,58 @@ export default function LandingPage() {
                 />
               )}
 
+              {/* Skills selector buttons - above input when scrolled */}
+              {skillsEnabled && !isChatMode && isInputStuckToBottom && (
+                <div style={{ pointerEvents: "auto", marginBottom: "12px" }}>
+                  <SkillsSelector
+                    nlpState={nlpState}
+                    onSkillSelect={(skill) => {
+                      const currentActiveSkill = input.find(
+                        (s) => s.category === "action"
+                      );
+
+                      if (
+                        !skill ||
+                        (currentActiveSkill &&
+                          currentActiveSkill.id === skill.id)
+                      ) {
+                        if (inputRef.current && "clear" in inputRef.current) {
+                          (
+                            inputRef.current as HTMLTextAreaElement & {
+                              clear: () => void;
+                            }
+                          ).clear();
+                          setInput([]);
+                        }
+                      } else if (skill.id === "send" || skill.id === "swap") {
+                        if (
+                          inputRef.current &&
+                          "activateNlpMode" in inputRef.current
+                        ) {
+                          (inputRef.current as any).activateNlpMode(
+                            `${skill.id} `
+                          );
+                        }
+                      } else {
+                        if (
+                          inputRef.current &&
+                          "resetAndAddSkill" in inputRef.current
+                        ) {
+                          (
+                            inputRef.current as HTMLTextAreaElement & {
+                              resetAndAddSkill: (skill: LoyalSkill) => void;
+                            }
+                          ).resetAndAddSkill(skill);
+                        }
+                      }
+                    }}
+                    selectedSkillId={
+                      input.find((skill) => skill.category === "action")?.id
+                    }
+                  />
+                </div>
+              )}
+
               {/* Input form - liquid glass style with integrated send button */}
               <form
                 onSubmit={handleSubmit}
@@ -2501,8 +2553,8 @@ export default function LandingPage() {
                 </div>
               </form>
 
-              {/* Skills selector buttons - below input */}
-              {skillsEnabled && !isChatMode && (
+              {/* Skills selector buttons - below input when not scrolled */}
+              {skillsEnabled && !isChatMode && !isInputStuckToBottom && (
                 <div style={{ pointerEvents: "auto" }}>
                   <SkillsSelector
                     className="mt-4"
