@@ -6,7 +6,7 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import {
   ArrowDownIcon,
   ArrowUpToLine,
-  MessageCircleQuestion,
+  CircleQuestionMark,
   MoreHorizontal,
   RefreshCw,
   Repeat2,
@@ -160,6 +160,18 @@ export default function LandingPage() {
       open();
     }
   }, [hasPromptedAuth, isConnected, pendingText, open]);
+
+  // Toggle body class when sidebar opens (for header visibility on mobile)
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.classList.add("sidebar-open");
+    } else {
+      document.body.classList.remove("sidebar-open");
+    }
+    return () => {
+      document.body.classList.remove("sidebar-open");
+    };
+  }, [isSidebarOpen]);
 
   const [isOnline, setIsOnline] = useState(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -1499,7 +1511,7 @@ export default function LandingPage() {
                   }}
                   title="Feedback and support"
                 >
-                  <MessageCircleQuestion size={24} strokeWidth={2} />
+                  <CircleQuestionMark size={24} strokeWidth={2} />
                 </button>
               </div>
 
@@ -2559,7 +2571,10 @@ export default function LandingPage() {
                           } else if (hasUsableInput) {
                             // For NLP mode, ensure completion data is set before submitting
                             // (same as what Enter key does in SkillsInput)
-                            if (nlpState?.isActive && nlpState?.intent === "send") {
+                            if (
+                              nlpState?.isActive &&
+                              nlpState?.intent === "send"
+                            ) {
                               if (
                                 nlpState.parsedData.amount &&
                                 nlpState.parsedData.currency &&
@@ -2567,13 +2582,19 @@ export default function LandingPage() {
                               ) {
                                 handleSendComplete({
                                   currency: nlpState.parsedData.currency,
-                                  currencyMint: nlpState.parsedData.currencyMint,
-                                  currencyDecimals: nlpState.parsedData.currencyDecimals,
+                                  currencyMint:
+                                    nlpState.parsedData.currencyMint,
+                                  currencyDecimals:
+                                    nlpState.parsedData.currencyDecimals,
                                   amount: nlpState.parsedData.amount,
-                                  walletAddress: nlpState.parsedData.walletAddress,
+                                  walletAddress:
+                                    nlpState.parsedData.walletAddress,
                                 });
                               }
-                            } else if (nlpState?.isActive && nlpState?.intent === "swap") {
+                            } else if (
+                              nlpState?.isActive &&
+                              nlpState?.intent === "swap"
+                            ) {
                               if (
                                 nlpState.parsedData.amount &&
                                 nlpState.parsedData.currency &&
@@ -2581,12 +2602,16 @@ export default function LandingPage() {
                               ) {
                                 handleSwapComplete({
                                   fromCurrency: nlpState.parsedData.currency,
-                                  fromCurrencyMint: nlpState.parsedData.currencyMint,
-                                  fromCurrencyDecimals: nlpState.parsedData.currencyDecimals,
+                                  fromCurrencyMint:
+                                    nlpState.parsedData.currencyMint,
+                                  fromCurrencyDecimals:
+                                    nlpState.parsedData.currencyDecimals,
                                   amount: nlpState.parsedData.amount,
                                   toCurrency: nlpState.parsedData.toCurrency,
-                                  toCurrencyMint: nlpState.parsedData.toCurrencyMint,
-                                  toCurrencyDecimals: nlpState.parsedData.toCurrencyDecimals,
+                                  toCurrencyMint:
+                                    nlpState.parsedData.toCurrencyMint,
+                                  toCurrencyDecimals:
+                                    nlpState.parsedData.toCurrencyDecimals,
                                 });
                               }
                             }
