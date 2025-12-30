@@ -6,6 +6,7 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import {
   ArrowDownIcon,
   ArrowUpToLine,
+  ShieldQuestionMark,
   MoreHorizontal,
   RefreshCw,
   Repeat2,
@@ -159,6 +160,18 @@ export default function LandingPage() {
       open();
     }
   }, [hasPromptedAuth, isConnected, pendingText, open]);
+
+  // Toggle body class when sidebar opens (for header visibility on mobile)
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.classList.add("sidebar-open");
+    } else {
+      document.body.classList.remove("sidebar-open");
+    }
+    return () => {
+      document.body.classList.remove("sidebar-open");
+    };
+  }, [isSidebarOpen]);
 
   const [isOnline, setIsOnline] = useState(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -585,23 +598,7 @@ export default function LandingPage() {
 
       if (inputNaturalCenterFromTop < stickThreshold) {
         setIsInputStuckToBottom(true);
-
-        // Check if we're near the copyright - adjust bottom offset to stay above it
-        const copyright = document.getElementById("footer-copyright");
-        const copyrightTop =
-          copyright?.getBoundingClientRect().top ?? viewportHeight;
-        const defaultBottomPadding = 24; // Same as header top padding
-
-        // If copyright is visible, push input up to stay above it
-        if (copyrightTop < viewportHeight) {
-          const requiredBottom =
-            viewportHeight - copyrightTop + defaultBottomPadding;
-          setStickyInputBottomOffset(
-            Math.max(requiredBottom, defaultBottomPadding)
-          );
-        } else {
-          setStickyInputBottomOffset(defaultBottomPadding);
-        }
+        setStickyInputBottomOffset(24);
       } else {
         setIsInputStuckToBottom(false);
         setStickyInputBottomOffset(24);
@@ -1470,12 +1467,42 @@ export default function LandingPage() {
                     size={24}
                   />
                 </button>
-              </div>
 
-              {/* Wallet Button - Bottom (only visible in chat mode when connected) */}
-              {isChatMode && isConnected && (
+                {/* Feedback Button */}
                 <button
                   className="sidebar-icon-btn"
+                  onClick={() => {
+                    if (typeof window !== "undefined" && window.Productlane) {
+                      window.Productlane.open("INDEX");
+                    }
+                  }}
+                  style={{
+                    width: "36px",
+                    height: "36px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    background: "rgba(255, 255, 255, 0.06)",
+                    backdropFilter: "blur(48px)",
+                    border: "none",
+                    borderRadius: "9999px",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    boxShadow:
+                      "0px 4px 8px 0px rgba(0, 0, 0, 0.04), 0px 2px 4px 0px rgba(0, 0, 0, 0.02)",
+                    mixBlendMode: "lighten",
+                    color: "#fff",
+                  }}
+                  title="Feedback and support"
+                >
+                  <ShieldQuestionMark size={24} strokeWidth={2} />
+                </button>
+              </div>
+
+              {/* Wallet Button - Bottom (only visible in chat mode when connected, hidden on mobile) */}
+              {isChatMode && isConnected && (
+                <button
+                  className="sidebar-icon-btn sidebar-wallet-btn"
                   onClick={() => open()}
                   style={{
                     width: "36px",
@@ -2528,7 +2555,10 @@ export default function LandingPage() {
                           } else if (hasUsableInput) {
                             // For NLP mode, ensure completion data is set before submitting
                             // (same as what Enter key does in SkillsInput)
-                            if (nlpState?.isActive && nlpState?.intent === "send") {
+                            if (
+                              nlpState?.isActive &&
+                              nlpState?.intent === "send"
+                            ) {
                               if (
                                 nlpState.parsedData.amount &&
                                 nlpState.parsedData.currency &&
@@ -2536,13 +2566,19 @@ export default function LandingPage() {
                               ) {
                                 handleSendComplete({
                                   currency: nlpState.parsedData.currency,
-                                  currencyMint: nlpState.parsedData.currencyMint,
-                                  currencyDecimals: nlpState.parsedData.currencyDecimals,
+                                  currencyMint:
+                                    nlpState.parsedData.currencyMint,
+                                  currencyDecimals:
+                                    nlpState.parsedData.currencyDecimals,
                                   amount: nlpState.parsedData.amount,
-                                  walletAddress: nlpState.parsedData.walletAddress,
+                                  walletAddress:
+                                    nlpState.parsedData.walletAddress,
                                 });
                               }
-                            } else if (nlpState?.isActive && nlpState?.intent === "swap") {
+                            } else if (
+                              nlpState?.isActive &&
+                              nlpState?.intent === "swap"
+                            ) {
                               if (
                                 nlpState.parsedData.amount &&
                                 nlpState.parsedData.currency &&
@@ -2550,12 +2586,16 @@ export default function LandingPage() {
                               ) {
                                 handleSwapComplete({
                                   fromCurrency: nlpState.parsedData.currency,
-                                  fromCurrencyMint: nlpState.parsedData.currencyMint,
-                                  fromCurrencyDecimals: nlpState.parsedData.currencyDecimals,
+                                  fromCurrencyMint:
+                                    nlpState.parsedData.currencyMint,
+                                  fromCurrencyDecimals:
+                                    nlpState.parsedData.currencyDecimals,
                                   amount: nlpState.parsedData.amount,
                                   toCurrency: nlpState.parsedData.toCurrency,
-                                  toCurrencyMint: nlpState.parsedData.toCurrencyMint,
-                                  toCurrencyDecimals: nlpState.parsedData.toCurrencyDecimals,
+                                  toCurrencyMint:
+                                    nlpState.parsedData.toCurrencyMint,
+                                  toCurrencyDecimals:
+                                    nlpState.parsedData.toCurrencyDecimals,
                                 });
                               }
                             }
@@ -3100,6 +3140,16 @@ export default function LandingPage() {
         .chat-messages-container {
           scrollbar-width: thin;
           scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+        }
+
+        /* Mobile styles for chat */
+        @media (max-width: 767px) {
+          .chat-messages-container {
+            padding-left: 56px !important;
+          }
+          .sidebar-wallet-btn {
+            display: none !important;
+          }
         }
       `}</style>
     </main>

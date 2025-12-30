@@ -32,52 +32,84 @@ export function Header() {
   }
 
   return (
-    <header className="fixed top-6 right-6 z-[100]">
-      <button
-        onClick={() => open()}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          background: "rgba(255, 255, 255, 0.06)",
-          backdropFilter: "blur(48px)",
-          border: "none",
-          borderRadius: "32px",
-          cursor: "pointer",
-          transition: "all 0.2s ease",
-          boxShadow:
-            "0px 4px 8px 0px rgba(0, 0, 0, 0.04), 0px 2px 4px 0px rgba(0, 0, 0, 0.02)",
-          mixBlendMode: "lighten",
-          padding: "4px",
-        }}
-      >
-        <div
+    <>
+      <header className="header-wallet fixed top-6 right-6 z-[100]">
+        <button
+          onClick={() => open()}
           style={{
-            width: "36px",
-            height: "36px",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
+            gap: "8px",
             background: "rgba(255, 255, 255, 0.06)",
-            borderRadius: "9999px",
+            backdropFilter: "blur(48px)",
+            border: "none",
+            borderRadius: "32px",
+            cursor: "pointer",
+            transition: "all 0.2s ease",
+            boxShadow:
+              "0px 4px 8px 0px rgba(0, 0, 0, 0.04), 0px 2px 4px 0px rgba(0, 0, 0, 0.02)",
+            mixBlendMode: "lighten",
+            padding: "4px",
           }}
         >
-          <img alt="Wallet" height={28} src="/Wallet-Icon.svg" width={28} />
-        </div>
-        <span
-          style={{
-            fontSize: "16px",
-            fontWeight: 400,
-            lineHeight: "20px",
-            color: "#fff",
-            paddingRight: "12px",
-          }}
-        >
-          {isConnected && truncatedAddress
-            ? truncatedAddress
-            : "Connect Wallet"}
-        </span>
-      </button>
-    </header>
+          <div
+            style={{
+              width: "36px",
+              height: "36px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "rgba(255, 255, 255, 0.06)",
+              borderRadius: "9999px",
+            }}
+          >
+            <img alt="Wallet" height={28} src="/Wallet-Icon.svg" width={28} />
+          </div>
+          <span
+            style={{
+              fontSize: "16px",
+              fontWeight: 400,
+              lineHeight: "20px",
+              color: "#fff",
+              paddingRight: "12px",
+            }}
+          >
+            {isConnected && truncatedAddress
+              ? truncatedAddress
+              : "Connect Wallet"}
+          </span>
+        </button>
+      </header>
+      <style jsx>{`
+        /* Mobile styles for header wallet button */
+        @media (max-width: 767px) {
+          .header-wallet {
+            top: 16px !important;
+            right: 8px !important;
+            transition: opacity 0.2s ease;
+          }
+          .header-wallet button {
+            height: 38px;
+            padding: 5px !important;
+          }
+          .header-wallet button > div {
+            width: 28px !important;
+            height: 28px !important;
+          }
+          .header-wallet button > div img {
+            width: 20px !important;
+            height: 20px !important;
+          }
+        }
+
+        /* Hide header when sidebar is open on mobile */
+        @media (max-width: 767px) {
+          :global(body.sidebar-open) .header-wallet {
+            opacity: 0;
+            pointer-events: none;
+          }
+        }
+      `}</style>
+    </>
   );
 }
