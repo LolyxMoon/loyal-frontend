@@ -6,7 +6,7 @@ import { DefaultChatTransport, type UIMessage } from "ai";
 import {
   ArrowDownIcon,
   ArrowUpToLine,
-  CircleQuestionMark,
+  ShieldQuestionMark,
   MoreHorizontal,
   RefreshCw,
   Repeat2,
@@ -1511,7 +1511,7 @@ export default function LandingPage() {
                   }}
                   title="Feedback and support"
                 >
-                  <CircleQuestionMark size={24} strokeWidth={2} />
+                  <ShieldQuestionMark size={24} strokeWidth={2} />
                 </button>
               </div>
 

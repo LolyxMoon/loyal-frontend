@@ -66,7 +66,6 @@ export function Header() {
             <img alt="Wallet" height={28} src="/Wallet-Icon.svg" width={28} />
           </div>
           <span
-            className="header-wallet-text"
             style={{
               fontSize: "16px",
               fontWeight: 400,
@@ -85,17 +84,21 @@ export function Header() {
         /* Mobile styles for header wallet button */
         @media (max-width: 767px) {
           .header-wallet {
-            top: 8px !important;
+            top: 16px !important;
             right: 8px !important;
             transition: opacity 0.2s ease;
           }
           .header-wallet button {
-            height: 36px;
-            padding: 0 !important;
-            border-radius: 9999px !important;
+            height: 38px;
+            padding: 5px !important;
           }
-          .header-wallet-text {
-            display: none;
+          .header-wallet button > div {
+            width: 28px !important;
+            height: 28px !important;
+          }
+          .header-wallet button > div img {
+            width: 20px !important;
+            height: 20px !important;
           }
         }
 
