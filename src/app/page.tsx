@@ -1183,8 +1183,8 @@ style = {{
   {/* Sliding hover indicator */ }
 {
   hoveredNavIndex !== null &&
-  navItemRefs.current[hoveredNavIndex] && (
-    <div
+    navItemRefs.current[hoveredNavIndex] && (
+      <div
                       style={
     {
       position: "absolute",
@@ -1675,26 +1675,26 @@ size = { 24}
               >
 {
   [
-  {
-    id: "send",
-    title: "Send",
-    subtitle: "Transfer Solana tokens",
-    icon: Send,
-  },
-  {
-    id: "swap",
-    title: "Swap",
-    subtitle: "Swap tokens on Solana",
-    icon: Repeat2,
-  },
+    {
+      id: "send",
+      title: "Send",
+      subtitle: "Transfer Solana tokens",
+      icon: Send,
+    },
+    {
+      id: "swap",
+      title: "Swap",
+      subtitle: "Swap tokens on Solana",
+      icon: Repeat2,
+    },
                 ].map((service) => (
-    <div
+      <div
                     key= { service.id }
                     onClick = {() => {
-    setIsSidebarOpen(false);
+      setIsSidebarOpen(false);
                       if(
-      inputRef.current &&
-        "activateNlpMode" in inputRef.current
+        inputRef.current &&
+          "activateNlpMode" in inputRef.current
                       ) {
   (inputRef.current as SkillsInputRef).activateNlpMode(
     `${service.id} `
@@ -2177,11 +2177,11 @@ title = "More options"
 {/* Assistant Message Footer Actions - only show on completed messages */ }
 {
   message.role === "assistant" &&
-  !(
-    messageIndex === messages.length - 1 &&
-    (status === "streaming" || status === "submitted")
-  ) && (
-    <div
+    !(
+      messageIndex === messages.length - 1 &&
+      (status === "streaming" || status === "submitted")
+    ) && (
+      <div
                             style={
     {
       display: "flex",
@@ -2448,21 +2448,21 @@ type = "button"
               }
 }
             >
-  {/* Ask Loyal logo - only visible when not in chat mode */ }
+  {/* Loyal Privacy logo - only visible when not in chat mode */ }
 {
   !isChatMode && !isInputStuckToBottom && (
     <Image
-                  alt="Ask Loyal"
+    alt="Loyal Privacy"
   height = { 64}
-  src = "/Askloyal.png"
+  src = "/Askloyal.png" // Asegúrate de que el nombre coincida aquí
   style = {{
     marginBottom: "32px",
       pointerEvents: "none",
-                  }
+    }
 }
 width = { 307}
   />
-              )}
+)}
 
 {/* Skills selector buttons - above input when scrolled */ }
 {
