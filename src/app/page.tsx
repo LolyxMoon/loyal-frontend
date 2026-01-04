@@ -130,7 +130,7 @@ export default function LandingPage() {
   const [copiedContract, setCopiedContract] = useState(false);
   
   // Contract address to copy
-  const CONTRACT_ADDRESS = "CA: xxxxxxxxxxxxxxxpump";
+  const CONTRACT_ADDRESS = "DTKVahLXkEaobZ3Ea16z96tZh6pucmwjauUuxJNEpump";
   
   // Handle contract copy
   const handleCopyContract = async () => {
@@ -2020,7 +2020,7 @@ export default function LandingPage() {
                         letterSpacing: "0.3px",
                       }}
                     >
-                      {copiedContract ? "✓ Copied!" : CONTRACT_ADDRESS}
+                      {copiedContract ? "✓ Copied!" : `CA: ${CONTRACT_ADDRESS.slice(0, 4)}...${CONTRACT_ADDRESS.slice(-4)}`}
                     </span>
                   </button>
                 </div>
@@ -2464,7 +2464,7 @@ export default function LandingPage() {
                         letterSpacing: "0.5px",
                       }}
                     >
-                      {copiedContract ? "✓ Copied!" : CONTRACT_ADDRESS}
+                      {copiedContract ? "✓ Copied!" : `CA: ${CONTRACT_ADDRESS.slice(0, 4)}...${CONTRACT_ADDRESS.slice(-4)}`}
                     </span>
                   </button>
                   <Image
