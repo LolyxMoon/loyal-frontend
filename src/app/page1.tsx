@@ -127,21 +127,6 @@ export default function LandingPage() {
   const isChatMode = isChatModeLocal;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
-  const [copiedContract, setCopiedContract] = useState(false);
-  
-  // Contract address to copy
-  const CONTRACT_ADDRESS = "3Yn98aLYEd4r3UMHGF1cjSp7rMUQ6a2Wa1zZPMQbpump";
-  
-  // Handle contract copy
-  const handleCopyContract = async () => {
-    try {
-      await navigator.clipboard.writeText(CONTRACT_ADDRESS);
-      setCopiedContract(true);
-      setTimeout(() => setCopiedContract(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy contract:", err);
-    }
-  };
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hoveredChatId, setHoveredChatId] = useState<string | null>(null);
   const [hoveredNavIndex, setHoveredNavIndex] = useState<number | null>(null);
@@ -1971,92 +1956,37 @@ export default function LandingPage() {
           >
             {/* Chat messages */}
             {isChatMode && (
-              <>
-                {/* Contract Copy Triangle - Fixed at top in chat mode */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "16px",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    zIndex: 100,
-                    display: "flex",
-                    justifyContent: "center",
-                  }}
-                >
-                  <button
-                    onClick={handleCopyContract}
-                    style={{
-                      position: "relative",
-                      width: 0,
-                      height: 0,
-                      background: "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      padding: 0,
-                      transition: "all 0.3s ease",
-                      filter: copiedContract ? "brightness(1.3)" : "brightness(1)",
-                    }}
-                    title={copiedContract ? "Copied!" : "Click to copy contract address"}
-                  >
-                    <div
-                      style={{
-                        width: 0,
-                        height: 0,
-                        borderLeft: "32px solid transparent",
-                        borderRight: "32px solid transparent",
-                        borderBottom: "56px solid rgba(30, 30, 30, 0.9)",
-                        transition: "all 0.2s ease",
-                      }}
-                    />
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: "24px",
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        fontSize: "9px",
-                        color: copiedContract ? "#4ade80" : "rgba(255, 255, 255, 0.5)",
-                        whiteSpace: "nowrap",
-                        fontWeight: 500,
-                        transition: "color 0.2s ease",
-                      }}
-                    >
-                      {copiedContract ? "✓" : "CA"}
-                    </span>
-                  </button>
-                </div>
-                <div
-                  className="chat-messages-container"
-                  onClick={(e) => {
-                    // Only focus input if no text is selected
-                    const selection = window.getSelection();
-                    if (!selection || selection.toString().length === 0) {
-                      // Focus input when clicking on the message area
-                      inputRef.current?.focus();
-                    }
-                  }}
-                  ref={messagesContainerRef}
-                  style={{
-                    flex: 1,
-                    overflowY: "auto",
-                    overflowX: "hidden",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "flex-start",
-                    gap: "1rem",
-                    padding: "60px 32px 128px",
-                    animation: "fadeIn 0.5s ease-in",
-                    position: "relative",
-                    maxWidth: "768px",
-                    margin: "0 auto",
-                    width: "100%",
-                    maskImage:
-                      "linear-gradient(to bottom, transparent 0%, black 60px, black calc(100% - 68px), transparent 100%)",
-                    WebkitMaskImage:
-                      "linear-gradient(to bottom, transparent 0%, black 60px, black calc(100% - 68px), transparent 100%)",
-                  }}
-                >
+              <div
+                className="chat-messages-container"
+                onClick={(e) => {
+                  // Only focus input if no text is selected
+                  const selection = window.getSelection();
+                  if (!selection || selection.toString().length === 0) {
+                    // Focus input when clicking on the message area
+                    inputRef.current?.focus();
+                  }
+                }}
+                ref={messagesContainerRef}
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  overflowX: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "flex-start",
+                  gap: "1rem",
+                  padding: "60px 32px 128px",
+                  animation: "fadeIn 0.5s ease-in",
+                  position: "relative",
+                  maxWidth: "768px",
+                  margin: "0 auto",
+                  width: "100%",
+                  maskImage:
+                    "linear-gradient(to bottom, transparent 0%, black 60px, black calc(100% - 68px), transparent 100%)",
+                  WebkitMaskImage:
+                    "linear-gradient(to bottom, transparent 0%, black 60px, black calc(100% - 68px), transparent 100%)",
+                }}
+              >
                 {messages.map((message, messageIndex) => {
                   const messageText = message.parts
                     .filter((part) => part.type === "text")
@@ -2327,7 +2257,6 @@ export default function LandingPage() {
 
                 <div ref={messagesEndRef} style={{ height: "1rem" }} />
               </div>
-              </>
             )}
 
             {/* Scroll to bottom button - positioned above input */}
@@ -2426,68 +2355,16 @@ export default function LandingPage() {
             >
               {/* Ask Loyal logo - only visible when not in chat mode */}
               {!isChatMode && !isInputStuckToBottom && (
-                <>
-                  {/* Contract Copy Triangle */}
-                  <button
-                    onClick={handleCopyContract}
-                    style={{
-                      position: "relative",
-                      width: 0,
-                      height: 0,
-                      borderLeft: "40px solid transparent",
-                      borderRight: "40px solid transparent",
-                      borderBottom: "70px solid rgba(30, 30, 30, 0.85)",
-                      background: "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      marginBottom: "24px",
-                      pointerEvents: "auto",
-                      transition: "all 0.3s ease",
-                      filter: copiedContract ? "brightness(1.3)" : "brightness(1)",
-                    }}
-                    title={copiedContract ? "Copied!" : "Click to copy contract address"}
-                  >
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "0",
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        width: 0,
-                        height: 0,
-                        borderLeft: "40px solid transparent",
-                        borderRight: "40px solid transparent",
-                        borderBottom: "70px solid rgba(30, 30, 30, 0.85)",
-                        transition: "all 0.2s ease",
-                      }}
-                    />
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: "28px",
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        fontSize: "10px",
-                        color: copiedContract ? "#4ade80" : "rgba(255, 255, 255, 0.5)",
-                        whiteSpace: "nowrap",
-                        fontWeight: 500,
-                        transition: "color 0.2s ease",
-                      }}
-                    >
-                      {copiedContract ? "✓" : "CA"}
-                    </span>
-                  </button>
-                  <Image
-                    alt="Ask Loyal"
-                    height={64}
-                    src="/Askloyal.svg"
-                    style={{
-                      marginBottom: "32px",
-                      pointerEvents: "none",
-                    }}
-                    width={307}
-                  />
-                </>
+                <Image
+                  alt="Ask Loyal"
+                  height={64}
+                  src="/Askloyal.svg"
+                  style={{
+                    marginBottom: "32px",
+                    pointerEvents: "none",
+                  }}
+                  width={307}
+                />
               )}
 
               {/* Skills selector buttons - above input when scrolled */}
