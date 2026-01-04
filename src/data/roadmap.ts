@@ -15,9 +15,9 @@ export type RoadmapEvent = {
 
 export const roadmapEvents: RoadmapEvent[] = [
   {
-    year: 2025,
+    year: 2026,
     periodType: "Q" as const,
-    periodNumber: 4,
+    periodNumber: 1,
     isChecked: false,
     events: [
       { title: "Transactions over Telegram", isChecked: true },
@@ -29,7 +29,7 @@ export const roadmapEvents: RoadmapEvent[] = [
   {
     year: 2026,
     periodType: "Q" as const,
-    periodNumber: 1,
+    periodNumber: 2,
     isChecked: false,
     events: [
       { title: "Squads multisig interoperability", isChecked: false },
