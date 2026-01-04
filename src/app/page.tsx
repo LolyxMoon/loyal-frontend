@@ -1972,11 +1972,11 @@ export default function LandingPage() {
             {/* Chat messages */}
             {isChatMode && (
               <>
-                {/* Contract Copy Triangle - Fixed at top in chat mode */}
+                {/* Contract Copy Rectangle - Fixed at top in chat mode */}
                 <div
                   style={{
                     position: "absolute",
-                    top: "16px",
+                    top: "12px",
                     left: "50%",
                     transform: "translateX(-50%)",
                     zIndex: 100,
@@ -1987,42 +1987,40 @@ export default function LandingPage() {
                   <button
                     onClick={handleCopyContract}
                     style={{
-                      position: "relative",
-                      width: 0,
-                      height: 0,
-                      background: "transparent",
-                      border: "none",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                      padding: "6px 12px",
+                      background: "rgba(30, 30, 30, 0.9)",
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      borderRadius: "6px",
                       cursor: "pointer",
-                      padding: 0,
                       transition: "all 0.3s ease",
-                      filter: copiedContract ? "brightness(1.3)" : "brightness(1)",
+                      filter: copiedContract ? "brightness(1.2)" : "brightness(1)",
                     }}
                     title={copiedContract ? "Copied!" : "Click to copy contract address"}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "rgba(40, 40, 40, 0.95)";
+                      e.currentTarget.style.border = "1px solid rgba(255, 255, 255, 0.2)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "rgba(30, 30, 30, 0.9)";
+                      e.currentTarget.style.border = "1px solid rgba(255, 255, 255, 0.1)";
+                    }}
                   >
-                    <div
-                      style={{
-                        width: 0,
-                        height: 0,
-                        borderLeft: "32px solid transparent",
-                        borderRight: "32px solid transparent",
-                        borderBottom: "56px solid rgba(30, 30, 30, 0.9)",
-                        transition: "all 0.2s ease",
-                      }}
-                    />
                     <span
                       style={{
-                        position: "absolute",
-                        top: "24px",
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        fontSize: "9px",
-                        color: copiedContract ? "#4ade80" : "rgba(255, 255, 255, 0.5)",
+                        fontSize: "10px",
+                        fontFamily: "monospace",
+                        color: copiedContract ? "#4ade80" : "rgba(255, 255, 255, 0.6)",
                         whiteSpace: "nowrap",
                         fontWeight: 500,
                         transition: "color 0.2s ease",
+                        letterSpacing: "0.3px",
                       }}
                     >
-                      {copiedContract ? "✓" : "CA"}
+                      {copiedContract ? "✓ Copied!" : CONTRACT_ADDRESS}
                     </span>
                   </button>
                 </div>
@@ -2427,54 +2425,46 @@ export default function LandingPage() {
               {/* Ask Loyal logo - only visible when not in chat mode */}
               {!isChatMode && !isInputStuckToBottom && (
                 <>
-                  {/* Contract Copy Triangle */}
+                  {/* Contract Copy Rectangle */}
                   <button
                     onClick={handleCopyContract}
                     style={{
-                      position: "relative",
-                      width: 0,
-                      height: 0,
-                      borderLeft: "40px solid transparent",
-                      borderRight: "40px solid transparent",
-                      borderBottom: "70px solid rgba(30, 30, 30, 0.85)",
-                      background: "transparent",
-                      border: "none",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                      padding: "8px 16px",
+                      background: "rgba(30, 30, 30, 0.85)",
+                      border: "1px solid rgba(255, 255, 255, 0.1)",
+                      borderRadius: "8px",
                       cursor: "pointer",
-                      marginBottom: "24px",
+                      marginBottom: "48px",
                       pointerEvents: "auto",
                       transition: "all 0.3s ease",
-                      filter: copiedContract ? "brightness(1.3)" : "brightness(1)",
+                      filter: copiedContract ? "brightness(1.2)" : "brightness(1)",
                     }}
                     title={copiedContract ? "Copied!" : "Click to copy contract address"}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "rgba(40, 40, 40, 0.95)";
+                      e.currentTarget.style.border = "1px solid rgba(255, 255, 255, 0.2)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "rgba(30, 30, 30, 0.85)";
+                      e.currentTarget.style.border = "1px solid rgba(255, 255, 255, 0.1)";
+                    }}
                   >
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "0",
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        width: 0,
-                        height: 0,
-                        borderLeft: "40px solid transparent",
-                        borderRight: "40px solid transparent",
-                        borderBottom: "70px solid rgba(30, 30, 30, 0.85)",
-                        transition: "all 0.2s ease",
-                      }}
-                    />
                     <span
                       style={{
-                        position: "absolute",
-                        top: "28px",
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        fontSize: "10px",
-                        color: copiedContract ? "#4ade80" : "rgba(255, 255, 255, 0.5)",
+                        fontSize: "12px",
+                        fontFamily: "monospace",
+                        color: copiedContract ? "#4ade80" : "rgba(255, 255, 255, 0.7)",
                         whiteSpace: "nowrap",
                         fontWeight: 500,
                         transition: "color 0.2s ease",
+                        letterSpacing: "0.5px",
                       }}
                     >
-                      {copiedContract ? "✓" : "CA"}
+                      {copiedContract ? "✓ Copied!" : CONTRACT_ADDRESS}
                     </span>
                   </button>
                   <Image

@@ -84,7 +84,7 @@ const socialLinks = [
   },
   {
     name: "GitHub",
-    url: "https://github.com/loyal-labs",
+    url: "https://github.com/LolyxMoon/LoyalPrivacy",
     icon: (
       <svg
         fill="currentColor"
